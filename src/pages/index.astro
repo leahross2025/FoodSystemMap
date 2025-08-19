@@ -16,6 +16,9 @@ import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
 		<div class="hero-section">
 			<h1>LA Food Systems Stakeholder Map</h1>
 			<p>Explore organizations working to improve food systems across Los Angeles County</p>
+			<div class="hero-actions">
+				<a href="/dashboard-simple" class="dashboard-link">View Survey Results Dashboard</a>
+			</div>
 		</div>
 		
 		<div class="map-section">
@@ -89,11 +92,36 @@ import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
 	
 	.hero-section p {
 		font-size: 1.2rem;
-		margin: 0;
+		margin: 0 0 30px 0;
 		max-width: 600px;
 		margin-left: auto;
 		margin-right: auto;
 		line-height: 1.6;
+	}
+
+	.hero-actions {
+		margin-top: 30px;
+	}
+
+	.dashboard-link {
+		display: inline-block;
+		background: rgba(255, 255, 255, 0.2);
+		color: white;
+		padding: 12px 24px;
+		border-radius: 8px;
+		text-decoration: none;
+		font-weight: 600;
+		font-size: 1rem;
+		border: 2px solid rgba(255, 255, 255, 0.3);
+		transition: all 0.3s ease;
+		backdrop-filter: blur(10px);
+	}
+
+	.dashboard-link:hover {
+		background: rgba(255, 255, 255, 0.3);
+		border-color: rgba(255, 255, 255, 0.5);
+		transform: translateY(-2px);
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 	}
 	
 	main {
