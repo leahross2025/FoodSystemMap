@@ -4,6 +4,36 @@ import organizationsData from '../data/organizations.json';
 // Get unique sectors and districts for filter options
 const sectors = [...new Set(organizationsData.organizations.map(org => org.sector))].sort();
 const districts = [...new Set(organizationsData.organizations.map(org => org.primaryDistrict))].sort();
+
+// Get unique SPAs from both primarySPA and additionalSPAs fields
+const allSPAs = new Set();
+organizationsData.organizations.forEach(org => {
+  // Add primarySPA
+  if (org.primarySPA) {
+    allSPAs.add(org.primarySPA);
+  }
+  
+  // Parse and add additionalSPAs
+  if (org.additionalSPAs) {
+    const additionalSPAsList = org.additionalSPAs.split(',').map(spa => spa.trim());
+    additionalSPAsList.forEach(spa => {
+      if (spa) {
+        allSPAs.add(spa);
+      }
+    });
+  }
+});
+
+// Convert to array and sort SPAs (Countywide first, then numerical order)
+const spas = Array.from(allSPAs).sort((a, b) => {
+  if (a === 'Countywide') return -1;
+  if (b === 'Countywide') return 1;
+  
+  // Extract numbers for proper numerical sorting
+  const aNum = parseInt(a.replace('SPA ', ''));
+  const bNum = parseInt(b.replace('SPA ', ''));
+  return aNum - bNum;
+});
 ---
 
 <div class="filters-container">
@@ -32,6 +62,13 @@ const districts = [...new Set(organizationsData.organizations.map(org => org.pri
           <option value={district}>{district}</option>
         ))}
       </select>
+      
+      <select id="spaFilter" class="filter-select">
+        <option value="">All SPAs</option>
+        {spas.map(spa => (
+          <option value={spa}>{spa}</option>
+        ))}
+      </select>
     </div>
   </div>
   
@@ -55,6 +92,7 @@ const districts = [...new Set(organizationsData.organizations.map(org => org.pri
     const searchInput = document.getElementById('searchInput');
     const sectorFilter = document.getElementById('sectorFilter');
     const districtFilter = document.getElementById('districtFilter');
+    const spaFilter = document.getElementById('spaFilter');
     const clearSearch = document.getElementById('clearSearch');
     const clearFilters = document.getElementById('clearFilters');
     const resultsCount = document.getElementById('resultsCount');
@@ -66,6 +104,7 @@ const districts = [...new Set(organizationsData.organizations.map(org => org.pri
       const searchTerm = searchInput.value.toLowerCase();
       const selectedSector = sectorFilter.value;
       const selectedDistrict = districtFilter.value;
+      const selectedSPA = spaFilter.value;
 
       // Hide all markers first
       window.allMarkers.forEach(marker => {
@@ -90,7 +129,25 @@ const districts = [...new Set(organizationsData.organizations.map(org => org.pri
         const matchesSector = !selectedSector || org.sector === selectedSector;
         const matchesDistrict = !selectedDistrict || org.primaryDistrict === selectedDistrict;
         
-        return matchesSearch && matchesSector && matchesDistrict;
+        // SPA filtering logic with special Countywide handling
+        let matchesSPA = true;
+        if (selectedSPA) {
+          // Check if organization has "Countywide" in additionalSPAs - if so, always include
+          const hasCountywide = org.additionalSPAs && org.additionalSPAs.includes('Countywide');
+          
+          if (hasCountywide) {
+            matchesSPA = true; // Always show Countywide organizations
+          } else {
+            // Check if selected SPA matches primarySPA or is in additionalSPAs
+            const matchesPrimary = org.primarySPA === selectedSPA;
+            const matchesAdditional = org.additionalSPAs && 
+              org.additionalSPAs.split(',').map(spa => spa.trim()).includes(selectedSPA);
+            
+            matchesSPA = matchesPrimary || matchesAdditional;
+          }
+        }
+        
+        return matchesSearch && matchesSector && matchesDistrict && matchesSPA;
       });
 
       // Add filtered markers back to map
@@ -112,6 +169,7 @@ const districts = [...new Set(organizationsData.organizations.map(org => org.pri
       searchInput.value = '';
       sectorFilter.value = '';
       districtFilter.value = '';
+      spaFilter.value = '';
       filterMarkers();
     }
 
@@ -125,6 +183,7 @@ const districts = [...new Set(organizationsData.organizations.map(org => org.pri
     searchInput.addEventListener('input', filterMarkers);
     sectorFilter.addEventListener('change', filterMarkers);
     districtFilter.addEventListener('change', filterMarkers);
+    spaFilter.addEventListener('change', filterMarkers);
     clearSearch.addEventListener('click', clearSearchOnly);
     clearFilters.addEventListener('click', clearAllFilters);
 
@@ -191,7 +250,7 @@ const districts = [...new Set(organizationsData.organizations.map(org => org.pri
 
   .filter-dropdowns {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
     gap: 15px;
   }
 

@@ -64,7 +64,11 @@ const fallbackCoords = {
   '858 W Jackman St., Lancaster CA, Los Angeles, CA': [34.686682, -118.137425],
   '2000 Ave of the Stars, Los Angeles, CA': [34.057580, -118.416932],
   '2000 Ave of the Stars, Los Angeles, CA, 90067': [34.057580, -118.416932],
-  '2000 Ave of the Stars, Los Angeles, CA 90067, Los Angeles, CA, 90067': [34.057580, -118.416932]
+  '2000 Ave of the Stars, Los Angeles, CA 90067, Los Angeles, CA, 90067': [34.057580, -118.416932],
+  
+  // Additional failed geocoding addresses
+  '2000 Ave of the Stars #1000s, Los Angeles, CA': [34.057580, -118.416932],
+  '510 S. Vermont Ave, 11th Floor, Los Angeles, CA': [34.057580, -118.291932]
 };
 
 // Clean address function
@@ -84,6 +88,28 @@ function cleanAddress(street, zipCode) {
   cleaned = cleaned.trim().replace(/^,+|,+$/g, '');
   
   return cleaned;
+}
+
+// Clean SPA data function - removes city names in parentheses
+function cleanSPAData(spaString) {
+  if (!spaString || spaString.trim() === '') return '';
+  
+  // Handle special cases first
+  if (spaString.toLowerCase().includes('countywide')) {
+    return 'Countywide';
+  }
+  
+  // Handle multiple SPAs separated by commas
+  const spas = spaString.split(',').map(spa => {
+    const trimmed = spa.trim();
+    // Extract just "SPA X" from strings like "SPA 4- Metro LA (Boyle Heights, Central City...)"
+    const match = trimmed.match(/^SPA\s*(\d+)/i);
+    return match ? `SPA ${match[1]}` : null;
+  }).filter(spa => spa !== null);
+  
+  // Remove duplicates and return
+  const uniqueSPAs = [...new Set(spas)];
+  return uniqueSPAs.length > 0 ? uniqueSPAs.join(', ') : '';
 }
 
 // Geocode function using Nominatim
@@ -199,8 +225,8 @@ async function processCSV() {
     const mission = row['Organization Mission Statement '] || '';
     const primaryActivity = row['Provide one sentence descriptor of your primary activity'] || '';
     const otherDistricts = row['Other Supervisorial District(s) Served (all districts where programs and services are provided) '] || '';
-    const primarySPA = row['Primary SPA (service planning area)(Based on headquarters address)'] || '';
-    const additionalSPAs = row['Additional SPA(s) (service planning area) Served  (all districts where programs and services are provided) - Mark any or all '] || '';
+    const primarySPA = cleanSPAData(row['Primary SPA (service planning area)(Based on headquarters address)'] || '');
+    const additionalSPAs = cleanSPAData(row['Additional SPA(s) (service planning area) Served  (all districts where programs and services are provided) - Mark any or all '] || '');
     const email = row['Email Address'] || '';
     const contactName = row['Your Name (First/Last)'] || '';
     
@@ -230,7 +256,12 @@ async function processCSV() {
       });
     } else {
       failCount++;
-      console.log(`Failed to geocode: ${orgName}`);
+      console.log(`\n❌ FAILED TO IMPORT: ${orgName}`);
+      console.log(`   Reason: Geocoding failed`);
+      console.log(`   Address: ${street || 'N/A'}`);
+      console.log(`   Zip Code: ${zipCode || 'N/A'}`);
+      console.log(`   Sector: ${sector}`);
+      console.log(`   Contact: ${contactName} (${email})`);
     }
     
     // Rate limiting - wait between requests
