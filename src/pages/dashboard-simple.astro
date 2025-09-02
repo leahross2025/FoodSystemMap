@@ -33,7 +33,7 @@ import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
 
 			<!-- Simple Goal Alignment Chart -->
 			<section class="visualizations-grid">
-				<div class="viz-container">
+				<div class="viz-container full-width">
 					<div class="viz-header">
 						<h2>Primary Goals Distribution</h2>
 						<p>Most common organizational goals</p>
@@ -43,7 +43,7 @@ import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
 					</div>
 				</div>
 
-				<div class="viz-container">
+				<div class="viz-container full-width">
 					<div class="viz-header">
 						<h2>Organization Sectors</h2>
 						<p>Types of organizations surveyed</p>
@@ -80,9 +80,13 @@ import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
 						// Parse the Excel file
 						const workbook = XLSX.read(excelData, { type: 'array' });
 						
-						// Get the first worksheet
-						const sheetName = workbook.SheetNames[0];
+						// Get the correct worksheet - "Copy of Survey Respones"
+						const sheetName = 'Copy of Survey Respones';
 						const worksheet = workbook.Sheets[sheetName];
+						
+						if (!worksheet) {
+							throw new Error(`Sheet "${sheetName}" not found in Excel file`);
+						}
 						
 						// Convert to JSON with header normalization
 						const jsonData = XLSX.utils.sheet_to_json(worksheet, {
@@ -162,12 +166,43 @@ import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
 
 				getGoalData() {
 					const goalCounts = {};
+					
 					this.processedData.forEach(org => {
-						const primaryGoal = org.If_you_had_to_choose_the_goal_MOST_aligned_with_your_organization__which_one_would_it_be_;
+						// Try multiple possible column names for primary goal
+						const possibleGoalFields = [
+							'If_you_had_to_choose_the_goal_MOST_aligned_with_your_organization__which_one_would_it_be_',
+							'If_you_had_to_choose_the_goal_MOST_aligned_with_your_organization_which_one_would_it_be_',
+							'Primary_goal',
+							'Most_aligned_goal',
+							'Organization_goal'
+						];
+						
+						let primaryGoal = '';
+						for (const field of possibleGoalFields) {
+							if (org[field] && org[field].trim()) {
+								primaryGoal = org[field].trim();
+								break;
+							}
+						}
+						
+						// If no exact match, look for any field containing 'goal' and 'aligned'
+						if (!primaryGoal) {
+							const keys = Object.keys(org);
+							const goalKey = keys.find(key => 
+								key.toLowerCase().includes('goal') && 
+								key.toLowerCase().includes('aligned')
+							);
+							if (goalKey && org[goalKey]) {
+								primaryGoal = org[goalKey].trim();
+							}
+						}
+						
 						if (primaryGoal) {
 							goalCounts[primaryGoal] = (goalCounts[primaryGoal] || 0) + 1;
 						}
 					});
+					
+					console.log('Goals data found:', goalCounts);
 					return goalCounts;
 				}
 
@@ -218,14 +253,28 @@ import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
 				}
 			}
 
-			// Simple bar chart function
-			function createBarChart(selector, data, title) {
+			// Simple bar chart function - completely rewritten
+			function createBarChartWithLegend(selector, data, title, isGoals = false) {
 				const container = d3.select(selector);
 				container.selectAll("*").remove();
 
-				const margin = { top: 20, right: 20, bottom: 160, left: 40 };
-				const width = 400 - margin.left - margin.right;
-				const height = 400 - margin.top - margin.bottom;
+				// Convert data to array and sort by value (descending)
+				const dataArray = Object.entries(data).map(([key, value]) => ({
+					label: key,
+					value: value
+				})).sort((a, b) => b.value - a.value);
+
+				// Show all data for goals
+				const displayData = isGoals ? dataArray : dataArray.slice(0, 8);
+
+				console.log('Total goals found:', displayData.length);
+				console.log('Goal data:', displayData);
+
+				const margin = { top: 20, right: 20, bottom: 80, left: 50 };
+				const containerWidth = container.node().getBoundingClientRect().width;
+				// Ensure width is large enough for all bars - minimum 600px for 4 bars
+				const width = Math.max(600, containerWidth - 48) - margin.left - margin.right;
+				const height = 350 - margin.top - margin.bottom;
 
 				const svg = container.append("svg")
 					.attr("width", width + margin.left + margin.right)
@@ -234,40 +283,137 @@ import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
 				const g = svg.append("g")
 					.attr("transform", `translate(${margin.left},${margin.top})`);
 
-				const dataArray = Object.entries(data).map(([key, value]) => ({
-					label: key.length > 30 ? key.substring(0, 30) + "..." : key,
-					value: value,
-					fullLabel: key
-				})).sort((a, b) => b.value - a.value).slice(0, 8);
-
+				// Create simple scales
 				const xScale = d3.scaleBand()
-					.domain(dataArray.map(d => d.label))
+					.domain(d3.range(displayData.length))  // Use simple numeric range
 					.range([0, width])
-					.padding(0.1);
+					.padding(0.2);
 
 				const yScale = d3.scaleLinear()
-					.domain([0, d3.max(dataArray, d => d.value)])
+					.domain([0, d3.max(displayData, d => d.value)])
 					.range([height, 0]);
 
-				// Create color scale for bars
+				console.log('X scale domain:', xScale.domain());
+				console.log('X scale range:', xScale.range());
+
+				// Create bars - one for each data point
+				displayData.forEach((d, i) => {
+					console.log(`Creating bar ${i}: value=${d.value}, x=${xScale(i)}, width=${xScale.bandwidth()}`);
+					
+					// Create bar
+					g.append("rect")
+						.attr("class", "bar")
+						.attr("x", xScale(i))
+						.attr("width", xScale.bandwidth())
+						.attr("y", yScale(d.value))
+						.attr("height", height - yScale(d.value))
+						.attr("fill", "#38a169")
+						.attr("stroke", "#2d3748")
+						.attr("stroke-width", 1);
+
+					// Add value label on top of bar
+					g.append("text")
+						.attr("class", "value-label")
+						.attr("x", xScale(i) + xScale.bandwidth() / 2)
+						.attr("y", yScale(d.value) - 5)
+						.attr("text-anchor", "middle")
+						.style("font-size", "14px")
+						.style("font-weight", "bold")
+						.style("fill", "#2d3748")
+						.text(d.value);
+
+					// Add x-axis label
+					g.append("text")
+						.attr("class", "x-label")
+						.attr("x", xScale(i) + xScale.bandwidth() / 2)
+						.attr("y", height + 15)
+						.attr("text-anchor", "middle")
+						.style("font-size", "10px")
+						.style("fill", "#4a5568")
+						.text(`Goal ${i + 1}`);
+				});
+
+				// Add y-axis
+				g.append("g")
+					.call(d3.axisLeft(yScale).ticks(5));
+
+				// Add y-axis label
+				g.append("text")
+					.attr("transform", "rotate(-90)")
+					.attr("y", 0 - margin.left)
+					.attr("x", 0 - (height / 2))
+					.attr("dy", "1em")
+					.style("text-anchor", "middle")
+					.style("font-size", "12px")
+					.style("fill", "#4a5568")
+					.text("Number of Organizations");
+
+				// Create simple legend below the chart
+				const legendContainer = container.append("div")
+					.style("margin-top", "20px")
+					.style("padding", "16px")
+					.style("background", "#f7fafc")
+					.style("border-radius", "8px")
+					.style("border", "1px solid #e2e8f0");
+
+				displayData.forEach((d, i) => {
+					const legendItem = legendContainer.append("div")
+						.style("margin-bottom", "8px")
+						.style("font-size", "12px")
+						.style("line-height", "1.4");
+
+					legendItem.html(`<strong>Goal ${i + 1}:</strong> ${d.label} <span style="color: #718096;">(${d.value} organizations)</span>`);
+				});
+			}
+
+			// Horizontal bar chart with legend function for challenges
+			function createHorizontalBarChartWithLegend(selector, data, title) {
+				const container = d3.select(selector);
+				container.selectAll("*").remove();
+
+				const dataArray = Object.entries(data).map(([key, value]) => ({
+					label: key,
+					value: value,
+					shortLabel: `${Object.keys(data).indexOf(key) + 1}`
+				})).sort((a, b) => b.value - a.value).slice(0, 8);
+
+				const margin = { top: 20, right: 60, bottom: 40, left: 50 };
+				const width = Math.min(600, container.node().getBoundingClientRect().width) - margin.left - margin.right;
+				const height = Math.max(250, dataArray.length * 35) - margin.top - margin.bottom;
+
+				const svg = container.append("svg")
+					.attr("width", width + margin.left + margin.right)
+					.attr("height", height + margin.top + margin.bottom);
+
+				const g = svg.append("g")
+					.attr("transform", `translate(${margin.left},${margin.top})`);
+
+				const xScale = d3.scaleLinear()
+					.domain([0, d3.max(dataArray, d => d.value)])
+					.range([0, width]);
+
+				const yScale = d3.scaleBand()
+					.domain(dataArray.map((d, i) => i))
+					.range([0, height])
+					.padding(0.2);
+
 				const colorScale = d3.scaleOrdinal()
-					.range(['#38a169', '#3182ce', '#805ad5', '#dd6b20', '#e53e3e', '#38b2ac', '#d69e2e', '#f56565']);
+					.range(['#e53e3e', '#dd6b20', '#d69e2e', '#38a169', '#38b2ac', '#3182ce', '#805ad5', '#f56565']);
 
 				// Create bars
 				g.selectAll(".bar")
 					.data(dataArray)
 					.enter().append("rect")
 					.attr("class", "bar")
-					.attr("x", d => xScale(d.label))
-					.attr("width", xScale.bandwidth())
-					.attr("y", d => yScale(d.value))
-					.attr("height", d => height - yScale(d.value))
+					.attr("x", 0)
+					.attr("y", (d, i) => yScale(i))
+					.attr("width", d => xScale(d.value))
+					.attr("height", yScale.bandwidth())
 					.attr("fill", (d, i) => colorScale(i))
 					.on("mouseover", function(event, d) {
 						const originalColor = d3.select(this).attr("fill");
 						d3.select(this).attr("fill", d3.color(originalColor).darker(0.3));
 						
-						// Simple tooltip
 						const tooltip = d3.select("body").append("div")
 							.attr("class", "tooltip")
 							.style("position", "absolute")
@@ -278,7 +424,8 @@ import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
 							.style("font-size", "12px")
 							.style("pointer-events", "none")
 							.style("z-index", "1000")
-							.html(`<strong>${d.fullLabel}</strong><br/>Count: ${d.value}`)
+							.style("max-width", "300px")
+							.html(`<strong>${d.label}</strong><br/>Count: ${d.value}`)
 							.style("left", (event.pageX + 10) + "px")
 							.style("top", (event.pageY - 10) + "px");
 					})
@@ -293,30 +440,69 @@ import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
 					.data(dataArray)
 					.enter().append("text")
 					.attr("class", "label")
-					.attr("x", d => xScale(d.label) + xScale.bandwidth() / 2)
-					.attr("y", d => yScale(d.value) - 5)
-					.attr("text-anchor", "middle")
+					.attr("x", d => xScale(d.value) + 5)
+					.attr("y", (d, i) => yScale(i) + yScale.bandwidth() / 2)
+					.attr("dy", ".35em")
 					.style("font-size", "12px")
+					.style("font-weight", "bold")
 					.style("fill", "#2d3748")
 					.text(d => d.value);
+
+				// Add short labels on y-axis
+				g.selectAll(".y-label")
+					.data(dataArray)
+					.enter().append("text")
+					.attr("class", "y-label")
+					.attr("x", -10)
+					.attr("y", (d, i) => yScale(i) + yScale.bandwidth() / 2)
+					.attr("dy", ".35em")
+					.attr("text-anchor", "end")
+					.style("font-size", "12px")
+					.style("fill", "#4a5568")
+					.text(d => d.shortLabel);
 
 				// Add x-axis
 				g.append("g")
 					.attr("transform", `translate(0,${height})`)
-					.call(d3.axisBottom(xScale))
-					.selectAll("text")
-					.style("text-anchor", "end")
-					.attr("dx", "-.8em")
-					.attr("dy", ".15em")
-					.attr("transform", "rotate(-45)")
-					.style("font-size", "10px");
+					.call(d3.axisBottom(xScale).ticks(5));
 
-				// Add y-axis
-				g.append("g")
-					.call(d3.axisLeft(yScale));
+				// Create legend below the chart
+				const legendContainer = container.append("div")
+					.attr("class", "chart-legend")
+					.style("margin-top", "20px");
+
+				const legendItems = legendContainer.selectAll(".legend-item")
+					.data(dataArray)
+					.enter().append("div")
+					.attr("class", "legend-item")
+					.style("display", "flex")
+					.style("align-items", "flex-start")
+					.style("margin-bottom", "8px")
+					.style("font-size", "12px")
+					.style("line-height", "1.4");
+
+				legendItems.append("div")
+					.style("width", "20px")
+					.style("height", "16px")
+					.style("border-radius", "3px")
+					.style("margin-right", "8px")
+					.style("margin-top", "2px")
+					.style("flex-shrink", "0")
+					.style("background-color", (d, i) => colorScale(i))
+					.style("display", "flex")
+					.style("align-items", "center")
+					.style("justify-content", "center")
+					.style("color", "white")
+					.style("font-weight", "bold")
+					.style("font-size", "10px")
+					.text(d => d.shortLabel);
+
+				legendItems.append("div")
+					.style("flex", "1")
+					.html(d => `${d.label} <span style="color: #718096;">(${d.value})</span>`);
 			}
 
-			// Simple pie chart function
+			// Simple pie chart function with legend
 			function createPieChart(selector, data, title) {
 				const container = d3.select(selector);
 				container.selectAll("*").remove();
@@ -335,10 +521,11 @@ import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
 					.attr("transform", `translate(${width/2},${height/2})`);
 
 				const color = d3.scaleOrdinal()
-					.range(['#38a169', '#3182ce', '#805ad5', '#dd6b20', '#e53e3e']);
+					.range(['#38a169', '#3182ce', '#805ad5', '#dd6b20', '#e53e3e', '#38b2ac', '#f56565', '#d69e2e']);
 
 				const pie = d3.pie()
-					.value(d => d.value);
+					.value(d => d.value)
+					.sort((a, b) => b.value - a.value); // Sort by value descending
 
 				const arc = d3.arc()
 					.innerRadius(0)
@@ -347,7 +534,7 @@ import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
 				const dataArray = Object.entries(data).map(([key, value]) => ({
 					label: key,
 					value: value
-				}));
+				})).sort((a, b) => b.value - a.value); // Sort data by value
 
 				const arcs = g.selectAll(".arc")
 					.data(pie(dataArray))
@@ -357,7 +544,12 @@ import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
 				arcs.append("path")
 					.attr("d", arc)
 					.attr("fill", (d, i) => color(i))
+					.attr("stroke", "#fff")
+					.attr("stroke-width", 2)
 					.on("mouseover", function(event, d) {
+						// Highlight effect
+						d3.select(this).attr("stroke-width", 3);
+						
 						const tooltip = d3.select("body").append("div")
 							.attr("class", "tooltip")
 							.style("position", "absolute")
@@ -373,6 +565,7 @@ import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
 							.style("top", (event.pageY - 10) + "px");
 					})
 					.on("mouseout", function() {
+						d3.select(this).attr("stroke-width", 2);
 						d3.selectAll(".tooltip").remove();
 					});
 
@@ -381,8 +574,39 @@ import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
 					.attr("dy", ".35em")
 					.style("text-anchor", "middle")
 					.style("font-size", "12px")
+					.style("font-weight", "bold")
 					.style("fill", "white")
 					.text(d => d.data.value > 1 ? d.data.value : '');
+
+				// Create legend below the chart
+				const legendContainer = container.append("div")
+					.attr("class", "chart-legend")
+					.style("margin-top", "20px");
+
+				const legendItems = legendContainer.selectAll(".legend-item")
+					.data(dataArray)
+					.enter().append("div")
+					.attr("class", "legend-item")
+					.style("display", "flex")
+					.style("align-items", "flex-start")
+					.style("margin-bottom", "8px")
+					.style("font-size", "12px")
+					.style("line-height", "1.4");
+
+				legendItems.append("div")
+					.style("width", "16px")
+					.style("height", "16px")
+					.style("border-radius", "50%")
+					.style("margin-right", "8px")
+					.style("margin-top", "2px")
+					.style("flex-shrink", "0")
+					.style("background-color", (d, i) => color(i))
+					.style("border", "2px solid #fff")
+					.style("box-shadow", "0 1px 3px rgba(0,0,0,0.2)");
+
+				legendItems.append("div")
+					.style("flex", "1")
+					.html(d => `${d.label} <span style="color: #718096;">(${d.value})</span>`);
 			}
 
 			async function loadSurveyData() {
@@ -434,27 +658,67 @@ import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
 
 			async function initializeDashboard() {
 				try {
+					console.log('Starting dashboard initialization...');
+					
 					const dataProcessor = await loadSurveyData();
 					if (!dataProcessor) {
 						throw new Error('Failed to load survey data');
 					}
 
+					console.log(`Successfully loaded ${dataProcessor.processedData.length} records`);
+					
 					// Debug: Log the first few rows to see the structure
 					console.log('Parsed data sample:', dataProcessor.processedData.slice(0, 3));
 					console.log('Available columns:', Object.keys(dataProcessor.processedData[0] || {}));
 
-					// Create summary cards
-					createSummaryCards(dataProcessor.getSummaryStats());
+					// Get and validate data for each visualization
+					const summaryStats = dataProcessor.getSummaryStats();
+					const goalData = dataProcessor.getGoalData();
+					const challengesData = dataProcessor.getChallengesData();
+					
+					console.log('Summary stats:', summaryStats);
+					console.log('Goal data entries:', Object.keys(goalData).length);
+					console.log('Challenges data entries:', Object.keys(challengesData).length);
 
-					// Create visualizations
-					createBarChart('#goals-chart', dataProcessor.getGoalData(), 'Primary Goals');
-					createPieChart('#sectors-chart', dataProcessor.getSummaryStats().sectorBreakdown, 'Organization Sectors');
-					createBarChart('#challenges-chart', dataProcessor.getChallengesData(), 'Collaboration Challenges');
+					// Create summary cards
+					console.log('Creating summary cards...');
+					createSummaryCards(summaryStats);
+
+					// Create visualizations with error handling
+					console.log('Creating goals chart...');
+					if (Object.keys(goalData).length > 0) {
+						createPieChart('#goals-chart', goalData, 'Primary Goals');
+						console.log('Goals chart created successfully');
+					} else {
+						console.warn('No goals data found');
+						document.querySelector('#goals-chart').innerHTML = '<div class="error-message">No goals data available</div>';
+					}
+
+					console.log('Creating sectors chart...');
+					if (Object.keys(summaryStats.sectorBreakdown).length > 0) {
+						createPieChart('#sectors-chart', summaryStats.sectorBreakdown, 'Organization Sectors');
+						console.log('Sectors chart created successfully');
+					} else {
+						console.warn('No sector data found');
+						document.querySelector('#sectors-chart').innerHTML = '<div class="error-message">No sector data available</div>';
+					}
+
+					console.log('Creating challenges chart...');
+					if (Object.keys(challengesData).length > 0) {
+						createHorizontalBarChartWithLegend('#challenges-chart', challengesData, 'Collaboration Challenges');
+						console.log('Challenges chart created successfully');
+					} else {
+						console.warn('No challenges data found');
+						document.querySelector('#challenges-chart').innerHTML = '<div class="error-message">No challenges data available</div>';
+					}
+
+					console.log('Dashboard initialization completed successfully');
 
 				} catch (error) {
 					console.error('Error initializing dashboard:', error);
+					console.error('Error stack:', error.stack);
 					document.querySelectorAll('.loading').forEach(el => {
-						el.textContent = 'Error loading visualization';
+						el.textContent = `Error loading visualization: ${error.message}`;
 						el.style.color = '#e53e3e';
 					});
 				}
@@ -620,6 +884,36 @@ import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
 		font-style: italic;
 	}
 
+	/* Legend Styling */
+	.chart-legend {
+		background: #f7fafc;
+		border-radius: 8px;
+		padding: 16px;
+		margin-top: 20px;
+		border: 1px solid #e2e8f0;
+		max-height: 300px;
+		overflow-y: auto;
+	}
+
+	.legend-item {
+		display: flex;
+		align-items: flex-start;
+		margin-bottom: 8px;
+		font-size: 12px;
+		line-height: 1.4;
+		transition: background-color 0.2s;
+		padding: 4px;
+		border-radius: 4px;
+	}
+
+	.legend-item:hover {
+		background-color: #edf2f7;
+	}
+
+	.legend-item:last-child {
+		margin-bottom: 0;
+	}
+
 	/* Responsive Design */
 	@media (max-width: 768px) {
 		.hero-section {
@@ -671,6 +965,19 @@ import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
 
 		.navigation h1 {
 			font-size: 1.2rem;
+		}
+
+		/* Mobile legend adjustments */
+		.chart-legend {
+			padding: 12px;
+			margin-top: 15px;
+			max-height: 250px;
+		}
+
+		.legend-item {
+			font-size: 11px;
+			margin-bottom: 6px;
+			padding: 3px;
 		}
 	}
 </style>

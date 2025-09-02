@@ -1,9 +1,41 @@
 import fs from 'fs';
-import Papa from 'papaparse';
+import XLSX from 'xlsx';
 import { createWriteStream } from 'fs';
 
 // Rate limiting for Nominatim API
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+// Cache file path
+const CACHE_FILE = '../data/geocode-cache.json';
+
+// Load existing cache
+function loadCache() {
+  try {
+    if (fs.existsSync(CACHE_FILE)) {
+      const cacheData = fs.readFileSync(CACHE_FILE, 'utf8');
+      return JSON.parse(cacheData);
+    }
+  } catch (error) {
+    console.log('Error loading cache, starting with empty cache:', error.message);
+  }
+  return {};
+}
+
+// Save cache to file
+function saveCache(cache) {
+  try {
+    fs.writeFileSync(CACHE_FILE, JSON.stringify(cache, null, 2));
+  } catch (error) {
+    console.error('Error saving cache:', error.message);
+  }
+}
+
+// Generate cache key from address components
+function getCacheKey(street, zipCode) {
+  const cleanedAddress = cleanAddress(street, zipCode);
+  if (!cleanedAddress) return null;
+  return `${cleanedAddress}, Los Angeles, CA, ${zipCode}`.toLowerCase();
+}
 
 // Hardcoded fallback coordinates for problematic addresses
 const fallbackCoords = {
@@ -112,8 +144,8 @@ function cleanSPAData(spaString) {
   return uniqueSPAs.length > 0 ? uniqueSPAs.join(', ') : '';
 }
 
-// Geocode function using Nominatim
-async function geocodeAddress(street, zipCode, orgName) {
+// Geocode function using Nominatim with caching
+async function geocodeAddress(street, zipCode, orgName, cache) {
   const cleanedAddress = cleanAddress(street, zipCode);
   
   if (!cleanedAddress) {
@@ -123,16 +155,27 @@ async function geocodeAddress(street, zipCode, orgName) {
   
   const fullAddress = `${cleanedAddress}, Los Angeles, CA, ${zipCode}`;
   const fallbackAddress = `${cleanedAddress}, Los Angeles, CA`;
+  const cacheKey = getCacheKey(street, zipCode);
   
-  // Check hardcoded fallbacks first
+  // Check cache first
+  if (cacheKey && cache[cacheKey]) {
+    console.log(`Using cached coordinates for ${orgName}`);
+    return cache[cacheKey];
+  }
+  
+  // Check hardcoded fallbacks
   if (fallbackCoords[fullAddress]) {
     console.log(`Using hardcoded coordinates for ${orgName}`);
-    return fallbackCoords[fullAddress];
+    const coords = fallbackCoords[fullAddress];
+    if (cacheKey) cache[cacheKey] = coords; // Cache the hardcoded result
+    return coords;
   }
   
   if (fallbackCoords[fallbackAddress]) {
     console.log(`Using hardcoded coordinates (fallback) for ${orgName}`);
-    return fallbackCoords[fallbackAddress];
+    const coords = fallbackCoords[fallbackAddress];
+    if (cacheKey) cache[cacheKey] = coords; // Cache the hardcoded result
+    return coords;
   }
   
   try {
@@ -154,8 +197,10 @@ async function geocodeAddress(street, zipCode, orgName) {
       const state = result.address?.state;
       
       if (state === 'California') {
+        const coords = [parseFloat(result.lat), parseFloat(result.lon)];
         console.log(`Geocoded ${orgName}: ${result.lat}, ${result.lon}`);
-        return [parseFloat(result.lat), parseFloat(result.lon)];
+        if (cacheKey) cache[cacheKey] = coords; // Cache the API result
+        return coords;
       }
     }
     
@@ -180,12 +225,15 @@ async function geocodeAddress(street, zipCode, orgName) {
       const state = result.address?.state;
       
       if (state === 'California') {
+        const coords = [parseFloat(result.lat), parseFloat(result.lon)];
         console.log(`Geocoded ${orgName} (fallback): ${result.lat}, ${result.lon}`);
-        return [parseFloat(result.lat), parseFloat(result.lon)];
+        if (cacheKey) cache[cacheKey] = coords; // Cache the API result
+        return coords;
       }
     }
     
     console.log(`Failed to geocode ${orgName}: ${fullAddress}`);
+    if (cacheKey) cache[cacheKey] = null; // Cache the failure to avoid retrying
     return null;
     
   } catch (error) {
@@ -194,22 +242,46 @@ async function geocodeAddress(street, zipCode, orgName) {
   }
 }
 
-// Process CSV data
-async function processCSV() {
-  console.log('Reading CSV file...');
+// Process Excel data
+async function processExcel() {
+  console.log('Reading Excel file...');
   
-  const csvFile = fs.readFileSync('../../public/FINAL- Food Systems Stakeholder Survey  (Responses) - Survey Respones.csv', 'utf8');
+  // Load geocoding cache
+  console.log('Loading geocoding cache...');
+  const cache = loadCache();
+  const cacheSize = Object.keys(cache).length;
+  console.log(`Loaded ${cacheSize} cached entries`);
   
-  const parsed = Papa.parse(csvFile, {
-    header: true,
-    skipEmptyLines: true
-  });
+  const workbook = XLSX.readFile('../../public/FINAL- Food Systems Stakeholder Survey  (Responses).xlsx');
+  const sheetName = 'Copy of Survey Respones'; // Second sheet
+  const worksheet = workbook.Sheets[sheetName];
+  
+  if (!worksheet) {
+    throw new Error(`Sheet "${sheetName}" not found in Excel file`);
+  }
+  
+  const data = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+  const headers = data[0];
+  const rows = data.slice(1);
+  
+  // Convert to object format similar to Papa.parse
+  const parsed = {
+    data: rows.map(row => {
+      const obj = {};
+      headers.forEach((header, index) => {
+        obj[header] = row[index] || '';
+      });
+      return obj;
+    })
+  };
   
   console.log(`Found ${parsed.data.length} organizations`);
   
   const organizations = [];
   let successCount = 0;
   let failCount = 0;
+  let cacheHits = 0;
+  let apiCalls = 0;
   
   for (let i = 0; i < parsed.data.length; i++) {
     const row = parsed.data[i];
@@ -230,8 +302,17 @@ async function processCSV() {
     const email = row['Email Address'] || '';
     const contactName = row['Your Name (First/Last)'] || '';
     
+    // Check if this will be a cache hit
+    const cacheKey = getCacheKey(street, zipCode);
+    const willUseCache = cacheKey && cache[cacheKey];
+    if (willUseCache) {
+      cacheHits++;
+    } else {
+      apiCalls++;
+    }
+    
     // Geocode the address
-    const coordinates = await geocodeAddress(street, zipCode, orgName);
+    const coordinates = await geocodeAddress(street, zipCode, orgName, cache);
     
     if (coordinates) {
       successCount++;
@@ -284,6 +365,11 @@ async function processCSV() {
     }
   };
   
+  // Save updated cache
+  console.log('Saving geocoding cache...');
+  saveCache(cache);
+  const finalCacheSize = Object.keys(cache).length;
+  
   // Write to file
   fs.writeFileSync('../data/organizations.json', JSON.stringify(outputData, null, 2));
   
@@ -292,8 +378,15 @@ async function processCSV() {
   console.log(`Successfully geocoded: ${successCount}`);
   console.log(`Failed to geocode: ${failCount}`);
   console.log(`Success rate: ${outputData.metadata.successRate}%`);
+  console.log('\n=== CACHE STATISTICS ===');
+  console.log(`Cache hits: ${cacheHits}`);
+  console.log(`API calls needed: ${apiCalls}`);
+  console.log(`Cache entries before: ${cacheSize}`);
+  console.log(`Cache entries after: ${finalCacheSize}`);
+  console.log(`New cache entries: ${finalCacheSize - cacheSize}`);
   console.log('Output saved to: src/data/organizations.json');
+  console.log('Cache saved to: src/data/geocode-cache.json');
 }
 
 // Run the script
-processCSV().catch(console.error);
+processExcel().catch(console.error);
