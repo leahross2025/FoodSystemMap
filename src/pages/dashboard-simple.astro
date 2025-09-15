@@ -20,7 +20,12 @@ import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
 		</nav>
 
 		<div class="hero-section">
-			<h1>LA Food Systems Stakeholder Survey Results</h1>
+			<div class="hero-logo">
+				<a href="https://lacountyfoodsystems.org/" target="_blank" rel="noopener noreferrer">
+					<img src="/images/LACOFE_FoodSystems_wht.webp" alt="LA Food Systems" />
+				</a>
+			</div>
+			<p>Survey Results Dashboard</p>
 		</div>
 		
 		<main class="dashboard-container">
@@ -52,16 +57,6 @@ import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
 						<div class="loading">Loading sectors chart...</div>
 					</div>
 				</div>
-
-				<div class="viz-container full-width">
-					<div class="viz-header">
-						<h2>Collaboration Challenges</h2>
-						<p>Most common barriers to collaboration</p>
-					</div>
-					<div class="viz-content" id="challenges-chart">
-						<div class="loading">Loading challenges chart...</div>
-					</div>
-				</div>
 			</section>
 		</main>
 
@@ -77,16 +72,47 @@ import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
 
 				parseExcel(excelData) {
 					try {
+						console.log('Attempting to parse Excel data, size:', excelData.length);
+						
 						// Parse the Excel file
 						const workbook = XLSX.read(excelData, { type: 'array' });
+						const availableSheets = Object.keys(workbook.Sheets);
+						console.log('Workbook parsed, available sheets:', availableSheets);
 						
-						// Get the correct worksheet - "Copy of Survey Respones"
-						const sheetName = 'Copy of Survey Respones';
-						const worksheet = workbook.Sheets[sheetName];
+						// Try to find the correct worksheet - try multiple possible names
+						const possibleSheetNames = [
+							'Copy of Survey Respones',
+							'Survey Responses',
+							'Form Responses 1',
+							'Sheet1',
+							'Responses'
+						];
+						
+						let sheetName = null;
+						let worksheet = null;
+						
+						// Try each possible sheet name
+						for (const name of possibleSheetNames) {
+							if (workbook.Sheets[name]) {
+								sheetName = name;
+								worksheet = workbook.Sheets[name];
+								break;
+							}
+						}
+						
+						// If no match found, use the first available sheet
+						if (!worksheet && availableSheets.length > 0) {
+							sheetName = availableSheets[0];
+							worksheet = workbook.Sheets[sheetName];
+							console.log(`Using first available sheet: "${sheetName}"`);
+						}
 						
 						if (!worksheet) {
-							throw new Error(`Sheet "${sheetName}" not found in Excel file`);
+							console.error('No worksheets found in Excel file. Available sheets:', availableSheets);
+							throw new Error('No worksheets found in Excel file');
 						}
+						
+						console.log('Found worksheet:', sheetName);
 						
 						// Convert to JSON with header normalization
 						const jsonData = XLSX.utils.sheet_to_json(worksheet, {
@@ -94,12 +120,16 @@ import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
 							defval: '' // Default value for empty cells
 						});
 						
+						console.log('JSON data extracted, rows:', jsonData.length);
+						
 						if (jsonData.length === 0) return [];
 						
 						// Get headers and normalize them
 						const headers = jsonData[0].map(header => 
 							String(header || '').trim().replace(/\s+/g, '_').replace(/[^\w]/g, '_')
 						);
+						
+						console.log('Headers found:', headers.slice(0, 5)); // Show first 5 headers
 						
 						// Convert data rows to objects
 						const data = [];
@@ -114,9 +144,11 @@ import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
 							}
 						}
 						
+						console.log('Processed data rows:', data.length);
 						return data;
 					} catch (error) {
-						console.error('Error parsing Excel file:', error);
+						console.error('Error parsing Excel file:', error.message);
+						console.error('Error details:', error);
 						return [];
 					}
 				}
@@ -206,51 +238,6 @@ import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
 					return goalCounts;
 				}
 
-				getChallengesData() {
-					const challengeCounts = {};
-					this.processedData.forEach(org => {
-						// Try multiple possible column names for challenges
-						const possibleChallengeFields = [
-							'What_are_the_biggest_challenges_your_organization_faces_in_collaborating_with_others_in_the_food_system__Select_up_to_3_',
-							'What_are_the_biggest_challenges_your_organization_faces_in_collaborating_with_others_in_the_food_system_',
-							'Biggest_challenges_collaborating',
-							'Challenges_collaborating',
-							'Collaboration_challenges'
-						];
-						
-						let challengesField = '';
-						for (const field of possibleChallengeFields) {
-							if (org[field]) {
-								challengesField = org[field];
-								break;
-							}
-						}
-						
-						// If no exact match, look for any field containing 'challenge' or 'collaborat'
-						if (!challengesField) {
-							const keys = Object.keys(org);
-							const challengeKey = keys.find(key => 
-								key.toLowerCase().includes('challenge') || 
-								key.toLowerCase().includes('collaborat')
-							);
-							if (challengeKey) {
-								challengesField = org[challengeKey];
-							}
-						}
-						
-						if (challengesField) {
-							const challenges = this.parseMultiSelect(challengesField);
-							challenges.forEach(challenge => {
-								if (challenge && challenge.trim()) {
-									challengeCounts[challenge] = (challengeCounts[challenge] || 0) + 1;
-								}
-							});
-						}
-					});
-					
-					console.log('Challenges data found:', challengeCounts);
-					return challengeCounts;
-				}
 			}
 
 			// Simple bar chart function - completely rewritten
@@ -366,141 +353,6 @@ import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
 				});
 			}
 
-			// Horizontal bar chart with legend function for challenges
-			function createHorizontalBarChartWithLegend(selector, data, title) {
-				const container = d3.select(selector);
-				container.selectAll("*").remove();
-
-				const dataArray = Object.entries(data).map(([key, value]) => ({
-					label: key,
-					value: value,
-					shortLabel: `${Object.keys(data).indexOf(key) + 1}`
-				})).sort((a, b) => b.value - a.value).slice(0, 8);
-
-				const margin = { top: 20, right: 60, bottom: 40, left: 50 };
-				const width = Math.min(600, container.node().getBoundingClientRect().width) - margin.left - margin.right;
-				const height = Math.max(250, dataArray.length * 35) - margin.top - margin.bottom;
-
-				const svg = container.append("svg")
-					.attr("width", width + margin.left + margin.right)
-					.attr("height", height + margin.top + margin.bottom);
-
-				const g = svg.append("g")
-					.attr("transform", `translate(${margin.left},${margin.top})`);
-
-				const xScale = d3.scaleLinear()
-					.domain([0, d3.max(dataArray, d => d.value)])
-					.range([0, width]);
-
-				const yScale = d3.scaleBand()
-					.domain(dataArray.map((d, i) => i))
-					.range([0, height])
-					.padding(0.2);
-
-				const colorScale = d3.scaleOrdinal()
-					.range(['#e53e3e', '#dd6b20', '#d69e2e', '#38a169', '#38b2ac', '#3182ce', '#805ad5', '#f56565']);
-
-				// Create bars
-				g.selectAll(".bar")
-					.data(dataArray)
-					.enter().append("rect")
-					.attr("class", "bar")
-					.attr("x", 0)
-					.attr("y", (d, i) => yScale(i))
-					.attr("width", d => xScale(d.value))
-					.attr("height", yScale.bandwidth())
-					.attr("fill", (d, i) => colorScale(i))
-					.on("mouseover", function(event, d) {
-						const originalColor = d3.select(this).attr("fill");
-						d3.select(this).attr("fill", d3.color(originalColor).darker(0.3));
-						
-						const tooltip = d3.select("body").append("div")
-							.attr("class", "tooltip")
-							.style("position", "absolute")
-							.style("background", "rgba(0,0,0,0.8)")
-							.style("color", "white")
-							.style("padding", "8px")
-							.style("border-radius", "4px")
-							.style("font-size", "12px")
-							.style("pointer-events", "none")
-							.style("z-index", "1000")
-							.style("max-width", "300px")
-							.html(`<strong>${d.label}</strong><br/>Count: ${d.value}`)
-							.style("left", (event.pageX + 10) + "px")
-							.style("top", (event.pageY - 10) + "px");
-					})
-					.on("mouseout", function(event, d) {
-						const index = dataArray.indexOf(d);
-						d3.select(this).attr("fill", colorScale(index));
-						d3.selectAll(".tooltip").remove();
-					});
-
-				// Add value labels
-				g.selectAll(".label")
-					.data(dataArray)
-					.enter().append("text")
-					.attr("class", "label")
-					.attr("x", d => xScale(d.value) + 5)
-					.attr("y", (d, i) => yScale(i) + yScale.bandwidth() / 2)
-					.attr("dy", ".35em")
-					.style("font-size", "12px")
-					.style("font-weight", "bold")
-					.style("fill", "#2d3748")
-					.text(d => d.value);
-
-				// Add short labels on y-axis
-				g.selectAll(".y-label")
-					.data(dataArray)
-					.enter().append("text")
-					.attr("class", "y-label")
-					.attr("x", -10)
-					.attr("y", (d, i) => yScale(i) + yScale.bandwidth() / 2)
-					.attr("dy", ".35em")
-					.attr("text-anchor", "end")
-					.style("font-size", "12px")
-					.style("fill", "#4a5568")
-					.text(d => d.shortLabel);
-
-				// Add x-axis
-				g.append("g")
-					.attr("transform", `translate(0,${height})`)
-					.call(d3.axisBottom(xScale).ticks(5));
-
-				// Create legend below the chart
-				const legendContainer = container.append("div")
-					.attr("class", "chart-legend")
-					.style("margin-top", "20px");
-
-				const legendItems = legendContainer.selectAll(".legend-item")
-					.data(dataArray)
-					.enter().append("div")
-					.attr("class", "legend-item")
-					.style("display", "flex")
-					.style("align-items", "flex-start")
-					.style("margin-bottom", "8px")
-					.style("font-size", "12px")
-					.style("line-height", "1.4");
-
-				legendItems.append("div")
-					.style("width", "20px")
-					.style("height", "16px")
-					.style("border-radius", "3px")
-					.style("margin-right", "8px")
-					.style("margin-top", "2px")
-					.style("flex-shrink", "0")
-					.style("background-color", (d, i) => colorScale(i))
-					.style("display", "flex")
-					.style("align-items", "center")
-					.style("justify-content", "center")
-					.style("color", "white")
-					.style("font-weight", "bold")
-					.style("font-size", "10px")
-					.text(d => d.shortLabel);
-
-				legendItems.append("div")
-					.style("flex", "1")
-					.html(d => `${d.label} <span style="color: #718096;">(${d.value})</span>`);
-			}
 
 			// Simple pie chart function with legend
 			function createPieChart(selector, data, title) {
@@ -611,10 +463,76 @@ import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
 
 			async function loadSurveyData() {
 				try {
-					const response = await fetch('/FINAL- Food Systems Stakeholder Survey  (Responses).xlsx');
-					const arrayBuffer = await response.arrayBuffer();
-					const uint8Array = new Uint8Array(arrayBuffer);
-					return new SurveyDataProcessor(uint8Array);
+					// Load the pre-processed organizations data
+					const response = await fetch('/src/data/organizations.json');
+					if (!response.ok) {
+						throw new Error(`HTTP error! status: ${response.status}`);
+					}
+					const organizationsData = await response.json();
+					
+					// Convert organizations data to the format expected by our processor
+					const processedData = organizationsData.organizations.map(org => ({
+						Organization_Name: org.name,
+						Sector: org.sector,
+						Primary_Supervisorial_District__based_on_headquarters_address_: org.primaryDistrict,
+						// Add other fields as needed for visualizations
+						coordinates: org.coordinates,
+						mission: org.mission,
+						primaryActivity: org.primaryActivity,
+						website: org.website
+					}));
+					
+					// Create a mock processor with the pre-processed data
+					return {
+						processedData: processedData,
+						getSummaryStats: function() {
+							// Convert the metadata to the expected format
+							const sectorCounts = {};
+							const districtCounts = {};
+							
+							// Count sectors and districts from the actual data
+							this.processedData.forEach(org => {
+								const sector = this.normalizeSector(org.Sector);
+								const district = this.extractPrimaryDistrict(org.Primary_Supervisorial_District__based_on_headquarters_address_);
+								
+								sectorCounts[sector] = (sectorCounts[sector] || 0) + 1;
+								districtCounts[district] = (districtCounts[district] || 0) + 1;
+							});
+							
+							return {
+								totalOrganizations: organizationsData.metadata.totalOrganizations,
+								sectorBreakdown: sectorCounts,
+								districtBreakdown: districtCounts
+							};
+						},
+						getGoalData: function() {
+							// Extract goal data from the processed organizations
+							const goalCounts = {};
+							this.processedData.forEach(org => {
+								// For now, use sector as a proxy for goals since we don't have goal data in organizations.json
+								// This should be updated when we add goal data to the geocoding process
+								const sector = this.normalizeSector(org.Sector);
+								goalCounts[sector] = (goalCounts[sector] || 0) + 1;
+							});
+							return goalCounts;
+						},
+						normalizeSector: function(sector) {
+							if (!sector) return 'Unknown';
+							const sectorMap = {
+								'Nonprofit/CBO': 'Nonprofit',
+								'Government Agency': 'Government',
+								'Foundation': 'Foundation',
+								'College/University': 'Academic'
+							};
+							return sectorMap[sector] || sector;
+						},
+						extractPrimaryDistrict: function(districtField) {
+							if (!districtField) return 'Unknown';
+							if (districtField.includes('Countywide')) return 'Countywide';
+							const match = districtField.match(/(\d+)(st|nd|rd|th)\s+District/);
+							return match ? `District ${match[1]}` : 'Unknown';
+						}
+					};
 				} catch (error) {
 					console.error('Error loading survey data:', error);
 					return null;
@@ -674,11 +592,9 @@ import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
 					// Get and validate data for each visualization
 					const summaryStats = dataProcessor.getSummaryStats();
 					const goalData = dataProcessor.getGoalData();
-					const challengesData = dataProcessor.getChallengesData();
 					
 					console.log('Summary stats:', summaryStats);
 					console.log('Goal data entries:', Object.keys(goalData).length);
-					console.log('Challenges data entries:', Object.keys(challengesData).length);
 
 					// Create summary cards
 					console.log('Creating summary cards...');
@@ -701,15 +617,6 @@ import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
 					} else {
 						console.warn('No sector data found');
 						document.querySelector('#sectors-chart').innerHTML = '<div class="error-message">No sector data available</div>';
-					}
-
-					console.log('Creating challenges chart...');
-					if (Object.keys(challengesData).length > 0) {
-						createHorizontalBarChartWithLegend('#challenges-chart', challengesData, 'Collaboration Challenges');
-						console.log('Challenges chart created successfully');
-					} else {
-						console.warn('No challenges data found');
-						document.querySelector('#challenges-chart').innerHTML = '<div class="error-message">No challenges data available</div>';
 					}
 
 					console.log('Dashboard initialization completed successfully');
@@ -769,15 +676,19 @@ import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
 	.hero-section {
 		text-align: center;
 		padding: 60px 20px;
-		background: linear-gradient(135deg, rgba(122, 139, 92, 0.49) 0%, rgba(27, 56, 34, 0.36) 100%);
+		background: #383838;
 		color: white;
 		margin-bottom: 40px;
 	}
 	
-	.hero-section h1 {
-		font-size: 3rem;
-		margin: 0 0 20px 0;
-		font-weight: bold;
+	.hero-logo {
+		margin-bottom: 20px;
+	}
+	
+	.hero-logo img {
+		width: 100%;
+		height: auto;
+		max-width: 100%;
 	}
 	
 	.hero-section p {

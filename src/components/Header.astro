@@ -4,7 +4,11 @@ import { SITE_TITLE } from '../consts';
 
 <header>
 	<nav>
-		<h2><a href="/">{SITE_TITLE}</a></h2>
+		<div class="logo-container">
+			<a href="/">
+				<img src="/images/LACOFE_FoodSystems_wht.webp" alt="LA Food Systems" class="logo" />
+			</a>
+		</div>
 		<div class="subtitle">
 			<span>Los Angeles County Food Systems</span>
 		</div>
@@ -14,26 +18,39 @@ import { SITE_TITLE } from '../consts';
 	header {
 		margin: 0;
 		padding: 0 1em;
-		background: white;
+		background: #383838;
 		box-shadow: 0 2px 8px rgba(var(--black), 5%);
 	}
-	h2 {
-		margin: 0;
-		font-size: 1em;
+	
+	.logo-container {
+		display: flex;
+		justify-content: center;
+		flex: 1;
 	}
-
-	h2 a,
-	h2 a.active {
-		text-decoration: none;
+	
+	.logo {
+		height: 60px;
+		width: auto;
+		padding: 1em 0;
 	}
+	
 	nav {
 		display: flex;
 		align-items: center;
-		justify-content: space-between;
+		justify-content: center;
+		position: relative;
 	}
+	
+	.subtitle {
+		position: absolute;
+		right: 0;
+		color: white;
+		font-size: 0.9em;
+	}
+	
 	nav a {
 		padding: 1em 0.5em;
-		color: var(--black);
+		color: white;
 		border-bottom: 4px solid transparent;
 		text-decoration: none;
 	}
@@ -48,6 +65,12 @@ import { SITE_TITLE } from '../consts';
 	@media (max-width: 720px) {
 		.social-links {
 			display: none;
+		}
+		.subtitle {
+			display: none;
+		}
+		nav {
+			justify-content: center;
 		}
 	}
 </style>

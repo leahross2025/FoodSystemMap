@@ -252,11 +252,12 @@ async function processExcel() {
   const cacheSize = Object.keys(cache).length;
   console.log(`Loaded ${cacheSize} cached entries`);
   
-  const workbook = XLSX.readFile('../../public/FINAL- Food Systems Stakeholder Survey  (Responses).xlsx');
-  const sheetName = 'Copy of Survey Respones'; // Second sheet
+  const workbook = XLSX.readFile('../../public/FINAL- Food Systems Stakeholder Survey (Responses).xlsx');
+  const sheetName = 'Copy of Survey Responses';
   const worksheet = workbook.Sheets[sheetName];
   
   if (!worksheet) {
+    console.error(`Sheet "${sheetName}" not found. Available sheets:`, workbook.SheetNames);
     throw new Error(`Sheet "${sheetName}" not found in Excel file`);
   }
   
@@ -301,6 +302,7 @@ async function processExcel() {
     const additionalSPAs = cleanSPAData(row['Additional SPA(s) (service planning area) Served  (all districts where programs and services are provided) - Mark any or all '] || '');
     const email = row['Email Address'] || '';
     const contactName = row['Your Name (First/Last)'] || '';
+    const website = row['Website'] || '';
     
     // Check if this will be a cache hit
     const cacheKey = getCacheKey(street, zipCode);
@@ -330,6 +332,7 @@ async function processExcel() {
         additionalSPAs: additionalSPAs,
         mission: mission,
         primaryActivity: primaryActivity,
+        website: website,
         contact: {
           email: email,
           name: contactName

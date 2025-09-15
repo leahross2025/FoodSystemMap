@@ -1,22 +1,71 @@
-import Papa from 'papaparse';
+import * as XLSX from 'xlsx';
 
 // Data processing utilities for D3 visualizations
 export class SurveyDataProcessor {
-  constructor(csvData) {
-    this.rawData = csvData;
-    this.processedData = this.parseCSV(csvData);
+  constructor(excelData) {
+    this.rawData = excelData;
+    this.processedData = this.parseExcel(excelData);
   }
 
-  parseCSV(csvData) {
-    const result = Papa.parse(csvData, {
-      header: true,
-      skipEmptyLines: true,
-      transformHeader: (header) => {
-        // Clean up header names for easier access
-        return header.trim().replace(/\s+/g, '_').replace(/[^\w]/g, '_');
+  parseExcel(excelData) {
+    try {
+      // Read the Excel file
+      const workbook = XLSX.read(excelData, { type: 'array' });
+      
+      // Get the "Copy of Survey Responses" sheet
+      const sheetName = 'Copy of Survey Responses';
+      if (!workbook.SheetNames.includes(sheetName)) {
+        console.error(`Sheet "${sheetName}" not found. Available sheets:`, workbook.SheetNames);
+        // Fallback to first sheet if "Copy of Survey Responses" doesn't exist
+        const fallbackSheet = workbook.SheetNames[0];
+        console.log(`Using fallback sheet: ${fallbackSheet}`);
+        const worksheet = workbook.Sheets[fallbackSheet];
+        return this.processWorksheet(worksheet);
       }
+      
+      const worksheet = workbook.Sheets[sheetName];
+      return this.processWorksheet(worksheet);
+    } catch (error) {
+      console.error('Error parsing Excel data:', error);
+      return [];
+    }
+  }
+
+  processWorksheet(worksheet) {
+    // Convert worksheet to JSON with header row
+    const jsonData = XLSX.utils.sheet_to_json(worksheet, {
+      header: 1, // Use first row as headers
+      defval: '', // Default value for empty cells
+      blankrows: false // Skip blank rows
     });
-    return result.data;
+
+    if (jsonData.length === 0) return [];
+
+    // Get headers from first row and clean them up
+    const headers = jsonData[0].map(header => {
+      if (!header) return 'Unknown_Column';
+      return header.toString().trim().replace(/\s+/g, '_').replace(/[^\w]/g, '_');
+    });
+
+    // Convert remaining rows to objects
+    const processedData = [];
+    for (let i = 1; i < jsonData.length; i++) {
+      const row = jsonData[i];
+      if (row.length === 0 || row.every(cell => !cell)) continue; // Skip empty rows
+      
+      const rowObject = {};
+      headers.forEach((header, index) => {
+        rowObject[header] = row[index] || '';
+      });
+      
+      // Only include rows that have an organization name
+      if (rowObject.Organization_Name && rowObject.Organization_Name.trim()) {
+        processedData.push(rowObject);
+      }
+    }
+
+    console.log(`Processed ${processedData.length} organizations from Excel sheet`);
+    return processedData;
   }
 
   // Get organization network data for force-directed graph
@@ -31,6 +80,7 @@ export class SurveyDataProcessor {
       activities: this.parseMultiSelect(org.How_would_you_describe_the_activities_of_your_organization_check_all_that_apply_as_related_to_the_food_system_),
       primaryGoal: org.If_you_had_to_choose_the_goal_MOST_aligned_with_your_organization__which_one_would_it_be_,
       challenges: this.parseMultiSelect(org.What_are_the_biggest_challenges_your_organization_faces_in_collaborating_with_others_in_the_food_system__Select_up_to_3_),
+      website: org.Website || '',
       size: this.calculateNodeSize(org)
     }));
 
@@ -287,12 +337,15 @@ export class SurveyDataProcessor {
   }
 }
 
-// Utility function to load and process CSV data
+// Utility function to load and process Excel data
 export async function loadSurveyData() {
   try {
-    const response = await fetch('/FINAL- Food Systems Stakeholder Survey  (Responses) - Survey Respones.csv');
-    const csvText = await response.text();
-    return new SurveyDataProcessor(csvText);
+    const response = await fetch('/FINAL- Food Systems Stakeholder Survey (Responses).xlsx');
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const arrayBuffer = await response.arrayBuffer();
+    return new SurveyDataProcessor(arrayBuffer);
   } catch (error) {
     console.error('Error loading survey data:', error);
     return null;
