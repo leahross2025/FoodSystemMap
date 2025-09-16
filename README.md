@@ -1,43 +1,50 @@
-# Astro Starter Kit: Blog
+# LA Food Systems Map
 
-[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/cloudflare/templates/tree/main/astro-blog-starter-template)
+![LA Food Systems Map](public/images/Screenshot.png)
 
-![Astro Template Preview](https://github.com/withastro/astro/assets/2244813/ff10799f-a816-4703-b967-c78997e8323d)
+An interactive web application that visualizes food systems stakeholders across Los Angeles County. This map provides insights into the organizations, activities, and networks that make up LA's food ecosystem based on comprehensive survey data.
 
-<!-- dash-content-start -->
+## Features
 
-Create a blog with Astro and deploy it on Cloudflare Workers as a [static website](https://developers.cloudflare.com/workers/static-assets/).
+- ✅ Interactive map visualization of food systems organizations
+- ✅ Advanced search and filtering capabilities
+- ✅ Data visualizations for activities, capacity, challenges, and goals
+- ✅ Geographic analysis by supervisorial districts
+- ✅ Network relationship mapping
+- ✅ Responsive design for desktop and mobile
+- ✅ Built with modern web technologies (Astro, JavaScript, CSS)
 
-Features:
+## About the Data
 
-- ✅ Minimal styling (make it your own!)
-- ✅ 100/100 Lighthouse performance
-- ✅ SEO-friendly with canonical URLs and OpenGraph data
-- ✅ Sitemap support
-- ✅ RSS Feed support
-- ✅ Markdown & MDX support
-
-<!-- dash-content-end -->
-
-## Getting Started
-
-Outside of this repo, you can start a new project with this template using [C3](https://developers.cloudflare.com/pages/get-started/c3/) (the `create-cloudflare` CLI):
-
-```bash
-npm create cloudflare@latest -- --template=cloudflare/templates/astro-blog-starter-template
-```
-
-A live public deployment of this template is available at [https://astro-blog-starter-template.templates.workers.dev](https://astro-blog-starter-template.templates.workers.dev)
+This application visualizes data from the "Food Systems Stakeholder Survey" which collected responses from organizations across Los Angeles County involved in various aspects of the food system - from production and distribution to policy and advocacy.
 
 ## 🚀 Project Structure
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+The application is built with Astro and includes several key components:
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
-
-The `src/content/` directory contains "collections" of related Markdown and MDX documents. Use `getCollection()` to retrieve posts from `src/content/blog/`, and type-check your frontmatter using an optional schema. See [Astro's Content Collections docs](https://docs.astro.build/en/guides/content-collections/) to learn more.
-
-Any static assets, like images, can be placed in the `public/` directory.
+```
+/
+├── public/
+│   ├── data/
+│   │   └── organizations.json          # Processed survey data
+│   ├── images/
+│   │   └── Screenshot.png             # Application preview
+│   └── FINAL- Food Systems Stakeholder Survey (Responses).xlsx
+├── src/
+│   ├── components/
+│   │   ├── MapContainer.astro         # Main interactive map
+│   │   ├── SearchFilters.astro        # Search and filter controls
+│   │   ├── Header.astro               # Site header
+│   │   └── Footer.astro               # Site footer
+│   ├── pages/
+│   │   ├── index.astro                # Main map page
+│   │   └── dashboard-simple.astro     # Data dashboard
+│   ├── scripts/
+│   │   ├── processData.js             # Data processing utilities
+│   │   └── geocode.js                 # Geocoding functionality
+│   └── styles/
+│       └── global.css                 # Application styles
+```
 
 ## 🧞 Commands
 
@@ -51,12 +58,21 @@ All commands are run from the root of the project, from a terminal:
 | `npm run preview`                 | Preview your build locally, before deploying     |
 | `npm run astro ...`               | Run CLI commands like `astro add`, `astro check` |
 | `npm run astro -- --help`         | Get help using the Astro CLI                     |
-| `npm run build && npm run deploy` | Deploy your production site to Cloudflare        |
+
+## Getting Started
+
+1. Clone this repository
+2. Install dependencies with `npm install`
+3. Start the development server with `npm run dev`
+4. Open your browser to `localhost:4321`
+
+## Data Processing
+
+The application includes scripts to process the raw survey data:
+
+- `src/scripts/processData.js` - Converts Excel survey responses to JSON format
+- `src/scripts/geocode.js` - Adds geographic coordinates to organization addresses
 
 ## 👀 Want to learn more?
 
-Check out [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
-
-## Credit
-
-This theme is based off of the lovely [Bear Blog](https://github.com/HermanMartinus/bearblog/).
+This project uses [Astro](https://astro.build) as the web framework. Check out the [Astro documentation](https://docs.astro.build) to learn more about the technology stack.
