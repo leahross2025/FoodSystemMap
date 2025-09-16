@@ -464,7 +464,7 @@ import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
 			async function loadSurveyData() {
 				try {
 					// Load the pre-processed organizations data
-					const response = await fetch('/src/data/organizations.json');
+					const response = await fetch('/data/organizations.json');
 					if (!response.ok) {
 						throw new Error(`HTTP error! status: ${response.status}`);
 					}

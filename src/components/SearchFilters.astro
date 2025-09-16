@@ -1,5 +1,5 @@
 ---
-import organizationsData from '../data/organizations.json';
+import organizationsData from '../../public/data/organizations.json';
 
 // Get unique sectors and districts for filter options
 const sectors = [...new Set(organizationsData.organizations.map(org => org.sector))].sort();
