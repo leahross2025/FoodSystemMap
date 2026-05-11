@@ -23,6 +23,9 @@ pnpm-debug.log*
 # jetbrains setting folder
 .idea/
 
+# internal planning docs
+project_plan.md
+
 # wrangler files
 .wrangler
 .dev.vars

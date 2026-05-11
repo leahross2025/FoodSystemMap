@@ -461,13 +461,17 @@ import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
 					.html(d => `${d.label} <span style="color: #718096;">(${d.value})</span>`);
 			}
 
-			async function loadSurveyData() {
-				try {
-					// Load the pre-processed organizations data
-					const response = await fetch('/data/organizations.json');
-					if (!response.ok) {
-						throw new Error(`HTTP error! status: ${response.status}`);
-					}
+		async function loadSurveyData() {
+			try {
+				// Prefer live data from the Worker API; fall back to the static file
+				let response = await fetch('/api/survey-data');
+				if (!response.ok) {
+					console.warn(`/api/survey-data returned ${response.status}, falling back to static file`);
+					response = await fetch('/data/organizations.json');
+				}
+				if (!response.ok) {
+					throw new Error(`HTTP error! status: ${response.status}`);
+				}
 					const organizationsData = await response.json();
 					
 					// Convert organizations data to the format expected by our processor

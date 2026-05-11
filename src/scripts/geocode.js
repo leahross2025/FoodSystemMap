@@ -1,12 +1,16 @@
 import fs from 'fs';
-import XLSX from 'xlsx';
-import { createWriteStream } from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import Papa from 'papaparse';
+import { SHEET_CSV_URL } from '../config/googleSheets.js';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // Rate limiting for Nominatim API
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 // Cache file path
-const CACHE_FILE = '../data/geocode-cache.json';
+const CACHE_FILE = path.resolve(__dirname, '../data/geocode-cache.json');
 
 // Load existing cache
 function loadCache() {
@@ -100,7 +104,19 @@ const fallbackCoords = {
   
   // Additional failed geocoding addresses
   '2000 Ave of the Stars #1000s, Los Angeles, CA': [34.057580, -118.416932],
-  '510 S. Vermont Ave, 11th Floor, Los Angeles, CA': [34.057580, -118.291932]
+  '510 S. Vermont Ave, 11th Floor, Los Angeles, CA': [34.057580, -118.291932],
+
+  // Addresses with city/state embedded in the street field — matched by fallbackAddress key
+  '510 S. Vermont Ave, 11th Floor, Los Angeles, Los Angeles, CA': [34.057580, -118.291900],
+  '510 S Vermont Avenue, 11th Floor. Los Angeles, CA, Los Angeles, CA': [34.057580, -118.291900],
+  '2000 Ave of the Stars #1000s, Los Angeles, CA 90067, Los Angeles, CA': [34.057580, -118.416932],
+  '777 S Alameda St, 2nd Floor Los Angeles, CA 90021, Los Angeles, CA': [34.044161, -118.234436],
+  '777 S Alameda St, 2nd Floor LA CA 90021, Los Angeles, CA': [34.044161, -118.234436],
+  '500 W. Temple Street Room 383 Los Angeles, CA, Los Angeles, CA': [34.052895, -118.243759],
+  'BOX 951405 2231 Murphy Hall, Los Angeles, CA': [34.068921, -118.445245],
+  '1024 N. Maclay Ave. M-13 San Fernando, CA 91340, Los Angeles, CA': [34.282960, -118.434558],
+  'PO Box 338 Rancho Cucamonga, CA 91729, Los Angeles, CA': [34.106400, -117.593100],
+  '36355 Russell Blvd, Davis, CA, Los Angeles, CA': [38.539398, -121.742897],
 };
 
 // Clean address function
@@ -182,7 +198,7 @@ async function geocodeAddress(street, zipCode, orgName, cache) {
     // Try full address first
     const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(fullAddress)}&addressdetails=1&limit=1`, {
       headers: {
-        'User-Agent': 'FoodSystemsStakeholderSurvey/1.0 (contact@example.com)'
+        'User-Agent': 'FoodSystemsStakeholderSurvey/1.0 (lacountyfoodsystems.org)'
       }
     });
     
@@ -210,7 +226,7 @@ async function geocodeAddress(street, zipCode, orgName, cache) {
     
     const fallbackResponse = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(fallbackAddress)}&addressdetails=1&limit=1`, {
       headers: {
-        'User-Agent': 'FoodSystemsStakeholderSurvey/1.0 (contact@example.com)'
+        'User-Agent': 'FoodSystemsStakeholderSurvey/1.0 (lacountyfoodsystems.org)'
       }
     });
     
@@ -242,40 +258,23 @@ async function geocodeAddress(street, zipCode, orgName, cache) {
   }
 }
 
-// Process Excel data
-async function processExcel() {
-  console.log('Reading Excel file...');
+// Fetch CSV from Google Sheets and process into organizations.json
+async function processData() {
+  console.log('Fetching data from Google Sheets...');
   
   // Load geocoding cache
   console.log('Loading geocoding cache...');
   const cache = loadCache();
   const cacheSize = Object.keys(cache).length;
   console.log(`Loaded ${cacheSize} cached entries`);
-  
-  const workbook = XLSX.readFile('../../public/FINAL- Food Systems Stakeholder Survey (Responses).xlsx');
-  const sheetName = 'Copy of Survey Responses';
-  const worksheet = workbook.Sheets[sheetName];
-  
-  if (!worksheet) {
-    console.error(`Sheet "${sheetName}" not found. Available sheets:`, workbook.SheetNames);
-    throw new Error(`Sheet "${sheetName}" not found in Excel file`);
+
+  const response = await fetch(SHEET_CSV_URL);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch Google Sheet CSV: ${response.status} ${response.statusText}`);
   }
-  
-  const data = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-  const headers = data[0];
-  const rows = data.slice(1);
-  
-  // Convert to object format similar to Papa.parse
-  const parsed = {
-    data: rows.map(row => {
-      const obj = {};
-      headers.forEach((header, index) => {
-        obj[header] = row[index] || '';
-      });
-      return obj;
-    })
-  };
-  
+  const csvText = await response.text();
+  const parsed = Papa.parse(csvText, { header: true, skipEmptyLines: true });
+
   console.log(`Found ${parsed.data.length} organizations`);
   
   const organizations = [];
@@ -372,9 +371,10 @@ async function processExcel() {
   console.log('Saving geocoding cache...');
   saveCache(cache);
   const finalCacheSize = Object.keys(cache).length;
-  
-  // Write to file
-  fs.writeFileSync('../data/organizations.json', JSON.stringify(outputData, null, 2));
+
+  // Write output
+  const outputPath = path.resolve(__dirname, '../data/organizations.json');
+  fs.writeFileSync(outputPath, JSON.stringify(outputData, null, 2));
   
   console.log('\n=== GEOCODING COMPLETE ===');
   console.log(`Total organizations: ${parsed.data.length}`);
@@ -392,4 +392,4 @@ async function processExcel() {
 }
 
 // Run the script
-processExcel().catch(console.error);
+processData().catch(console.error);

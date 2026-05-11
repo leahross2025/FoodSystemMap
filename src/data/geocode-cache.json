@@ -3,7 +3,10 @@
     34.0603082,
     -118.3641137
   ],
-  "2000 ave of the stars #1000s, los angeles, ca 90067, los angeles, ca, 90067": null,
+  "2000 ave of the stars #1000s, los angeles, ca 90067, los angeles, ca, 90067": [
+    34.05758,
+    -118.416932
+  ],
   "858 w jackman st., lancaster ca, los angeles, ca, 93534": [
     34.686682,
     -118.137425
@@ -44,13 +47,22 @@
     34.06485,
     -118.278945
   ],
-  "36355 russell blvd, davis, ca, los angeles, ca, 95616": null,
-  "510 s. vermont ave, 11th floor, los angeles, los angeles, ca, 90020": null,
+  "36355 russell blvd, davis, ca, los angeles, ca, 95616": [
+    38.539398,
+    -121.742897
+  ],
+  "510 s. vermont ave, 11th floor, los angeles, los angeles, ca, 90020": [
+    34.05758,
+    -118.2919
+  ],
   "1517 ashland ave, los angeles, ca, 90405": [
     34.025681,
     -118.478065
   ],
-  "500 w. temple street room 383 los angeles, ca, los angeles, ca, 90012": null,
+  "500 w. temple street room 383 los angeles, ca, los angeles, ca, 90012": [
+    34.052895,
+    -118.243759
+  ],
   "510 s. vermont ave., los angeles, ca 90020, los angeles, ca, 90020": [
     34.0651468,
     -118.2915495
@@ -63,7 +75,10 @@
     34.028243,
     -118.024345
   ],
-  "4301 w 3rd street los angeles, ca 90020, los angeles, ca, 90020": null,
+  "4301 w 3rd street los angeles, ca 90020, los angeles, ca, 90020": [
+    34.06905,
+    -118.308047
+  ],
   "701 hoefner ave los angeles ca 90022, los angeles, ca, 90022": [
     34.0210673,
     -118.1498999
@@ -124,7 +139,10 @@
     34.047825,
     -118.304545
   ],
-  "777 s alameda st, 2nd floor los angeles, ca 90021, los angeles, ca, 90021": null,
+  "777 s alameda st, 2nd floor los angeles, ca 90021, los angeles, ca, 90021": [
+    34.044161,
+    -118.234436
+  ],
   "244 s. san pedro street, los angeles, los angeles, ca, 90012": [
     34.0473914,
     -118.2419061
@@ -153,7 +171,10 @@
     34.2319908,
     -118.4688207
   ],
-  "10896 lehigh ave. pacoima, ca 91331, los angeles, ca, 91331": null,
+  "10896 lehigh ave. pacoima, ca 91331, los angeles, ca, 91331": [
+    34.2678329,
+    -118.4151902
+  ],
   "4103 w adams blvd, los angeles, ca, 90018": [
     34.0326809,
     -118.3297303
@@ -251,5 +272,73 @@
   "4301 west 3rd street los angeles, ca 90020, los angeles, ca, 90020": [
     34.06905,
     -118.308047
+  ],
+  "750 n alameda st, los angeles, ca, 90012": [
+    34.06485,
+    -118.2233
+  ],
+  "12820 crossroads pkwy south, city of industry, los angeles, ca, 91746": [
+    34.0289706,
+    -118.0255985
+  ],
+  "6636 selma avenue, los angeles ca, los angeles, ca, 90028": [
+    34.099617,
+    -118.334871
+  ],
+  "153 glendale blvd, los angeles, ca, 90026": [
+    34.0634381,
+    -118.2601764
+  ],
+  "675 s. carondelet st., los angeles, ca, 90057": [
+    34.0593166,
+    -118.2811713
+  ],
+  "box 951405 2231 murphy hall, los angeles, ca, 90095": [
+    34.068921,
+    -118.445245
+  ],
+  "1024 n. maclay ave. m-13 san fernando, ca 91340, los angeles, ca, 91340": [
+    34.28296,
+    -118.434558
+  ],
+  "13300 crossroads parkway north, los angeles, ca, 91746": [
+    34.0299355,
+    -118.0137179
+  ],
+  "711 w florence avenue, los angeles, ca, 90044": [
+    33.9747246,
+    -118.2861863
+  ],
+  "po box 338 rancho cucamonga, ca 91729, los angeles, ca, 91729": [
+    34.1064,
+    -117.5931
+  ],
+  "510 s vermont avenue, 11th floor. los angeles, ca, los angeles, ca, 90020": [
+    34.05758,
+    -118.2919
+  ],
+  "777 s alameda st, 2nd floor la ca 90021, los angeles, ca, 90021": [
+    34.044161,
+    -118.234436
+  ],
+  "244 s. san pedro street, los angeles, ca, 90012": [
+    34.0473915,
+    -118.2419061
+  ],
+  "2800 stanford ave, los angeles, ca, 90011": [
+    34.0192692,
+    -118.2602039
+  ],
+  "701 e. 28th street, , long beach, ca, los angeles, ca, 90806": [
+    33.8084754,
+    -118.1846035
+  ],
+  "1250 bellflower blvd, los angeles, ca, 90815": [
+    33.7874282,
+    -118.1144116
+  ],
+  "3070 santa fe ave, long beach, ca, los angeles, ca, 90810": [
+    33.8132627,
+    -118.2153509
   ]
 }

@@ -35,7 +35,9 @@
     "check": "astro build && tsc && wrangler deploy --dry-run",
     "deploy": "wrangler deploy",
     "dev": "astro dev",
-    "preview": "astro build && wrangler dev"
+    "preview": "astro build && wrangler dev",
+    "sync": "node src/scripts/geocode.js",
+    "sync:build": "npm run sync && npm run build"
   },
   "type": "module"
 }
