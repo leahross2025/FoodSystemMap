@@ -26,13 +26,18 @@ export const GET = async () => {
       skipEmptyLines: true,
     });
 
-    const organizations = parsed.data.map((row, i) => ({
+    const organizations = parsed.data.map((row, i) => {
+      const rawDistrict = (row['Primary Supervisorial District  (based on headquarters address) '] || '').trim();
+      const isMapOnly = !row['Sector']?.trim() && !rawDistrict;
+      const primaryDistrict = isMapOnly ? 'Other' : (rawDistrict || 'Unknown');
+      return {
       id: `org-${i}`,
       name: row['Organization Name'] || 'Unknown',
+      mapOnly: isMapOnly,
       sector: row['Sector'] || 'Unknown',
       address: row['Main Org Street Address (headquarters)'] || '',
       zipCode: row['Main Org Zip Code'] || '',
-      primaryDistrict: row['Primary Supervisorial District  (based on headquarters address) '] || 'Unknown',
+      primaryDistrict,
       otherDistricts: row['Other Supervisorial District(s) Served (all districts where programs and services are provided) '] || '',
       primarySPA: cleanSPA(row['Primary SPA (service planning area)(Based on headquarters address)'] || ''),
       additionalSPAs: cleanSPA(row['Additional SPA(s) (service planning area) Served  (all districts where programs and services are provided) - Mark any or all '] || ''),
@@ -43,7 +48,8 @@ export const GET = async () => {
         email: row['Email Address'] || '',
         name: row['Your Name (First/Last)'] || '',
       },
-    }));
+      };
+    });
 
     const output = {
       organizations,

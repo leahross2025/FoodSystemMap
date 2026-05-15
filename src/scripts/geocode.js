@@ -38,7 +38,8 @@ function saveCache(cache) {
 function getCacheKey(street, zipCode) {
   const cleanedAddress = cleanAddress(street, zipCode);
   if (!cleanedAddress) return null;
-  return `${cleanedAddress}, Los Angeles, CA, ${zipCode}`.toLowerCase();
+  const zipPart = zipCode ? `, ${zipCode}` : '';
+  return `${cleanedAddress}, Los Angeles, CA${zipPart}`.toLowerCase();
 }
 
 // Hardcoded fallback coordinates for problematic addresses
@@ -119,12 +120,15 @@ const fallbackCoords = {
   '36355 Russell Blvd, Davis, CA, Los Angeles, CA': [38.539398, -121.742897],
 };
 
-// Clean address function
+// Clean address function (zipCode is optional — map-only entries may not have one)
 function cleanAddress(street, zipCode) {
-  if (!street || !zipCode) return null;
+  if (!street) return null;
   
   let cleaned = street.toString().trim();
   
+  // Strip trailing ", USA" that Google Maps auto-appends
+  cleaned = cleaned.replace(/,?\s*USA\s*$/i, '').trim();
+
   // Remove suite/floor information more carefully - use word boundaries
   cleaned = cleaned.replace(/\b(Suite|Ste\.?)\s*[A-Za-z0-9#\-]+/gi, '');
   cleaned = cleaned.replace(/\b#\s*[A-Za-z0-9\-]+/gi, '');
@@ -165,12 +169,21 @@ async function geocodeAddress(street, zipCode, orgName, cache) {
   const cleanedAddress = cleanAddress(street, zipCode);
   
   if (!cleanedAddress) {
-    console.log(`Skipping ${orgName}: Missing address or zip`);
+    console.log(`Skipping ${orgName}: Missing address`);
     return null;
   }
   
-  const fullAddress = `${cleanedAddress}, Los Angeles, CA, ${zipCode}`;
-  const fallbackAddress = `${cleanedAddress}, Los Angeles, CA`;
+  // If the address already has city/state embedded (e.g. "Carpinteria, CA 93013")
+  // don't force-append "Los Angeles, CA" — that creates a contradictory query
+  const hasEmbeddedLocation = /,\s*(CA|California)\b/i.test(cleanedAddress);
+  const fullAddress = hasEmbeddedLocation
+    ? cleanedAddress
+    : zipCode
+      ? `${cleanedAddress}, Los Angeles, CA, ${zipCode}`
+      : `${cleanedAddress}, Los Angeles, CA`;
+  const fallbackAddress = hasEmbeddedLocation
+    ? cleanedAddress
+    : `${cleanedAddress}, Los Angeles, CA`;
   const cacheKey = getCacheKey(street, zipCode);
   
   // Check cache first
@@ -183,14 +196,14 @@ async function geocodeAddress(street, zipCode, orgName, cache) {
   if (fallbackCoords[fullAddress]) {
     console.log(`Using hardcoded coordinates for ${orgName}`);
     const coords = fallbackCoords[fullAddress];
-    if (cacheKey) cache[cacheKey] = coords; // Cache the hardcoded result
+    if (cacheKey) cache[cacheKey] = coords;
     return coords;
   }
   
   if (fallbackCoords[fallbackAddress]) {
     console.log(`Using hardcoded coordinates (fallback) for ${orgName}`);
     const coords = fallbackCoords[fallbackAddress];
-    if (cacheKey) cache[cacheKey] = coords; // Cache the hardcoded result
+    if (cacheKey) cache[cacheKey] = coords;
     return coords;
   }
   
@@ -215,14 +228,21 @@ async function geocodeAddress(street, zipCode, orgName, cache) {
       if (state === 'California') {
         const coords = [parseFloat(result.lat), parseFloat(result.lon)];
         console.log(`Geocoded ${orgName}: ${result.lat}, ${result.lon}`);
-        if (cacheKey) cache[cacheKey] = coords; // Cache the API result
+        if (cacheKey) cache[cacheKey] = coords;
         return coords;
       }
     }
+
+    // Skip fallback if it's the same query (no zip was provided or address had embedded location)
+    if (fullAddress === fallbackAddress) {
+      console.log(`Failed to geocode ${orgName}: ${fullAddress}`);
+      if (cacheKey) cache[cacheKey] = null;
+      return null;
+    }
     
-    // Try fallback address
+    // Try fallback address (without zip)
     console.log(`Trying fallback for ${orgName}`);
-    await delay(2000); // Increased delay for rate limiting
+    await delay(2000);
     
     const fallbackResponse = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(fallbackAddress)}&addressdetails=1&limit=1`, {
       headers: {
@@ -243,13 +263,13 @@ async function geocodeAddress(street, zipCode, orgName, cache) {
       if (state === 'California') {
         const coords = [parseFloat(result.lat), parseFloat(result.lon)];
         console.log(`Geocoded ${orgName} (fallback): ${result.lat}, ${result.lon}`);
-        if (cacheKey) cache[cacheKey] = coords; // Cache the API result
+        if (cacheKey) cache[cacheKey] = coords;
         return coords;
       }
     }
     
     console.log(`Failed to geocode ${orgName}: ${fullAddress}`);
-    if (cacheKey) cache[cacheKey] = null; // Cache the failure to avoid retrying
+    if (cacheKey) cache[cacheKey] = null;
     return null;
     
   } catch (error) {
@@ -278,10 +298,12 @@ async function processData() {
   console.log(`Found ${parsed.data.length} organizations`);
   
   const organizations = [];
+  const failedEntries = [];
   let successCount = 0;
   let failCount = 0;
   let cacheHits = 0;
   let apiCalls = 0;
+  let manualCoordCount = 0;
   
   for (let i = 0; i < parsed.data.length; i++) {
     const row = parsed.data[i];
@@ -293,7 +315,12 @@ async function processData() {
     const street = row['Main Org Street Address (headquarters)'] || '';
     const zipCode = row['Main Org Zip Code'] || '';
     const sector = row['Sector'] || 'Unknown';
-    const primaryDistrict = row['Primary Supervisorial District  (based on headquarters address) '] || 'Unknown';
+    const rawDistrict = (row['Primary Supervisorial District  (based on headquarters address) '] || '').trim();
+
+    // Map-only entry: client added just a name + address, no survey data
+    const isMapOnly = !row['Sector']?.trim() && !rawDistrict;
+    const primaryDistrict = isMapOnly ? 'Other' : (rawDistrict || 'Unknown');
+
     const mission = row['Organization Mission Statement '] || '';
     const primaryActivity = row['Provide one sentence descriptor of your primary activity'] || '';
     const otherDistricts = row['Other Supervisorial District(s) Served (all districts where programs and services are provided) '] || '';
@@ -302,25 +329,38 @@ async function processData() {
     const email = row['Email Address'] || '';
     const contactName = row['Your Name (First/Last)'] || '';
     const website = row['Website'] || '';
-    
-    // Check if this will be a cache hit
+
+    // Manual coordinates from sheet columns — checked first, skip geocoding if present
+    const manualLat = parseFloat(row['Latitude'] || '');
+    const manualLng = parseFloat(row['Longitude'] || '');
+    const hasManualCoords = !isNaN(manualLat) && !isNaN(manualLng);
+
+    // Determine whether this entry will need an API call for rate-limit accounting
     const cacheKey = getCacheKey(street, zipCode);
-    const willUseCache = cacheKey && cache[cacheKey];
-    if (willUseCache) {
+    const willSkipAPI = hasManualCoords || !!(cacheKey && cache[cacheKey]);
+    if (willSkipAPI) {
       cacheHits++;
     } else {
       apiCalls++;
     }
-    
-    // Geocode the address
-    const coordinates = await geocodeAddress(street, zipCode, orgName, cache);
-    
+
+    // Resolve coordinates: manual → cache/geocode
+    let coordinates;
+    if (hasManualCoords) {
+      coordinates = [manualLat, manualLng];
+      manualCoordCount++;
+      console.log(`Using manual coordinates for ${orgName}: ${manualLat}, ${manualLng}`);
+    } else {
+      coordinates = await geocodeAddress(street, zipCode, orgName, cache);
+    }
+
     if (coordinates) {
       successCount++;
       
       organizations.push({
         id: `org-${i}`,
         name: orgName,
+        mapOnly: isMapOnly,
         sector: sector,
         address: street,
         zipCode: zipCode,
@@ -345,11 +385,19 @@ async function processData() {
       console.log(`   Zip Code: ${zipCode || 'N/A'}`);
       console.log(`   Sector: ${sector}`);
       console.log(`   Contact: ${contactName} (${email})`);
+
+      failedEntries.push({
+        name: orgName,
+        address: street,
+        zipCode: zipCode,
+        sector: sector,
+        contact: { name: contactName, email: email }
+      });
     }
     
-    // Rate limiting - wait between requests
-    if (i < parsed.data.length - 1) {
-      await delay(2000); // Increased delay
+    // Rate limiting — only pause when we actually hit the Nominatim API
+    if (!willSkipAPI && i < parsed.data.length - 1) {
+      await delay(2000);
     }
   }
   
@@ -367,18 +415,27 @@ async function processData() {
     }
   };
   
-  // Save updated cache
+  // Save updated geocode cache
   console.log('Saving geocoding cache...');
   saveCache(cache);
   const finalCacheSize = Object.keys(cache).length;
 
-  // Write output
+  // Write organizations JSON
   const outputPath = path.resolve(__dirname, '../data/organizations.json');
   fs.writeFileSync(outputPath, JSON.stringify(outputData, null, 2));
+
+  // Write failed-geocode JSON (consumed by /failed page)
+  const failedData = {
+    lastUpdated: new Date().toISOString(),
+    failedEntries: failedEntries
+  };
+  const failedPath = path.resolve(__dirname, '../data/failed-geocode.json');
+  fs.writeFileSync(failedPath, JSON.stringify(failedData, null, 2));
   
   console.log('\n=== GEOCODING COMPLETE ===');
   console.log(`Total organizations: ${parsed.data.length}`);
   console.log(`Successfully geocoded: ${successCount}`);
+  console.log(`  - Manual coordinates: ${manualCoordCount}`);
   console.log(`Failed to geocode: ${failCount}`);
   console.log(`Success rate: ${outputData.metadata.successRate}%`);
   console.log('\n=== CACHE STATISTICS ===');
@@ -389,6 +446,10 @@ async function processData() {
   console.log(`New cache entries: ${finalCacheSize - cacheSize}`);
   console.log('Output saved to: src/data/organizations.json');
   console.log('Cache saved to: src/data/geocode-cache.json');
+  if (failedEntries.length > 0) {
+    console.log(`\n⚠️  ${failedEntries.length} entries failed geocoding — see /failed page or src/data/failed-geocode.json`);
+    console.log('   Add "Latitude" and "Longitude" columns to the Google Sheet for these entries.');
+  }
 }
 
 // Run the script

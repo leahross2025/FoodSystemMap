@@ -3,6 +3,7 @@
     {
       "id": "org-0",
       "name": "(UPAS) United Parents and Students",
+      "mapOnly": false,
       "sector": "Nonprofit/CBO",
       "address": "1150 S Olive St, Los Angeles, CA 90015",
       "zipCode": "90015",
@@ -25,6 +26,7 @@
     {
       "id": "org-1",
       "name": "Aging and Disabilities Department ",
+      "mapOnly": false,
       "sector": "Government Agency",
       "address": "510 S. Vermont Ave, 11th Floor, Los Angeles ",
       "zipCode": "90020",
@@ -47,6 +49,7 @@
     {
       "id": "org-2",
       "name": "Angel City Advisors",
+      "mapOnly": false,
       "sector": "For-Profit",
       "address": "6141 Barrows Drive",
       "zipCode": "90048",
@@ -69,6 +72,7 @@
     {
       "id": "org-3",
       "name": "Annenberg Foundation",
+      "mapOnly": false,
       "sector": "Foundation",
       "address": "2000 Ave of the Stars #1000s, Los Angeles, CA 90067",
       "zipCode": "90067",
@@ -91,6 +95,7 @@
     {
       "id": "org-4",
       "name": "Antelope Valley Partners for Health",
+      "mapOnly": false,
       "sector": "Nonprofit/CBO",
       "address": "858 W Jackman St., Lancaster CA",
       "zipCode": "93534",
@@ -113,6 +118,7 @@
     {
       "id": "org-5",
       "name": "Armenian Relief Society of Western USA, Inc.",
+      "mapOnly": false,
       "sector": "Nonprofit/CBO",
       "address": "517 W. Glenoaks Blvd.",
       "zipCode": "91202",
@@ -135,6 +141,7 @@
     {
       "id": "org-6",
       "name": "Associated Mothers in Action",
+      "mapOnly": false,
       "sector": "Nonprofit/CBO",
       "address": "1919 E El Segundo blvd compton CA 90222",
       "zipCode": "90222",
@@ -157,6 +164,7 @@
     {
       "id": "org-7",
       "name": "BreastfeedLA",
+      "mapOnly": false,
       "sector": "Nonprofit/CBO",
       "address": "2851 West 120th St, Suite E335, Hawthorne, CA",
       "zipCode": "90250",
@@ -179,6 +187,7 @@
     {
       "id": "org-8",
       "name": "Butterfly Equity Foundation",
+      "mapOnly": false,
       "sector": "Foundation",
       "address": "9595 Wilshire Blvd., Suite 510",
       "zipCode": "90212",
@@ -201,6 +210,7 @@
     {
       "id": "org-9",
       "name": "California Community Foundation",
+      "mapOnly": false,
       "sector": "Foundation",
       "address": "717 W. Temple St.",
       "zipCode": "90012",
@@ -223,6 +233,7 @@
     {
       "id": "org-10",
       "name": "Chief Sustainability Office -- L.A. County",
+      "mapOnly": false,
       "sector": "Government Agency",
       "address": "1517 ASHLAND AVE",
       "zipCode": "90405",
@@ -245,6 +256,7 @@
     {
       "id": "org-11",
       "name": "Chinese Christian Herald Crusades ",
+      "mapOnly": false,
       "sector": "Nonprofit/CBO",
       "address": "715 E Mission Rd",
       "zipCode": "91776",
@@ -267,6 +279,7 @@
     {
       "id": "org-12",
       "name": "CHIRLA ",
+      "mapOnly": false,
       "sector": "Nonprofit/CBO",
       "address": "2533 W 3rd st Los Angeles, CA ",
       "zipCode": "90057",
@@ -289,6 +302,7 @@
     {
       "id": "org-13",
       "name": "Chronic Disease and Injury Prevention, County of Los Angeles, Department of Public Health",
+      "mapOnly": false,
       "sector": "Government Agency",
       "address": "Downtown and at 3530 Wilshire Blvd, 8th Floor, Los Angeles, CA 90010",
       "zipCode": "90010",
@@ -311,6 +325,7 @@
     {
       "id": "org-14",
       "name": "Clínica Oscar Romero",
+      "mapOnly": false,
       "sector": "Nonprofit/CBO",
       "address": "Alvarado and Beverly",
       "zipCode": "90057",
@@ -333,6 +348,7 @@
     {
       "id": "org-15",
       "name": "Community Alliance with Family Farmers (CAFF)",
+      "mapOnly": false,
       "sector": "Nonprofit/CBO",
       "address": "36355 Russell Blvd, Davis, CA ",
       "zipCode": "95616",
@@ -355,6 +371,7 @@
     {
       "id": "org-16",
       "name": "County of Los Angeles Department of Public Health",
+      "mapOnly": false,
       "sector": "Government Agency",
       "address": "3530 Wilshire Blvd., Suite 800. Los Angeles, CA",
       "zipCode": "90010",
@@ -377,6 +394,7 @@
     {
       "id": "org-17",
       "name": "Cruz",
+      "mapOnly": false,
       "sector": "Nonprofit/CBO",
       "address": "5142 Tujunga Ave, North Hollywood ",
       "zipCode": "91601",
@@ -399,6 +417,7 @@
     {
       "id": "org-18",
       "name": "Culver-Palms Family Y ",
+      "mapOnly": false,
       "sector": "Nonprofit/CBO",
       "address": "4301 W 3rd Street Los Angeles, CA 90020",
       "zipCode": "90020",
@@ -421,6 +440,7 @@
     {
       "id": "org-19",
       "name": "Department of Public Social Services",
+      "mapOnly": false,
       "sector": "Government Agency",
       "address": "12820 Crossroads Pkwy South, City of Industry",
       "zipCode": "91746",
@@ -443,6 +463,7 @@
     {
       "id": "org-20",
       "name": "Eastmont Community Center ",
+      "mapOnly": false,
       "sector": "Nonprofit/CBO",
       "address": "701 Hoefner Ave Los Angeles CA 90022",
       "zipCode": "90022",
@@ -465,6 +486,7 @@
     {
       "id": "org-21",
       "name": "Eco Urban Gardens",
+      "mapOnly": false,
       "sector": "Nonprofit/CBO",
       "address": "4921 N Cedar Ave ",
       "zipCode": "El Monte, CA 91732",
@@ -487,6 +509,7 @@
     {
       "id": "org-22",
       "name": "El Nido Family Centers",
+      "mapOnly": false,
       "sector": "Nonprofit/CBO",
       "address": "11243 Glenoaks Blvd.",
       "zipCode": "90038",
@@ -509,6 +532,7 @@
     {
       "id": "org-23",
       "name": "Episcopal Diocese of Los Angeles-Seeds of Hope",
+      "mapOnly": false,
       "sector": "Nonprofit/CBO",
       "address": "840 Echo Park Ave",
       "zipCode": "90026",
@@ -531,6 +555,7 @@
     {
       "id": "org-24",
       "name": "Every Day Action ",
+      "mapOnly": false,
       "sector": "Nonprofit/CBO",
       "address": "143 S Alvarado St Los Angeles ",
       "zipCode": "90057",
@@ -553,6 +578,7 @@
     {
       "id": "org-25",
       "name": "First 5 LA",
+      "mapOnly": false,
       "sector": "Government Agency",
       "address": "750 North Alameda Street, Los Angeles, CA",
       "zipCode": "90012",
@@ -575,6 +601,7 @@
     {
       "id": "org-26",
       "name": "First 5 Los Angeles",
+      "mapOnly": false,
       "sector": "we're a governmental nonprofit, part of county but independent",
       "address": "750 N Alameda St",
       "zipCode": "90012",
@@ -597,6 +624,7 @@
     {
       "id": "org-27",
       "name": "Food Access LA (f/k/a Sustainable Economic Enterprises LA)",
+      "mapOnly": false,
       "sector": "Nonprofit/CBO",
       "address": "1231 N. Spring Street, Suite C-102",
       "zipCode": "90039",
@@ -619,6 +647,7 @@
     {
       "id": "org-28",
       "name": "Food Forward",
+      "mapOnly": false,
       "sector": "Nonprofit/CBO",
       "address": "7412 Fulton Ave Suite #3, North Hollywood, CA",
       "zipCode": "91605",
@@ -641,6 +670,7 @@
     {
       "id": "org-29",
       "name": "Food Forward",
+      "mapOnly": false,
       "sector": "Nonprofit/CBO",
       "address": "7412 Fulton Ave Suite #3, North Hollywood, CA",
       "zipCode": "91605",
@@ -663,6 +693,7 @@
     {
       "id": "org-30",
       "name": "FoodCycle",
+      "mapOnly": false,
       "sector": "Nonprofit/CBO",
       "address": "6636 Selma Avenue, Los Angeles CA",
       "zipCode": "90028",
@@ -685,6 +716,7 @@
     {
       "id": "org-31",
       "name": "FoodCycle",
+      "mapOnly": false,
       "sector": "Nonprofit/CBO",
       "address": "129 E 223rd Street Carson CA",
       "zipCode": "90745",
@@ -707,6 +739,7 @@
     {
       "id": "org-32",
       "name": "Garden School Foundation",
+      "mapOnly": false,
       "sector": "Nonprofit/CBO",
       "address": "222 E Glenarm Street Ste B2 Pasadena, CA 91106",
       "zipCode": "91106",
@@ -729,6 +762,7 @@
     {
       "id": "org-33",
       "name": "God's Pantry",
+      "mapOnly": false,
       "sector": "Nonprofit/CBO",
       "address": "250 E Center Street",
       "zipCode": "91767",
@@ -751,6 +785,7 @@
     {
       "id": "org-34",
       "name": "GrowGood",
+      "mapOnly": false,
       "sector": "Nonprofit/CBO",
       "address": "5600 Rickenbacker Road, Bell, CA",
       "zipCode": "90201",
@@ -773,6 +808,7 @@
     {
       "id": "org-35",
       "name": "Help Me Help You",
+      "mapOnly": false,
       "sector": "Nonprofit/CBO",
       "address": "PO Box 32861 Long Beach CA 90832",
       "zipCode": "90813",
@@ -795,6 +831,7 @@
     {
       "id": "org-36",
       "name": "Hollywood Food Coalition",
+      "mapOnly": false,
       "sector": "Nonprofit/CBO",
       "address": "5939 Hollywood Blvd",
       "zipCode": "90028",
@@ -817,6 +854,7 @@
     {
       "id": "org-37",
       "name": "Hollywood Food Coalition ",
+      "mapOnly": false,
       "sector": "Nonprofit/CBO",
       "address": "5939 Hollywood Blvd  ",
       "zipCode": "90028",
@@ -839,6 +877,7 @@
     {
       "id": "org-38",
       "name": "Hunger Action Los Angeles Inc",
+      "mapOnly": false,
       "sector": "Nonprofit/CBO",
       "address": "961 S Mariposa Ave # 205",
       "zipCode": "90006",
@@ -861,6 +900,7 @@
     {
       "id": "org-39",
       "name": "Impact Justice",
+      "mapOnly": false,
       "sector": "Nonprofit/CBO",
       "address": "777 S Alameda St, 2nd Floor Los Angeles, CA 90021",
       "zipCode": "90021",
@@ -883,6 +923,7 @@
     {
       "id": "org-40",
       "name": "Japanese American Cultural & Community Center",
+      "mapOnly": false,
       "sector": "Nonprofit/CBO",
       "address": "244 S. San Pedro Street, Los Angeles",
       "zipCode": "90012",
@@ -905,6 +946,7 @@
     {
       "id": "org-41",
       "name": "LA County Chief Sustainability Office",
+      "mapOnly": false,
       "sector": "Government Agency",
       "address": "500 W. Temple Street Room 383 Los Angeles, CA ",
       "zipCode": "90012",
@@ -927,6 +969,7 @@
     {
       "id": "org-42",
       "name": "Los Angeles County Department of Children and Family Services ",
+      "mapOnly": false,
       "sector": "Government Agency",
       "address": "510 S. Vermont Ave., Los Angeles, CA 90020",
       "zipCode": "90020",
@@ -949,6 +992,7 @@
     {
       "id": "org-43",
       "name": "Los Angeles County Department of Public Social Services",
+      "mapOnly": false,
       "sector": "Government Agency",
       "address": "12860 Crossroads Prkwy. South",
       "zipCode": "91746",
@@ -971,6 +1015,7 @@
     {
       "id": "org-44",
       "name": "Los Angeles Food Policy Council",
+      "mapOnly": false,
       "sector": "Nonprofit/CBO",
       "address": "1000 N. Alameda St. Suite 240",
       "zipCode": "90012",
@@ -993,6 +1038,7 @@
     {
       "id": "org-45",
       "name": "Los Angeles Regional Food Bank",
+      "mapOnly": false,
       "sector": "Nonprofit/CBO",
       "address": "1734 East 41st Street, Los Angeles CA 90058",
       "zipCode": "90058",
@@ -1015,6 +1061,7 @@
     {
       "id": "org-46",
       "name": "Mayor's Fund for Long Beach",
+      "mapOnly": false,
       "sector": "Nonprofit/CBO",
       "address": "65 Pine Ave., #898, Long Beach, CA 90802",
       "zipCode": "90802",
@@ -1037,6 +1084,7 @@
     {
       "id": "org-47",
       "name": "National Health Foundation",
+      "mapOnly": false,
       "sector": "Nonprofit/CBO",
       "address": "515 S Figueroa Street, Suite 1300",
       "zipCode": "90071",
@@ -1059,6 +1107,7 @@
     {
       "id": "org-48",
       "name": "NoHo Home Alliance",
+      "mapOnly": false,
       "sector": "Nonprofit/CBO",
       "address": "11031 Camarillo ST",
       "zipCode": "91602",
@@ -1081,6 +1130,7 @@
     {
       "id": "org-49",
       "name": "North Valley Caring Services",
+      "mapOnly": false,
       "sector": "Nonprofit/CBO",
       "address": "15453 Rayen Street",
       "zipCode": "91343",
@@ -1103,6 +1153,7 @@
     {
       "id": "org-50",
       "name": "North Valley Family YMCA",
+      "mapOnly": false,
       "sector": "Nonprofit/CBO",
       "address": "10896 Lehigh Ave. Pacoima, CA 91331",
       "zipCode": "91331",
@@ -1125,6 +1176,7 @@
     {
       "id": "org-51",
       "name": "Partnership for Growth LA (Freedom Farms)",
+      "mapOnly": false,
       "sector": "Nonprofit/CBO",
       "address": "4103 W Adams Blvd",
       "zipCode": "90018",
@@ -1147,6 +1199,7 @@
     {
       "id": "org-52",
       "name": "Pilipino Workers Center",
+      "mapOnly": false,
       "sector": "Nonprofit/CBO",
       "address": "153 Glendale Blvd",
       "zipCode": "90026",
@@ -1169,6 +1222,7 @@
     {
       "id": "org-53",
       "name": "Pilipino Workers Center of Southern California",
+      "mapOnly": false,
       "sector": "Nonprofit/CBO",
       "address": "153 Glendale Blvd., Los Angeles, CA",
       "zipCode": "90007",
@@ -1191,6 +1245,7 @@
     {
       "id": "org-54",
       "name": "Project Angel Food",
+      "mapOnly": false,
       "sector": "Nonprofit/CBO",
       "address": "922 Vine Street",
       "zipCode": "90038",
@@ -1213,6 +1268,7 @@
     {
       "id": "org-55",
       "name": "Project Angel Food",
+      "mapOnly": false,
       "sector": "Nonprofit/CBO",
       "address": "922 Vine Street",
       "zipCode": "90038",
@@ -1235,6 +1291,7 @@
     {
       "id": "org-56",
       "name": "Special Service for Groups, Inc. / Asian Pacific Islander Forward Movement (SSG/APIFM)",
+      "mapOnly": false,
       "sector": "Nonprofit/CBO",
       "address": "905 E. 8th St., Los Angeles, CA 90021",
       "zipCode": "90021",
@@ -1257,6 +1314,7 @@
     {
       "id": "org-57",
       "name": "St. Barnabas Senior Center",
+      "mapOnly": false,
       "sector": "Nonprofit/CBO",
       "address": "675 S. Carondelet Street Los Angeles, CA ",
       "zipCode": "90057",
@@ -1279,6 +1337,7 @@
     {
       "id": "org-58",
       "name": "St. Barnabas Senior Services",
+      "mapOnly": false,
       "sector": "Nonprofit/CBO",
       "address": "675 S. Carondelet St.",
       "zipCode": "90057",
@@ -1301,6 +1360,7 @@
     {
       "id": "org-59",
       "name": "Street Company",
+      "mapOnly": false,
       "sector": "Nonprofit/CBO",
       "address": "104 E AVENUE K-4, STE G",
       "zipCode": "93535",
@@ -1323,6 +1383,7 @@
     {
       "id": "org-60",
       "name": "The Midnight Mission",
+      "mapOnly": false,
       "sector": "Nonprofit/CBO",
       "address": "601 S. San Pedro St., Los ANgeles CA",
       "zipCode": "90014",
@@ -1345,6 +1406,7 @@
     {
       "id": "org-61",
       "name": "Union Station Homeless Services",
+      "mapOnly": false,
       "sector": "Nonprofit/CBO",
       "address": "825 E Orange Grove Blvd, Pasadena, CA",
       "zipCode": "91104",
@@ -1367,6 +1429,7 @@
     {
       "id": "org-62",
       "name": "University of California Agriculture & Natural Resources (UCANR)",
+      "mapOnly": false,
       "sector": "College/University",
       "address": "700 W Main St Alhambra, CA ",
       "zipCode": "91801",
@@ -1389,6 +1452,7 @@
     {
       "id": "org-63",
       "name": "University of Southern California",
+      "mapOnly": false,
       "sector": "College/University",
       "address": "3551 Trousdale Parkway, Los Angeles, CA",
       "zipCode": "90089",
@@ -1411,6 +1475,7 @@
     {
       "id": "org-64",
       "name": "Urban & Environmental Policy Institute at Occidental College (UEPI)",
+      "mapOnly": false,
       "sector": "College/University",
       "address": "1600 Campus Road, Los Angeles",
       "zipCode": "90041",
@@ -1433,6 +1498,7 @@
     {
       "id": "org-65",
       "name": "Westside Food Bank",
+      "mapOnly": false,
       "sector": "Nonprofit/CBO",
       "address": "1710 22ND STREET, Santa Monica",
       "zipCode": "90404",
@@ -1455,6 +1521,7 @@
     {
       "id": "org-66",
       "name": "With Love Market & Cafe",
+      "mapOnly": false,
       "sector": "For-Profit",
       "address": "1969 S Vermont Ave",
       "zipCode": "90007",
@@ -1477,6 +1544,7 @@
     {
       "id": "org-67",
       "name": "World Harvest Charities and Family Services",
+      "mapOnly": false,
       "sector": "Nonprofit/CBO",
       "address": "3100 Venice Blvd, Los Angeles, 90019 CA",
       "zipCode": "90019",
@@ -1499,6 +1567,7 @@
     {
       "id": "org-68",
       "name": "PHFE WIC , A program of Heluna Health",
+      "mapOnly": false,
       "sector": "Nonprofit/CBO",
       "address": "13181 Crossroads Parkway North, City of Industry, CA 91746",
       "zipCode": "91746",
@@ -1521,6 +1590,7 @@
     {
       "id": "org-69",
       "name": "Semel Healthy Campus Initiative Center at UCLA",
+      "mapOnly": false,
       "sector": "College/University",
       "address": "BOX 951405 2231 Murphy Hall",
       "zipCode": "90095",
@@ -1543,6 +1613,7 @@
     {
       "id": "org-70",
       "name": "Pueblo y Salud, Inc.",
+      "mapOnly": false,
       "sector": "Nonprofit/CBO",
       "address": "1024 N. Maclay Ave. M-13 San Fernando, CA 91340",
       "zipCode": "91340",
@@ -1565,6 +1636,7 @@
     {
       "id": "org-71",
       "name": "Heluna Health",
+      "mapOnly": false,
       "sector": "Nonprofit/CBO",
       "address": "13300 Crossroads Parkway North, Suite 450",
       "zipCode": "91746",
@@ -1587,6 +1659,7 @@
     {
       "id": "org-72",
       "name": "UMMA Health ",
+      "mapOnly": false,
       "sector": "For-Profit",
       "address": "711 W Florence Avenue ",
       "zipCode": "90044",
@@ -1609,6 +1682,7 @@
     {
       "id": "org-73",
       "name": "Bienestar is Wellbeing ",
+      "mapOnly": false,
       "sector": "Nonprofit/CBO",
       "address": "PO Box 338 Rancho Cucamonga, CA 91729",
       "zipCode": "91729",
@@ -1631,6 +1705,7 @@
     {
       "id": "org-74",
       "name": "Los Angeles County Aging and Disabilities Department",
+      "mapOnly": false,
       "sector": "Government Agency",
       "address": "510 S Vermont Avenue, 11th Floor. Los Angeles, CA",
       "zipCode": "90020",
@@ -1653,6 +1728,7 @@
     {
       "id": "org-75",
       "name": "Farm2People ",
+      "mapOnly": false,
       "sector": "Nonprofit/CBO",
       "address": "777 S Alameda St, 2nd Floor LA CA 90021",
       "zipCode": "90021",
@@ -1675,6 +1751,7 @@
     {
       "id": "org-76",
       "name": "Wyatt",
+      "mapOnly": false,
       "sector": "Nonprofit/CBO",
       "address": "244 S. San Pedro Street",
       "zipCode": "90012",
@@ -1697,6 +1774,7 @@
     {
       "id": "org-77",
       "name": "FEAST",
+      "mapOnly": false,
       "sector": "Nonprofit/CBO",
       "address": "2800 Stanford Ave",
       "zipCode": "90011",
@@ -1719,6 +1797,7 @@
     {
       "id": "org-78",
       "name": "TCC Family Health",
+      "mapOnly": false,
       "sector": "Nonprofit/CBO",
       "address": "701 E. 28th Street, Suite 200, Long Beach, CA",
       "zipCode": "90806",
@@ -1741,6 +1820,7 @@
     {
       "id": "org-79",
       "name": "David Hedden Design",
+      "mapOnly": false,
       "sector": "College/University",
       "address": "1250 Bellflower Blvd",
       "zipCode": "90815",
@@ -1763,6 +1843,7 @@
     {
       "id": "org-80",
       "name": "Noel Community Organization ",
+      "mapOnly": false,
       "sector": "Nonprofit/CBO",
       "address": "3070 Santa Fe Ave, Long Beach, Ca",
       "zipCode": "90810",
@@ -1781,20 +1862,895 @@
         "email": "noelcommunityorganization@gmail.com",
         "name": "Lina Noel"
       }
+    },
+    {
+      "id": "org-81",
+      "name": "Watts Labor Community Action Committee ",
+      "mapOnly": false,
+      "sector": "Nonprofit/CBO",
+      "address": "10950 S Central Ave",
+      "zipCode": "90059",
+      "coordinates": [
+        33.9361241,
+        -118.2540934
+      ],
+      "primaryDistrict": "4th District- Janice Hahn",
+      "otherDistricts": "4th District- Janice Hahn",
+      "primarySPA": "SPA 6",
+      "additionalSPAs": "SPA 6",
+      "mission": "to improve the quality of life for the residents of Watts and neighboring communities. F",
+      "primaryActivity": "We have q daily food program that consist of hot food,  produce, perishable and non perishable items. ",
+      "website": "",
+      "contact": {
+        "email": "sthomas@wlcac.org",
+        "name": "Sheila Lewis"
+      }
+    },
+    {
+      "id": "org-82",
+      "name": "805 Flowers Growers",
+      "mapOnly": true,
+      "sector": "Unknown",
+      "address": "4996 Foothill Rd, Carpinteria, CA 93013, USA",
+      "zipCode": "93013",
+      "coordinates": [
+        34.4084905,
+        -119.5149485
+      ],
+      "primaryDistrict": "Other",
+      "otherDistricts": "",
+      "primarySPA": "",
+      "additionalSPAs": "",
+      "mission": "",
+      "primaryActivity": "",
+      "website": "",
+      "contact": {
+        "email": "",
+        "name": ""
+      }
+    },
+    {
+      "id": "org-84",
+      "name": "Avila and Sons Farms, LLC",
+      "mapOnly": true,
+      "sector": "Unknown",
+      "address": "13391 Fargo Ave, Hanford, CA 93230, USA",
+      "zipCode": "93230",
+      "coordinates": [
+        36.3572191,
+        -119.6543189
+      ],
+      "primaryDistrict": "Other",
+      "otherDistricts": "",
+      "primarySPA": "",
+      "additionalSPAs": "",
+      "mission": "",
+      "primaryActivity": "",
+      "website": "",
+      "contact": {
+        "email": "",
+        "name": ""
+      }
+    },
+    {
+      "id": "org-85",
+      "name": "Barons Microgreens",
+      "mapOnly": true,
+      "sector": "Unknown",
+      "address": "18731 Pine Canyon Rd, Lake Hughes, CA 93532, USA",
+      "zipCode": "93532",
+      "coordinates": [
+        34.6826032,
+        -118.4615897
+      ],
+      "primaryDistrict": "Other",
+      "otherDistricts": "",
+      "primarySPA": "",
+      "additionalSPAs": "",
+      "mission": "",
+      "primaryActivity": "",
+      "website": "",
+      "contact": {
+        "email": "",
+        "name": ""
+      }
+    },
+    {
+      "id": "org-87",
+      "name": "Bolanos Family Sprouts",
+      "mapOnly": true,
+      "sector": "Unknown",
+      "address": "1311 W 35th Pl, Los Angeles, CA 90007, USA",
+      "zipCode": "90007",
+      "coordinates": [
+        34.0237617,
+        -118.2976377
+      ],
+      "primaryDistrict": "Other",
+      "otherDistricts": "",
+      "primarySPA": "",
+      "additionalSPAs": "",
+      "mission": "",
+      "primaryActivity": "",
+      "website": "",
+      "contact": {
+        "email": "",
+        "name": ""
+      }
+    },
+    {
+      "id": "org-92",
+      "name": "Dancing Crow Vineyards",
+      "mapOnly": true,
+      "sector": "Unknown",
+      "address": "2790 Spring St, St Helena, CA 94574, USA",
+      "zipCode": "94574",
+      "coordinates": [
+        38.4907123,
+        -122.4787067
+      ],
+      "primaryDistrict": "Other",
+      "otherDistricts": "",
+      "primarySPA": "",
+      "additionalSPAs": "",
+      "mission": "",
+      "primaryActivity": "",
+      "website": "",
+      "contact": {
+        "email": "",
+        "name": ""
+      }
+    },
+    {
+      "id": "org-93",
+      "name": "Drake Family Farms",
+      "mapOnly": true,
+      "sector": "Unknown",
+      "address": "33920 Simpson Rd, Winchester, CA 92596, USA",
+      "zipCode": "92596",
+      "coordinates": [
+        33.7073889,
+        -117.069027
+      ],
+      "primaryDistrict": "Other",
+      "otherDistricts": "",
+      "primarySPA": "",
+      "additionalSPAs": "",
+      "mission": "",
+      "primaryActivity": "",
+      "website": "",
+      "contact": {
+        "email": "",
+        "name": ""
+      }
+    },
+    {
+      "id": "org-95",
+      "name": "FEAST Mini-Farm at Occidental College",
+      "mapOnly": true,
+      "sector": "Unknown",
+      "address": "1882 Campus Rd, Los Angeles, CA 90041, USA",
+      "zipCode": "90041",
+      "coordinates": [
+        34.1304203,
+        -118.2092401
+      ],
+      "primaryDistrict": "Other",
+      "otherDistricts": "",
+      "primarySPA": "",
+      "additionalSPAs": "",
+      "mission": "",
+      "primaryActivity": "",
+      "website": "",
+      "contact": {
+        "email": "",
+        "name": ""
+      }
+    },
+    {
+      "id": "org-97",
+      "name": "Frecker Farms",
+      "mapOnly": true,
+      "sector": "Unknown",
+      "address": "6701 Casitas Pass Rd, Carpinteria, CA 93013, USA",
+      "zipCode": "93013",
+      "coordinates": [
+        34.394351,
+        -119.479138
+      ],
+      "primaryDistrict": "Other",
+      "otherDistricts": "",
+      "primarySPA": "",
+      "additionalSPAs": "",
+      "mission": "",
+      "primaryActivity": "",
+      "website": "",
+      "contact": {
+        "email": "",
+        "name": ""
+      }
+    },
+    {
+      "id": "org-99",
+      "name": "G Farms",
+      "mapOnly": true,
+      "sector": "Unknown",
+      "address": "1315 N Belmont Rd, Exeter, CA 93221, USA",
+      "zipCode": "93221",
+      "coordinates": [
+        36.2835661,
+        -119.1540164
+      ],
+      "primaryDistrict": "Other",
+      "otherDistricts": "",
+      "primarySPA": "",
+      "additionalSPAs": "",
+      "mission": "",
+      "primaryActivity": "",
+      "website": "",
+      "contact": {
+        "email": "",
+        "name": ""
+      }
+    },
+    {
+      "id": "org-100",
+      "name": "Galpin Farms",
+      "mapOnly": true,
+      "sector": "Unknown",
+      "address": "23325 E South Ave, Reedley, CA 93654, USA",
+      "zipCode": "93654",
+      "coordinates": [
+        36.6186536,
+        -119.4398574
+      ],
+      "primaryDistrict": "Other",
+      "otherDistricts": "",
+      "primarySPA": "",
+      "additionalSPAs": "",
+      "mission": "",
+      "primaryActivity": "",
+      "website": "",
+      "contact": {
+        "email": "",
+        "name": ""
+      }
+    },
+    {
+      "id": "org-101",
+      "name": "Givens Farms",
+      "mapOnly": true,
+      "sector": "Unknown",
+      "address": "1133 N Fairview Ave, Goleta, CA 93117, USA",
+      "zipCode": "93117",
+      "coordinates": [
+        34.4585706,
+        -119.8308988
+      ],
+      "primaryDistrict": "Other",
+      "otherDistricts": "",
+      "primarySPA": "",
+      "additionalSPAs": "",
+      "mission": "",
+      "primaryActivity": "",
+      "website": "",
+      "contact": {
+        "email": "",
+        "name": ""
+      }
+    },
+    {
+      "id": "org-102",
+      "name": "Harry's Berries (aka Gean Farm)",
+      "mapOnly": true,
+      "sector": "Unknown",
+      "address": "5777 E Vineyard Ave, Oxnard, CA 93036, USA",
+      "zipCode": "93036",
+      "coordinates": [
+        34.2266761,
+        -119.1770297
+      ],
+      "primaryDistrict": "Other",
+      "otherDistricts": "",
+      "primarySPA": "",
+      "additionalSPAs": "",
+      "mission": "",
+      "primaryActivity": "",
+      "website": "",
+      "contact": {
+        "email": "",
+        "name": ""
+      }
+    },
+    {
+      "id": "org-104",
+      "name": "Honey Pacifica",
+      "mapOnly": true,
+      "sector": "Unknown",
+      "address": "9856 Everest St, Downey, CA 90242, USA",
+      "zipCode": "90242",
+      "coordinates": [
+        33.9194712,
+        -118.117339
+      ],
+      "primaryDistrict": "Other",
+      "otherDistricts": "",
+      "primarySPA": "",
+      "additionalSPAs": "",
+      "mission": "",
+      "primaryActivity": "",
+      "website": "",
+      "contact": {
+        "email": "",
+        "name": ""
+      }
+    },
+    {
+      "id": "org-105",
+      "name": "Ipatzi Nursery",
+      "mapOnly": true,
+      "sector": "Unknown",
+      "address": "1613 Penny Way, Oxnard, CA 93030, USA",
+      "zipCode": "93030",
+      "coordinates": [
+        34.2135481,
+        -119.1961514
+      ],
+      "primaryDistrict": "Other",
+      "otherDistricts": "",
+      "primarySPA": "",
+      "additionalSPAs": "",
+      "mission": "",
+      "primaryActivity": "",
+      "website": "",
+      "contact": {
+        "email": "",
+        "name": ""
+      }
+    },
+    {
+      "id": "org-106",
+      "name": "J Davis Farms",
+      "mapOnly": true,
+      "sector": "Unknown",
+      "address": "41272 De Luz Rd, Fallbrook, CA 92028, USA",
+      "zipCode": "92028",
+      "coordinates": [
+        33.463477,
+        -117.322654
+      ],
+      "primaryDistrict": "Other",
+      "otherDistricts": "",
+      "primarySPA": "",
+      "additionalSPAs": "",
+      "mission": "",
+      "primaryActivity": "",
+      "website": "",
+      "contact": {
+        "email": "",
+        "name": ""
+      }
+    },
+    {
+      "id": "org-107",
+      "name": "J&J Farms",
+      "mapOnly": true,
+      "sector": "Unknown",
+      "address": "310 Spruce Dr, Santa Maria, CA 93454, USA",
+      "zipCode": "93454",
+      "coordinates": [
+        34.9552549,
+        -120.4049488
+      ],
+      "primaryDistrict": "Other",
+      "otherDistricts": "",
+      "primarySPA": "",
+      "additionalSPAs": "",
+      "mission": "",
+      "primaryActivity": "",
+      "website": "",
+      "contact": {
+        "email": "",
+        "name": ""
+      }
+    },
+    {
+      "id": "org-108",
+      "name": "J.G. Berries",
+      "mapOnly": true,
+      "sector": "Unknown",
+      "address": "912 Kingston Dr, Santa Maria, CA 93458, USA",
+      "zipCode": "93458",
+      "coordinates": [
+        34.9720355,
+        -120.4462269
+      ],
+      "primaryDistrict": "Other",
+      "otherDistricts": "",
+      "primarySPA": "",
+      "additionalSPAs": "",
+      "mission": "",
+      "primaryActivity": "",
+      "website": "",
+      "contact": {
+        "email": "",
+        "name": ""
+      }
+    },
+    {
+      "id": "org-109",
+      "name": "Jimenez Family Farms",
+      "mapOnly": true,
+      "sector": "Unknown",
+      "address": "1834 CA-154, Santa Ynez, CA 93460, USA",
+      "zipCode": "93460",
+      "coordinates": [
+        34.6268813,
+        -120.074571
+      ],
+      "primaryDistrict": "Other",
+      "otherDistricts": "",
+      "primarySPA": "",
+      "additionalSPAs": "",
+      "mission": "",
+      "primaryActivity": "",
+      "website": "",
+      "contact": {
+        "email": "",
+        "name": ""
+      }
+    },
+    {
+      "id": "org-111",
+      "name": "Kandarian Farms",
+      "mapOnly": true,
+      "sector": "Unknown",
+      "address": "3255 Los Osos Valley Rd, Los Osos, CA 93402, USA",
+      "zipCode": "93402",
+      "coordinates": [
+        35.2987998,
+        -120.7878647
+      ],
+      "primaryDistrict": "Other",
+      "otherDistricts": "",
+      "primarySPA": "",
+      "additionalSPAs": "",
+      "mission": "",
+      "primaryActivity": "",
+      "website": "",
+      "contact": {
+        "email": "",
+        "name": ""
+      }
+    },
+    {
+      "id": "org-113",
+      "name": "Lee, Peter (Environmental Arts by Peter Lee)",
+      "mapOnly": true,
+      "sector": "Unknown",
+      "address": "555 W 152nd St, Gardena, CA 90248, USA",
+      "zipCode": "90248",
+      "coordinates": [
+        33.8937006,
+        -118.3029743
+      ],
+      "primaryDistrict": "Other",
+      "otherDistricts": "",
+      "primarySPA": "",
+      "additionalSPAs": "",
+      "mission": "",
+      "primaryActivity": "",
+      "website": "",
+      "contact": {
+        "email": "",
+        "name": ""
+      }
+    },
+    {
+      "id": "org-114",
+      "name": "Markowicz Egg Ranch (Henry’s Farm)",
+      "mapOnly": true,
+      "sector": "Unknown",
+      "address": "10863 Fremont St, Yucaipa, CA 92399, USA",
+      "zipCode": "92399",
+      "coordinates": [
+        34.0562247,
+        -117.0256859
+      ],
+      "primaryDistrict": "Other",
+      "otherDistricts": "",
+      "primarySPA": "",
+      "additionalSPAs": "",
+      "mission": "",
+      "primaryActivity": "",
+      "website": "",
+      "contact": {
+        "email": "",
+        "name": ""
+      }
+    },
+    {
+      "id": "org-115",
+      "name": "McGrath Family Farmers",
+      "mapOnly": true,
+      "sector": "Unknown",
+      "address": "1012 W Ventura Blvd, Camarillo, CA 93010, USA",
+      "zipCode": "93010",
+      "coordinates": [
+        34.2168883,
+        -119.0791278
+      ],
+      "primaryDistrict": "Other",
+      "otherDistricts": "",
+      "primarySPA": "",
+      "additionalSPAs": "",
+      "mission": "",
+      "primaryActivity": "",
+      "website": "",
+      "contact": {
+        "email": "",
+        "name": ""
+      }
+    },
+    {
+      "id": "org-116",
+      "name": "Mountain Meadow Mushroom Farms, Inc.",
+      "mapOnly": true,
+      "sector": "Unknown",
+      "address": "Broadway Pl, Escondido, CA 92025, USA",
+      "zipCode": "92025",
+      "coordinates": [
+        33.1096483,
+        -117.0739086
+      ],
+      "primaryDistrict": "Other",
+      "otherDistricts": "",
+      "primarySPA": "",
+      "additionalSPAs": "",
+      "mission": "",
+      "primaryActivity": "",
+      "website": "",
+      "contact": {
+        "email": "",
+        "name": ""
+      }
+    },
+    {
+      "id": "org-118",
+      "name": "mushroom culture",
+      "mapOnly": true,
+      "sector": "Unknown",
+      "address": "1569 Helen Dr, Los Angeles, CA 90063, USA",
+      "zipCode": "90063",
+      "coordinates": [
+        34.0589652,
+        -118.1717415
+      ],
+      "primaryDistrict": "Other",
+      "otherDistricts": "",
+      "primarySPA": "",
+      "additionalSPAs": "",
+      "mission": "",
+      "primaryActivity": "",
+      "website": "",
+      "contact": {
+        "email": "",
+        "name": ""
+      }
+    },
+    {
+      "id": "org-119",
+      "name": "Oak Grove Farms Organics",
+      "mapOnly": true,
+      "sector": "Unknown",
+      "address": "40822 Vía Ranchitos, Fallbrook, CA 92028, USA",
+      "zipCode": "92028",
+      "coordinates": [
+        33.4181455,
+        -117.2277809
+      ],
+      "primaryDistrict": "Other",
+      "otherDistricts": "",
+      "primarySPA": "",
+      "additionalSPAs": "",
+      "mission": "",
+      "primaryActivity": "",
+      "website": "",
+      "contact": {
+        "email": "",
+        "name": ""
+      }
+    },
+    {
+      "id": "org-120",
+      "name": "Peads & Barnett",
+      "mapOnly": true,
+      "sector": "Unknown",
+      "address": "11515 W Pico Blvd, Los Angeles, CA 90064, USA",
+      "zipCode": "90064",
+      "coordinates": [
+        34.0337133,
+        -118.4419199
+      ],
+      "primaryDistrict": "Other",
+      "otherDistricts": "",
+      "primarySPA": "",
+      "additionalSPAs": "",
+      "mission": "",
+      "primaryActivity": "",
+      "website": "",
+      "contact": {
+        "email": "",
+        "name": ""
+      }
+    },
+    {
+      "id": "org-121",
+      "name": "Rancho Santa Cecilia",
+      "mapOnly": true,
+      "sector": "Unknown",
+      "address": "7337 Gobernador Canyon Rd, Carpinteria, CA 93013, USA",
+      "zipCode": "93013",
+      "coordinates": [
+        34.398823,
+        -119.457327
+      ],
+      "primaryDistrict": "Other",
+      "otherDistricts": "",
+      "primarySPA": "",
+      "additionalSPAs": "",
+      "mission": "",
+      "primaryActivity": "",
+      "website": "",
+      "contact": {
+        "email": "",
+        "name": ""
+      }
+    },
+    {
+      "id": "org-123",
+      "name": "Shigeru Nursery",
+      "mapOnly": true,
+      "sector": "Unknown",
+      "address": "2071 Statham Blvd, Oxnard, CA 93033, USA",
+      "zipCode": "93033",
+      "coordinates": [
+        34.1799057,
+        -119.1661519
+      ],
+      "primaryDistrict": "Other",
+      "otherDistricts": "",
+      "primarySPA": "",
+      "additionalSPAs": "",
+      "mission": "",
+      "primaryActivity": "",
+      "website": "",
+      "contact": {
+        "email": "",
+        "name": ""
+      }
+    },
+    {
+      "id": "org-125",
+      "name": "Sycamore Hill Ranch",
+      "mapOnly": true,
+      "sector": "Unknown",
+      "address": "2745 Grand Ave, Fillmore, CA 93015, USA",
+      "zipCode": "93015",
+      "coordinates": [
+        34.4141814,
+        -118.933647
+      ],
+      "primaryDistrict": "Other",
+      "otherDistricts": "",
+      "primarySPA": "",
+      "additionalSPAs": "",
+      "mission": "",
+      "primaryActivity": "",
+      "website": "",
+      "contact": {
+        "email": "",
+        "name": ""
+      }
+    },
+    {
+      "id": "org-127",
+      "name": "Tamai Farms",
+      "mapOnly": true,
+      "sector": "Unknown",
+      "address": "1830 Astoria Pl, Oxnard, CA 93030, USA",
+      "zipCode": "93030",
+      "coordinates": [
+        34.2181677,
+        -119.1992762
+      ],
+      "primaryDistrict": "Other",
+      "otherDistricts": "",
+      "primarySPA": "",
+      "additionalSPAs": "",
+      "mission": "",
+      "primaryActivity": "",
+      "website": "",
+      "contact": {
+        "email": "",
+        "name": ""
+      }
+    },
+    {
+      "id": "org-129",
+      "name": "Tutti Frutti Farms Inc",
+      "mapOnly": true,
+      "sector": "Unknown",
+      "address": "4457 Santa Rosa Rd, Lompoc, CA 93436, USA",
+      "zipCode": "93436",
+      "coordinates": [
+        34.6077745,
+        -120.352299
+      ],
+      "primaryDistrict": "Other",
+      "otherDistricts": "",
+      "primarySPA": "",
+      "additionalSPAs": "",
+      "mission": "",
+      "primaryActivity": "",
+      "website": "",
+      "contact": {
+        "email": "",
+        "name": ""
+      }
+    },
+    {
+      "id": "org-132",
+      "name": "Venegas Creek Roses (Buena Creek Roses)",
+      "mapOnly": true,
+      "sector": "Unknown",
+      "address": "2158 Buena Creek Rd, Vista, CA 92084, USA",
+      "zipCode": "92084",
+      "coordinates": [
+        33.180504,
+        -117.204175
+      ],
+      "primaryDistrict": "Other",
+      "otherDistricts": "",
+      "primarySPA": "",
+      "additionalSPAs": "",
+      "mission": "",
+      "primaryActivity": "",
+      "website": "",
+      "contact": {
+        "email": "",
+        "name": ""
+      }
+    },
+    {
+      "id": "org-135",
+      "name": "Weiser Family Farms",
+      "mapOnly": true,
+      "sector": "Unknown",
+      "address": "19247 Highline Rd, Tehachapi, CA 93561, USA",
+      "zipCode": "93561",
+      "coordinates": [
+        35.1090999,
+        -118.5884843
+      ],
+      "primaryDistrict": "Other",
+      "otherDistricts": "",
+      "primarySPA": "",
+      "additionalSPAs": "",
+      "mission": "",
+      "primaryActivity": "",
+      "website": "",
+      "contact": {
+        "email": "",
+        "name": ""
+      }
+    },
+    {
+      "id": "org-138",
+      "name": "Yamabushi Farms LLC",
+      "mapOnly": true,
+      "sector": "Unknown",
+      "address": "1834 W Jefferson Blvd, Los Angeles, CA 90018, USA",
+      "zipCode": "90018",
+      "coordinates": [
+        34.0254696,
+        -118.3099776
+      ],
+      "primaryDistrict": "Other",
+      "otherDistricts": "",
+      "primarySPA": "",
+      "additionalSPAs": "",
+      "mission": "",
+      "primaryActivity": "",
+      "website": "",
+      "contact": {
+        "email": "",
+        "name": ""
+      }
+    },
+    {
+      "id": "org-139",
+      "name": "Yao Cheng Farm Inc",
+      "mapOnly": true,
+      "sector": "Unknown",
+      "address": "9643 Santa Rosa Rd, Camarillo, CA 93012, USA",
+      "zipCode": "93012",
+      "coordinates": [
+        34.2360077,
+        -118.9686589
+      ],
+      "primaryDistrict": "Other",
+      "otherDistricts": "",
+      "primarySPA": "",
+      "additionalSPAs": "",
+      "mission": "",
+      "primaryActivity": "",
+      "website": "",
+      "contact": {
+        "email": "",
+        "name": ""
+      }
+    },
+    {
+      "id": "org-140",
+      "name": "Yasutomi Farm Inc.",
+      "mapOnly": true,
+      "sector": "Unknown",
+      "address": "9941 La Docena Ln, Pico Rivera, CA 90660, USA",
+      "zipCode": "90660",
+      "coordinates": [
+        33.9589851,
+        -118.0895169
+      ],
+      "primaryDistrict": "Other",
+      "otherDistricts": "",
+      "primarySPA": "",
+      "additionalSPAs": "",
+      "mission": "",
+      "primaryActivity": "",
+      "website": "",
+      "contact": {
+        "email": "",
+        "name": ""
+      }
+    },
+    {
+      "id": "org-141",
+      "name": "YNT Farm",
+      "mapOnly": true,
+      "sector": "Unknown",
+      "address": "37733 Rd 76, Dinuba, CA 93618, USA",
+      "zipCode": "93618",
+      "coordinates": [
+        36.5695581,
+        -119.4040608
+      ],
+      "primaryDistrict": "Other",
+      "otherDistricts": "",
+      "primarySPA": "",
+      "additionalSPAs": "",
+      "mission": "",
+      "primaryActivity": "",
+      "website": "",
+      "contact": {
+        "email": "",
+        "name": ""
+      }
     }
   ],
   "metadata": {
-    "totalOrganizations": 81,
-    "geocodedOrganizations": 81,
-    "failedGeocode": 0,
-    "successRate": "100.0",
-    "lastUpdated": "2026-05-11T18:15:19.317Z",
+    "totalOrganizations": 142,
+    "geocodedOrganizations": 119,
+    "failedGeocode": 23,
+    "successRate": "83.8",
+    "lastUpdated": "2026-05-15T17:02:43.718Z",
     "districts": [
       "2nd District- Holly Mitchell",
       "3rd District- Lindsey Horvath",
       "5th District- Kathryn Barger",
       "1st District- Hilda Solis",
-      "4th District- Janice Hahn"
+      "4th District- Janice Hahn",
+      "Other"
     ],
     "sectors": [
       "Nonprofit/CBO",
@@ -1802,7 +2758,8 @@
       "For-Profit",
       "Foundation",
       "we're a governmental nonprofit, part of county but independent",
-      "College/University"
+      "College/University",
+      "Unknown"
     ]
   }
 }

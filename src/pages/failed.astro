@@ -1,0 +1,160 @@
+---
+import failedData from '../data/failed-geocode.json';
+
+const { lastUpdated, failedEntries } = failedData;
+const formattedDate = lastUpdated
+  ? new Date(lastUpdated).toLocaleString('en-US', { timeZone: 'America/Los_Angeles', dateStyle: 'medium', timeStyle: 'short' })
+  : 'Never synced';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Failed Geocoding — Food Systems Map</title>
+    <style>
+      * { box-sizing: border-box; }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        background: #f7fafc;
+        color: #2d3748;
+        margin: 0;
+        padding: 0;
+      }
+      .header {
+        background: #2d3748;
+        color: white;
+        padding: 24px 32px;
+      }
+      .header h1 { margin: 0 0 4px 0; font-size: 1.5rem; }
+      .header p { margin: 0; color: #a0aec0; font-size: 0.9rem; }
+      .container { max-width: 1100px; margin: 0 auto; padding: 32px; }
+
+      .instructions {
+        background: #ebf8ff;
+        border: 1px solid #bee3f8;
+        border-radius: 8px;
+        padding: 20px 24px;
+        margin-bottom: 32px;
+      }
+      .instructions h2 { margin: 0 0 12px 0; font-size: 1.1rem; color: #2b6cb0; }
+      .instructions ol { margin: 0; padding-left: 20px; }
+      .instructions li { margin-bottom: 6px; line-height: 1.5; font-size: 0.9rem; }
+      .instructions code {
+        background: #bee3f8;
+        padding: 1px 6px;
+        border-radius: 3px;
+        font-size: 0.85em;
+      }
+
+      .stats {
+        display: flex;
+        gap: 16px;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+      }
+      .stat-card {
+        background: white;
+        border-radius: 8px;
+        padding: 16px 20px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        min-width: 160px;
+      }
+      .stat-card .value { font-size: 2rem; font-weight: bold; color: #e53e3e; }
+      .stat-card .label { font-size: 0.85rem; color: #718096; margin-top: 4px; }
+
+      .success .value { color: #38a169; }
+      .info .value { color: #3182ce; }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      }
+      thead { background: #2d3748; color: white; }
+      th { padding: 12px 16px; text-align: left; font-size: 0.85rem; font-weight: 600; white-space: nowrap; }
+      td { padding: 12px 16px; font-size: 0.875rem; border-bottom: 1px solid #e2e8f0; vertical-align: top; }
+      tr:last-child td { border-bottom: none; }
+      tr:hover td { background: #f7fafc; }
+
+      .empty-state {
+        background: white;
+        border-radius: 8px;
+        padding: 48px;
+        text-align: center;
+        color: #718096;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      }
+      .empty-state .icon { font-size: 3rem; margin-bottom: 12px; }
+      .empty-state h2 { margin: 0 0 8px 0; color: #38a169; }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <h1>⚠️ Failed Geocoding Entries</h1>
+      <p>Last sync: {formattedDate} · These entries could not be placed on the map</p>
+    </div>
+
+    <div class="container">
+      <div class="instructions">
+        <h2>How to fix these entries</h2>
+        <ol>
+          <li>Open the Google Sheet and add two new columns: <code>Latitude</code> and <code>Longitude</code></li>
+          <li>For each organization below, look up its coordinates (e.g., open Google Maps, right-click the location, copy the lat/lng)</li>
+          <li>Enter the values in the sheet — e.g., Latitude: <code>34.0522</code> &nbsp; Longitude: <code>-118.2437</code></li>
+          <li>Run <code>npm run sync</code> — the sync script will read the manual coordinates and skip geocoding for those rows</li>
+          <li>Once synced successfully, the entries will be removed from this list on the next build</li>
+        </ol>
+      </div>
+
+      <div class="stats">
+        <div class="stat-card">
+          <div class="value">{failedEntries.length}</div>
+          <div class="label">Entries missing from map</div>
+        </div>
+      </div>
+
+      {failedEntries.length === 0 ? (
+        <div class="empty-state">
+          <div class="icon">✅</div>
+          <h2>All entries geocoded successfully</h2>
+          <p>No failed entries from the last sync.</p>
+        </div>
+      ) : (
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Organization Name</th>
+              <th>Address</th>
+              <th>Zip</th>
+              <th>Sector</th>
+              <th>Contact</th>
+            </tr>
+          </thead>
+          <tbody>
+            {failedEntries.map((entry, i) => (
+              <tr>
+                <td style="color: #a0aec0;">{i + 1}</td>
+                <td><strong>{entry.name}</strong></td>
+                <td style="color: #4a5568;">{entry.address || '—'}</td>
+                <td style="color: #4a5568;">{entry.zipCode || '—'}</td>
+                <td style="color: #718096;">{entry.sector || '—'}</td>
+                <td style="color: #718096; font-size: 0.8rem;">
+                  {entry.contact?.name && <div>{entry.contact.name}</div>}
+                  {entry.contact?.email && (
+                    <a href={`mailto:${entry.contact.email}`} style="color: #3182ce;">{entry.contact.email}</a>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </div>
+  </body>
+</html>

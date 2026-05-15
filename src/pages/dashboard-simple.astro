@@ -475,16 +475,18 @@ import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
 					const organizationsData = await response.json();
 					
 					// Convert organizations data to the format expected by our processor
-					const processedData = organizationsData.organizations.map(org => ({
-						Organization_Name: org.name,
+				const processedData = organizationsData.organizations
+					.filter(org => !org.mapOnly)
+					.map(org => ({
+					Organization_Name: org.name,
 						Sector: org.sector,
 						Primary_Supervisorial_District__based_on_headquarters_address_: org.primaryDistrict,
 						// Add other fields as needed for visualizations
 						coordinates: org.coordinates,
 						mission: org.mission,
 						primaryActivity: org.primaryActivity,
-						website: org.website
-					}));
+					website: org.website
+				}));
 					
 					// Create a mock processor with the pre-processed data
 					return {
@@ -503,11 +505,11 @@ import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
 								districtCounts[district] = (districtCounts[district] || 0) + 1;
 							});
 							
-							return {
-								totalOrganizations: organizationsData.metadata.totalOrganizations,
-								sectorBreakdown: sectorCounts,
-								districtBreakdown: districtCounts
-							};
+						return {
+							totalOrganizations: this.processedData.length,
+							sectorBreakdown: sectorCounts,
+							districtBreakdown: districtCounts
+						};
 						},
 						getGoalData: function() {
 							// Extract goal data from the processed organizations
