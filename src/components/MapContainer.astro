@@ -61,7 +61,10 @@
   });
 
   // Add base layer
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+  // CARTO basemaps require an API key (enforced since Aug 2026) — without it every
+  // tile comes back stamped "API KEY REQUIRED". Key is free for non-commercial use.
+  const cartoKey = 'cb1_3wsl_1_f8b05976b1ca3661d547abbc';
+  L.tileLayer(`https://{s}.basemaps.cartocdn.com/rastertiles/light_all/{z}/{x}/{y}{r}.png?key=${cartoKey}`, {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
     subdomains: 'abcd',
     maxZoom: 18
