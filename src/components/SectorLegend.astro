@@ -1,0 +1,191 @@
+---
+import { SECTORS } from '../lib/sectors.js';
+
+interface Props {
+  /** The organizations on the map (see index.astro). */
+  orgs: { sector: string }[];
+}
+
+const { orgs } = Astro.props;
+
+// Every sector is listed, even with no organizations, so the legend always looks the same.
+const rows = SECTORS.map(({ key, color }) => ({ key, color, count: orgs.filter((org) => org.sector === key).length }));
+---
+
+<section class="legend" aria-labelledby="sector-legend-heading">
+  <h3 id="sector-legend-heading">Sector Legend</h3>
+  <p class="legend-hint">Click a sector to show only its organizations on the map. Click it again to show all.</p>
+  <ul class="legend-items">
+    {rows.map(({ key, color, count }) => (
+      <li>
+        <button type="button" class="legend-item" data-sector={key} aria-pressed="false" style={`--sector-color: ${color}`}>
+          <span class="legend-color"></span>
+          <span class="legend-name">{key}</span>
+          <span class="legend-count">{count}<span class="sr-only"> organizations</span></span>
+        </button>
+      </li>
+    ))}
+  </ul>
+</section>
+
+<script>
+  // Each row toggles the Sector filter, which SearchFilters.astro owns (see the events listed there).
+  const buttons = [...document.querySelectorAll<HTMLButtonElement>('.legend-item[data-sector]')];
+  let activeSector = '';
+
+  document.addEventListener('orgs:filter', (event) => {
+    activeSector = (event as CustomEvent<{ sector: string }>).detail.sector;
+    for (const button of buttons) button.setAttribute('aria-pressed', String(button.dataset.sector === activeSector));
+  });
+
+  for (const button of buttons) {
+    button.addEventListener('click', (event) => {
+      const sector = button.dataset.sector === activeSector ? '' : button.dataset.sector;
+      document.dispatchEvent(new CustomEvent('orgs:pick-sector', { detail: { sector } }));
+      // Mouse and touch clicks (not the keyboard): on small screens the map is usually scrolled
+      // out of view by the time you reach the legend, so bring it back to show the result.
+      if (event.detail > 0) showMap();
+    });
+  }
+
+  function showMap() {
+    const map = document.getElementById('map');
+    if (!map) return;
+    const { top, bottom, height } = map.getBoundingClientRect();
+    const visibleHeight = Math.min(bottom, window.innerHeight) - Math.max(top, 0);
+    if (visibleHeight < height / 3) {
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      map.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'end' });
+    }
+  }
+
+  document.dispatchEvent(new Event('orgs:filter-request'));
+</script>
+
+<style>
+  .legend {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .legend h3 {
+    margin: 0 0 6px 0;
+    color: #2d3748;
+  }
+
+  .legend-hint {
+    margin: 0 0 12px 0;
+    font-size: 0.8em;
+    line-height: 1.4;
+    color: #4a5568;
+  }
+
+  .legend-items {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 4px 10px;
+    border: 2px solid transparent;
+    border-radius: 6px;
+    background: none;
+    font: inherit;
+    line-height: 1.4;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color 0.15s, opacity 0.15s;
+  }
+
+  .legend-item:hover {
+    background: #f7fafc;
+  }
+
+  .legend-item:focus-visible {
+    outline: 2px solid #3182ce;
+    outline-offset: 1px;
+  }
+
+  .legend-item[aria-pressed='true'] {
+    background: #edf2f7;
+    background: color-mix(in srgb, var(--sector-color) 14%, white);
+    border-color: var(--sector-color);
+    font-weight: bold;
+  }
+
+  /* While one sector is selected, fade the others. */
+  .legend-items:has([aria-pressed='true']) .legend-item[aria-pressed='false'] {
+    opacity: 0.55;
+  }
+
+  .legend-items:has([aria-pressed='true']) .legend-item[aria-pressed='false']:hover {
+    opacity: 1;
+  }
+
+  .legend-color {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    border: 2px solid white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    background: var(--sector-color);
+  }
+
+  .legend-count {
+    margin-left: auto;
+    padding-left: 10px;
+    color: #4a5568;
+    font-variant-numeric: tabular-nums;
+  }
+
+  @media (max-width: 768px) {
+    .legend {
+      padding: 15px;
+    }
+
+    .legend h3 {
+      font-size: 1.4rem;
+    }
+
+    .legend-item {
+      gap: 8px;
+    }
+
+    .legend-color {
+      width: 18px;
+      height: 18px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .legend {
+      padding: 12px;
+    }
+
+    .legend h3 {
+      font-size: 1.2rem;
+    }
+
+    .legend-item {
+      gap: 6px;
+      font-size: 0.85rem;
+    }
+
+    .legend-color {
+      width: 16px;
+      height: 16px;
+    }
+  }
+</style>

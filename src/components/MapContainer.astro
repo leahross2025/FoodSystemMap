@@ -1,63 +1,42 @@
-<div id="map"></div>
+---
+import 'leaflet/dist/leaflet.css';
+---
+
+<div id="map" role="region" aria-label="Map of food systems organizations"></div>
 
 <script>
+  // Draws the organizations from the #org-data JSON (see index.astro) as dots colored by sector.
+  // Which dots are shown is decided by SearchFilters.astro (the 'orgs:filter' event).
   import L from 'leaflet';
-  import organizationsData from '../data/organizations.json';
+  import { OTHER_SECTOR, SECTOR_COLORS } from '../lib/sectors.js';
 
-  // District colors
-  const districtColors = {
-    '1st District- Hilda Solis': '#E53E3E',
-    '2nd District- Holly Mitchell': '#3182CE',
-    '3rd District- Lindsey Horvath': '#38A169',
-    '4th District- Janice Hahn': '#805AD5',
-    '5th District- Kathryn Barger': '#DD6B20',
-    'Countywide': '#4A5568',
-    'Other': '#319795'
+  type Org = {
+    id: string;
+    name: string;
+    sector: string;
+    coordinates: [number, number];
+    address: string;
+    districtLabel: string;
+    activity: string;
+    mission: string;
+    website: string;
+    email: string;
   };
 
-  // GeoJSON district colors for boundaries
-  const geojsonColors = {
-    '1': '#E53E3E',
-    '2': '#3182CE',
-    '3': '#38A169',
-    '4': '#805AD5',
-    '5': '#DD6B20'
-  };
+  const orgs: Org[] = JSON.parse(document.getElementById('org-data')?.textContent || '[]');
+  const sectorColor = (sector: string) => SECTOR_COLORS[sector] ?? SECTOR_COLORS[OTHER_SECTOR];
 
-  // Initialize map with mobile-friendly options
+  // Centred on LA, zoomed out a little on small screens. Zooming out to 6 reaches the farms
+  // outside the county.
+  const screenWidth = window.innerWidth;
   const map = L.map('map', {
     center: [34.0522, -118.2437],
-    zoom: 10,
-    zoomControl: true,
-    attributionControl: true,
-    // Mobile-friendly options
-    tap: true,
-    touchZoom: true,
-    dragging: true,
-    scrollWheelZoom: true,
-    doubleClickZoom: true,
-    boxZoom: true,
-    keyboard: true,
+    zoom: screenWidth <= 480 ? 8 : screenWidth <= 768 ? 9 : 10,
     zoomSnap: 0.5,
     zoomDelta: 0.5,
     wheelPxPerZoomLevel: 60,
     maxZoom: 18,
-    minZoom: 8
-  });
-
-  // Adjust initial zoom for mobile
-  if (window.innerWidth <= 768) {
-    map.setView([34.0522, -118.2437], 9);
-  }
-  if (window.innerWidth <= 480) {
-    map.setView([34.0522, -118.2437], 8);
-  }
-
-  // Handle window resize
-  window.addEventListener('resize', () => {
-    setTimeout(() => {
-      map.invalidateSize();
-    }, 100);
+    minZoom: 6
   });
 
   // Add base layer
@@ -70,84 +49,140 @@
     maxZoom: 18
   }).addTo(map);
 
-  // Add district boundaries
-  const geojsonUrl = '/Supervisorial_Districts.geojson';
-  
-  fetch(geojsonUrl)
-    .then(response => response.json())
-    .then(data => {
+  // Supervisorial district outlines. The fill is invisible but still shows "District N" when
+  // hovering anywhere inside a district; the dots are in a higher pane, so they stay clickable.
+  fetch('/districts.geojson')
+    .then((response) => (response.ok ? response.json() : Promise.reject(new Error(`HTTP ${response.status}`))))
+    .then((data) => {
       L.geoJSON(data, {
-        style: function(feature) {
-          const district = feature.properties.DISTRICT;
-          return {
-            fillColor: geojsonColors[district] || '#00000000',
-            color: '#000000',
-            weight: 2,
-            fillOpacity: 0.3
-          };
+        style: {
+          color: '#4A5568',
+          weight: 1.5,
+          opacity: 0.8,
+          dashArray: '6 4',
+          fillOpacity: 0,
+          className: 'district-boundary'
         },
-        onEachFeature: function(feature, layer) {
-          layer.bindTooltip(`District ${feature.properties.DISTRICT}`, {
-            permanent: false,
-            direction: 'center'
-          });
+        onEachFeature: (feature, layer) => {
+          layer.bindTooltip(`District ${feature.properties.DISTRICT}`, { sticky: true });
         }
       }).addTo(map);
     })
-    .catch(error => {
+    .catch((error) => {
       console.error('Error loading district boundaries:', error);
     });
 
-  // Store all markers for filtering
-  let allMarkers = [];
+  // Organizations at the same spot (e.g. sharing an office) are fanned out in a small circle
+  // (~130 m) so each dot can be clicked once zoomed in. Sheet order keeps the layout the same.
+  const SPREAD = 0.0012; // degrees
 
-  // Add organization markers
-  organizationsData.organizations.forEach(org => {
-    const [lat, lng] = org.coordinates;
-    const color = districtColors[org.primaryDistrict] || '#718096';
+  function markerPositions(list: Org[]) {
+    const spots = new Map<string, Org[]>();
+    for (const org of list) {
+      const key = org.coordinates.map((n) => n.toFixed(5)).join(',');
+      spots.set(key, [...(spots.get(key) ?? []), org]);
+    }
+    const positions = new Map<string, [number, number]>();
+    for (const group of spots.values()) {
+      group.forEach((org, i) => {
+        const [lat, lng] = org.coordinates;
+        if (group.length === 1) {
+          positions.set(org.id, [lat, lng]);
+          return;
+        }
+        // Clockwise from north. A degree of longitude is shorter than one of latitude, so
+        // stretch it to keep the circle round.
+        const angle = (2 * Math.PI * i) / group.length;
+        positions.set(org.id, [
+          lat + SPREAD * Math.cos(angle),
+          lng + (SPREAD * Math.sin(angle)) / Math.cos((lat * Math.PI) / 180)
+        ]);
+      });
+    }
+    return positions;
+  }
     
-    // Create popup content
-    const popupContent = `
-      <div class="popup-content">
-        <h3 style="margin: 0 0 10px 0; color: ${color};">${org.name}</h3>
-        <p><strong>Sector:</strong> ${org.sector}</p>
-        <p><strong>District:</strong> ${org.primaryDistrict}</p>
-        <p><strong>Address:</strong> ${org.address}</p>
-        ${org.mission ? `<p><strong>Mission:</strong> ${org.mission}</p>` : ''}
-        ${org.primaryActivity ? `<p><strong>Activity:</strong> ${org.primaryActivity}</p>` : ''}
-        ${org.contact.email ? `<p><strong>Contact:</strong> <a href="mailto:${org.contact.email}">${org.contact.email}</a></p>` : ''}
-      </div>
-    `;
+  // Builds popup elements. Text goes in as text nodes, so nothing from the spreadsheet is
+  // ever read as HTML.
+  function h(tag: string, attributes: Record<string, string>, ...children: (Node | string)[]) {
+    const element = document.createElement(tag);
+    for (const [name, value] of Object.entries(attributes)) element.setAttribute(name, value);
+    element.append(...children);
+    return element;
+  }
 
-    // Create marker with mobile-friendly options
-    const markerSize = window.innerWidth <= 480 ? 18 : 20;
-    const marker = L.marker([lat, lng], {
-      icon: L.divIcon({
-        className: 'custom-marker',
-        html: `<div style="background-color: ${color}; width: ${markerSize}px; height: ${markerSize}px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3);"></div>`,
-        iconSize: [markerSize, markerSize],
-        iconAnchor: [markerSize/2, markerSize/2]
-      }),
-      title: org.name
-    }).bindPopup(popupContent, { 
-      maxWidth: window.innerWidth <= 480 ? 250 : window.innerWidth <= 768 ? 280 : 400,
-      autoPan: true,
-      autoPanPadding: [20, 20],
-      closeButton: true,
-      autoClose: true,
-      closeOnEscapeKey: true
+  const field = (label: string, value: Node | string) => h('p', {}, h('strong', {}, `${label}:`), ' ', value);
+
+  function popupContent(org: Org) {
+    const pill = h('span', { class: 'sector-pill' }, org.sector);
+    pill.style.setProperty('--sector-color', sectorColor(org.sector));
+
+    const content = h('div', { class: 'popup-content' }, h('h3', {}, org.name), h('p', {}, pill));
+    if (org.address) content.append(field('Address', org.address));
+    content.append(field('District', org.districtLabel));
+    if (org.activity) content.append(field('Activity', org.activity));
+    if (org.mission) content.append(field('Mission', org.mission));
+    if (/^https?:\/\//i.test(org.website)) {
+      const shown = org.website.replace(/^https?:\/\/(www\.)?/i, '').replace(/\/$/, '');
+      content.append(field('Website', h('a', { href: org.website, target: '_blank', rel: 'noopener' }, shown)));
+    }
+    if (org.email) content.append(field('Email', h('a', { href: `mailto:${org.email}` }, org.email)));
+    return content;
+  }
+
+  const smallScreen = window.matchMedia('(max-width: 480px)');
+  const markerRadius = () => (smallScreen.matches ? 7 : 8);
+  const positions = markerPositions(orgs);
+  const markerLayer = L.layerGroup().addTo(map);
+  const markers = new Map(); // org id → dot
+
+  for (const org of orgs) {
+    const marker = L.circleMarker(positions.get(org.id), {
+      pane: 'markerPane', // above the district outlines
+      radius: markerRadius(),
+      color: '#fff',
+      weight: 2,
+      fillColor: sectorColor(org.sector),
+      fillOpacity: 1,
+      className: 'org-marker'
+    }).bindPopup(() => popupContent(org), {
+      maxWidth: screenWidth <= 480 ? 250 : screenWidth <= 768 ? 280 : 400,
+      autoPanPadding: [20, 20]
     });
 
-    // Add searchable properties to marker
-    marker.orgData = org;
-    marker.addTo(map);
-    allMarkers.push(marker);
+    // Keyboard access: each dot can be tabbed to; Enter or Space opens its popup, Escape closes it.
+    // (Leaflet makes a new element each time a dot is shown again, hence on every 'add'.)
+    marker.on('add', () => {
+      const dot = marker.getElement();
+      dot.setAttribute('tabindex', '0');
+      dot.setAttribute('role', 'button');
+      dot.setAttribute('aria-label', `${org.name} (${org.sector})`);
+      dot.addEventListener('keydown', (event: KeyboardEvent) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          marker.openPopup();
+        } else if (event.key === 'Escape') {
+          marker.closePopup();
+        }
+      });
+    });
+
+    markerLayer.addLayer(marker);
+    markers.set(org.id, marker);
+  }
+
+  smallScreen.addEventListener('change', () => {
+    for (const marker of markers.values()) marker.setRadius(markerRadius());
   });
 
-  // Export for use by search functionality
-  window.mapInstance = map;
-  window.allMarkers = allMarkers;
-  window.districtColors = districtColors;
+  document.addEventListener('orgs:filter', (event) => {
+    const { visible } = (event as CustomEvent<{ visible: Set<string> }>).detail;
+    for (const [id, marker] of markers) {
+      if (visible.has(id)) markerLayer.addLayer(marker);
+      else markerLayer.removeLayer(marker);
+    }
+  });
+  document.dispatchEvent(new Event('orgs:filter-request'));
 </script>
 
 <style>
@@ -160,27 +195,61 @@
     min-height: 400px;
     overflow: hidden;
     box-sizing: border-box;
+    font-family: inherit;
+  }
+
+  /* Hovering a district shows its tooltip, but the map is dragged, not clicked. */
+  :global(path.district-boundary.leaflet-interactive) {
+    cursor: grab;
+  }
+
+  :global(path.org-marker:focus-visible) {
+    outline: none;
+    stroke: #1a202c;
+    stroke-width: 3px;
   }
 
   :global(.popup-content) {
     max-height: 300px;
     overflow-y: auto;
+    overflow-wrap: anywhere;
   }
 
   :global(.popup-content h3) {
     font-size: 1.1em;
     font-weight: bold;
+    margin: 0 0 6px 0;
+    color: #1a202c;
   }
 
   :global(.popup-content p) {
     margin: 8px 0;
     font-size: 0.9em;
     line-height: 1.4;
+    white-space: pre-line;
   }
 
-  :global(.custom-marker) {
-    background: transparent !important;
-    border: none !important;
+  /* Tinted rather than solid, so the text stays readable on every sector color. */
+  :global(.sector-pill) {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 2px 10px 2px 8px;
+    border: 1.5px solid var(--sector-color);
+    border-radius: 999px;
+    background: #f7fafc;
+    background: color-mix(in srgb, var(--sector-color) 14%, white);
+    color: #1a202c;
+    font-weight: bold;
+    white-space: nowrap;
+  }
+
+  :global(.sector-pill)::before {
+    content: '';
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--sector-color);
   }
 
   /* Mobile optimizations */
