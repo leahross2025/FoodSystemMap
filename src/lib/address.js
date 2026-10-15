@@ -47,7 +47,9 @@ export function parseManualCoords(latRaw, lngRaw) {
 /** Normalize a website value into a clickable https URL, or '' if it isn't one. */
 export function normalizeWebsite(raw) {
   let v = String(raw ?? '').trim();
-  if (!v || v.includes('@') || /\s/.test(v)) return '';
+  // An @ before the first "/" is an email address (or a login), not a website; later on it's
+  // fine, e.g. https://www.youtube.com/@FoodForward.
+  if (!v || /^(https?:\/\/)?[^/]*@/i.test(v) || /\s/.test(v)) return '';
   if (!/^https?:\/\//i.test(v)) {
     if (!/^[\w-]+(\.[\w-]+)+/.test(v)) return '';
     v = `https://${v}`;

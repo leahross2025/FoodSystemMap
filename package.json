@@ -37,7 +37,8 @@
     "dev": "astro dev",
     "preview": "astro build && wrangler dev",
     "sync": "node src/scripts/geocode.js",
-    "sync:build": "npm run sync && npm run build"
+    "sync:build": "npm run sync && npm run build",
+    "test": "node --test tests/*.test.js"
   },
   "type": "module"
 }
