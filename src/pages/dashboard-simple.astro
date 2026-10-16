@@ -10,7 +10,7 @@ import { summarize } from '../lib/survey.js';
 // Rendered on each request, so spreadsheet edits show up within minutes.
 export const prerender = false;
 
-const { organizations, report } = await loadData();
+const { organizations, report } = await loadData(Astro.locals.runtime?.ctx);
 const summary = summarize(organizations.filter((org) => org.isSurveyRespondent));
 
 const cards = [

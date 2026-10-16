@@ -6,8 +6,8 @@ import { SECTORS } from '../../lib/sectors.js';
 
 export const prerender = false;
 
-export const GET: APIRoute = async () => {
-  const { organizations, report } = await loadData();
+export const GET: APIRoute = async ({ locals }) => {
+  const { organizations, report } = await loadData(locals?.runtime?.ctx);
   const body = {
     organizations: organizations.map(({ survey, email, ...org }) => org),
     metadata: {

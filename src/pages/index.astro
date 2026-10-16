@@ -12,7 +12,7 @@ import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
 import { loadData } from '../lib/data.server.js';
 import { OUTSIDE_COUNTY } from '../lib/districts.js';
 
-const { organizations } = await loadData();
+const { organizations } = await loadData(Astro.locals.runtime?.ctx);
 
 // Organizations with a map location, with just what the map, filters and popups use.
 // Emails are shown for survey respondents only, so other rows' emails never reach the browser.

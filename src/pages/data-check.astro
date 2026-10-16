@@ -14,7 +14,7 @@ export const prerender = false;
 
 Astro.response.headers.set('Cache-Control', 'no-store'); // always show the sheet as it is now
 
-const { organizations, report } = await loadData();
+const { organizations, report } = await loadData(Astro.locals.runtime?.ctx);
 const merged = report.sheetRows - report.uniqueOrganizations;
 const missing = report.missingLocation;
 

@@ -9,28 +9,35 @@ import snapshot from '../data/snapshot.json' with { type: 'json' };
 import { makeDistrictLookup } from './districts.js';
 import { buildDataset, parseCSV } from './organizations.js';
 
-const districtLookup = makeDistrictLookup(districtsGeojson);
-
 const MEMO_MS = 60_000;
 const FETCH_TIMEOUT_MS = 8_000;
 
-/** @type {{ at: number, data: ReturnType<typeof buildDataset> } | null} */
+/** @type {{ at: number, data: Promise<ReturnType<typeof buildDataset>> } | null} */
 let memo = null;
+
+/** @type {ReturnType<typeof makeDistrictLookup> | null} */
+let districtLookup = null;
 
 /**
  * Organizations and the data-quality report, from the live sheet or the saved snapshot.
- * Each call gets its own copy, so callers may sort or modify the result.
+ * One result is shared by every request for 60 seconds, so callers must not modify it.
+ * Requests that arrive while the sheet is being read wait for that same read.
+ * @param {{ waitUntil(promise: Promise<unknown>): void }} [ctx]  the request's context
+ *   (`Astro.locals.runtime.ctx`). When this request starts a read, the read is finished even if the
+ *   visitor leaves, so the other requests waiting for it still get their answer.
  * @returns {Promise<ReturnType<typeof buildDataset>>}
  */
-export async function loadData() {
+export function loadData(ctx) {
   if (!memo || Date.now() - memo.at >= MEMO_MS) {
-    const data = await load();
-    memo = { at: Date.now(), data };
+    memo = { at: Date.now(), data: load() };
+    ctx?.waitUntil(memo.data);
   }
-  return structuredClone(memo.data);
+  return memo.data;
 }
 
 async function load() {
+  // Built on first use rather than when the Worker starts.
+  districtLookup ??= makeDistrictLookup(districtsGeojson);
   try {
     // Cloudflare caches the sheet for 5 minutes, so most requests never reach Google.
     const res = await fetch(SHEET_CSV_URL, {

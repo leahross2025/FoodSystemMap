@@ -37,24 +37,50 @@ describe('loadData', () => {
     assert.equal(calls[0].url, SHEET_CSV_URL);
     assert.deepEqual(calls[0].init.cf, { cacheTtl: 300, cacheEverything: true });
     assert.ok(calls[0].init.signal instanceof AbortSignal);
+    // Farms didn't answer the district question: their district comes from the district boundaries.
+    const beylik = organizations.find((o) => o.name === 'Beylik Family Farms');
+    assert.deepEqual([beylik.district, beylik.districtSource], [0, 'location']);
   });
 
-  test('reuses the result for 60 seconds, giving each caller its own copy', async (t) => {
+  test('shares one result for 60 seconds', async (t) => {
     const calls = stubFetch(t, () => new Response(fixture));
     const loadData = await freshLoadData();
     const start = Date.now();
 
     const first = await loadData();
-    first.organizations.length = 0;
-    first.report.sheetRows = -1;
-    const second = await loadData();
+    assert.equal(await loadData(), first); // the same object, not a copy
     assert.equal(calls.length, 1);
-    assert.equal(second.organizations.length, 143);
-    assert.equal(second.report.sheetRows, 148);
 
     t.mock.method(Date, 'now', () => start + 61_000);
-    await loadData();
+    assert.notEqual(await loadData(), first);
     assert.equal(calls.length, 2);
+  });
+
+  test('requests that arrive while the sheet is being read wait for that read', async (t) => {
+    let finishDownload;
+    const calls = stubFetch(t, () => new Promise((resolve) => (finishDownload = resolve)));
+    const loadData = await freshLoadData();
+
+    const waiting = [loadData(), loadData(), loadData()];
+    assert.equal(calls.length, 1);
+    finishDownload(new Response(fixture));
+    const [first, ...others] = await Promise.all(waiting);
+    assert.equal(first.report.sheetRows, 148);
+    for (const result of others) assert.equal(result, first);
+  });
+
+  test('a read is handed to waitUntil, so it finishes even if the visitor who started it leaves', async (t) => {
+    stubFetch(t, () => new Response(fixture));
+    const loadData = await freshLoadData();
+    const handed = [];
+    const ctx = { waitUntil: (promise) => handed.push(promise) };
+
+    const reading = loadData(ctx);
+    assert.equal(handed.length, 1);
+    assert.equal(handed[0], reading);
+    await reading;
+    await loadData(ctx); // nothing new to wait for
+    assert.equal(handed.length, 1);
   });
 
   const failures = {

@@ -26,8 +26,10 @@ Every page renders on demand in the Cloudflare Worker (`export const prerender =
 ## How the data flows
 
 1. **Read the sheet.** `loadData()` (`src/lib/data.server.js`) fetches the sheet's published CSV
-   (`src/config/googleSheets.js`). Cloudflare caches the response for 5 minutes and the Worker reuses the
-   result for 60 seconds. If the sheet can't be read (error, timeout, no rows), it falls back to
+   (`src/config/googleSheets.js`). Cloudflare caches the response for 5 minutes and the Worker shares the
+   result between requests for 60 seconds (requests that arrive during a read wait for it; pages pass
+   `Astro.locals.runtime.ctx` so the read is finished with `waitUntil` even if its visitor leaves). Callers
+   must not modify the result. If the sheet can't be read (error, timeout, no rows), it falls back to
    `src/data/snapshot.json` and the pages say they show a saved copy.
 2. **Build the organizations.** `parseCSV` and `buildDataset` (`src/lib/organizations.js`, pure, runs in
    Node and in the Worker) turn the rows into organizations plus the report shown on `/data-check`:
