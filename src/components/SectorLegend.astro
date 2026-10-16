@@ -12,8 +12,8 @@ const { orgs } = Astro.props;
 const rows = SECTORS.map(({ key, color }) => ({ key, color, count: orgs.filter((org) => org.sector === key).length }));
 ---
 
-<section class="legend" aria-labelledby="sector-legend-heading">
-  <h3 id="sector-legend-heading">Sector Legend</h3>
+<section class="legend" id="sector-legend" tabindex="-1" aria-labelledby="sector-legend-heading">
+  <h2 id="sector-legend-heading">Sector Legend</h2>
   <p class="legend-hint">Click a sector to show only its organizations on the map. Click it again to show all.</p>
   <ul class="legend-items">
     {rows.map(({ key, color, count }) => (
@@ -70,8 +70,14 @@ const rows = SECTORS.map(({ key, color }) => ({ key, color, count: orgs.filter((
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
 
-  .legend h3 {
+  /* Focused only by the map's "Skip map" link; the legend buttons show where the focus goes next. */
+  .legend:focus {
+    outline: none;
+  }
+
+  .legend h2 {
     margin: 0 0 6px 0;
+    font-size: 1.953em; /* the h3 size of the site's type scale */
     color: #2d3748;
   }
 
@@ -155,7 +161,7 @@ const rows = SECTORS.map(({ key, color }) => ({ key, color, count: orgs.filter((
       padding: 15px;
     }
 
-    .legend h3 {
+    .legend h2 {
       font-size: 1.4rem;
     }
 
@@ -174,7 +180,7 @@ const rows = SECTORS.map(({ key, color }) => ({ key, color, count: orgs.filter((
       padding: 12px;
     }
 
-    .legend h3 {
+    .legend h2 {
       font-size: 1.2rem;
     }
 

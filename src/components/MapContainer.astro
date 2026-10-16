@@ -117,7 +117,7 @@ import 'leaflet/dist/leaflet.css';
     const pill = h('span', { class: 'sector-pill' }, org.sector);
     pill.style.setProperty('--sector-color', sectorColor(org.sector));
 
-    const content = h('div', { class: 'popup-content' }, h('h3', {}, org.name), h('p', {}, pill));
+    const content = h('div', { class: 'popup-content' }, h('h2', {}, org.name), h('p', {}, pill));
     if (org.address) content.append(field('Address', org.address));
     content.append(field('District', org.districtLabel));
     if (org.activity) content.append(field('Activity', org.activity));
@@ -161,10 +161,21 @@ import 'leaflet/dist/leaflet.css';
         if (event.key === 'Enter' || event.key === ' ') {
           event.preventDefault();
           marker.openPopup();
+          // Popups come after all the dots in the tab order, so take the focus into this one.
+          const popup = marker.getPopup()?.getElement();
+          const target = popup?.querySelector<HTMLElement>('.popup-content a, .leaflet-popup-close-button');
+          target?.focus({ preventScroll: true });
         } else if (event.key === 'Escape') {
           marker.closePopup();
         }
       });
+    });
+
+    // When a popup that has the focus closes, the focus goes back to its dot.
+    marker.on('popupclose', (event) => {
+      if (event.popup.getElement()?.contains(document.activeElement)) {
+        marker.getElement()?.focus({ preventScroll: true });
+      }
     });
 
     markerLayer.addLayer(marker);
@@ -173,6 +184,11 @@ import 'leaflet/dist/leaflet.css';
 
   smallScreen.addEventListener('change', () => {
     for (const marker of markers.values()) marker.setRadius(markerRadius());
+  });
+
+  // Escape closes a popup from inside it too. (Leaflet only handles Escape while the map itself has the focus.)
+  map.getContainer().addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && map.getPane('popupPane')?.contains(event.target as Node)) map.closePopup();
   });
 
   document.addEventListener('orgs:filter', (event) => {
@@ -215,7 +231,7 @@ import 'leaflet/dist/leaflet.css';
     overflow-wrap: anywhere;
   }
 
-  :global(.popup-content h3) {
+  :global(.popup-content h2) {
     font-size: 1.1em;
     font-weight: bold;
     margin: 0 0 6px 0;
@@ -265,7 +281,7 @@ import 'leaflet/dist/leaflet.css';
       max-width: 280px;
     }
     
-    :global(.popup-content h3) {
+    :global(.popup-content h2) {
       font-size: 1em;
     }
     
@@ -290,7 +306,7 @@ import 'leaflet/dist/leaflet.css';
       max-width: 250px;
     }
     
-    :global(.popup-content h3) {
+    :global(.popup-content h2) {
       font-size: 0.9em;
     }
     

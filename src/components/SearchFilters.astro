@@ -112,7 +112,12 @@ const spas = [...spaLabels].sort(([a], [b]) => spaOrder(a) - spaOrder(b));
     text: fold([org.name, org.sector, org.activity, org.mission, org.address, org.districtLabel].join('\n')),
   }));
 
-  function filterMarkers() {
+  // Screen readers announce the results count (role="status"), so while someone is typing it's only
+  // updated once they pause, instead of being read out after every key.
+  const TYPING_PAUSE_MS = 500;
+  let countTimer: ReturnType<typeof setTimeout> | undefined;
+
+  function filterMarkers({ typing = false } = {}) {
     const query = searchInput.value.trim();
     const words = fold(query).split(/\s+/).filter(Boolean);
     const sector = sectorFilter.value;
@@ -132,7 +137,10 @@ const spas = [...spaLabels].sort(([a], [b]) => spaOrder(a) - spaOrder(b));
         .map(({ org }) => org.id),
     );
 
-    resultsCount.textContent = `Showing ${visible.size} of ${orgs.length} organizations`;
+    const count = `Showing ${visible.size} of ${orgs.length} organizations`;
+    clearTimeout(countTimer);
+    if (typing) countTimer = setTimeout(() => (resultsCount.textContent = count), TYPING_PAUSE_MS);
+    else resultsCount.textContent = count;
     clearSearch.style.display = query ? 'block' : 'none';
     document.dispatchEvent(new CustomEvent('orgs:filter', { detail: { visible, sector } }));
   }
@@ -151,10 +159,8 @@ const spas = [...spaLabels].sort(([a], [b]) => spaOrder(a) - spaOrder(b));
     searchInput.focus();
   }
 
-  searchInput.addEventListener('input', filterMarkers);
-  sectorFilter.addEventListener('change', filterMarkers);
-  districtFilter.addEventListener('change', filterMarkers);
-  spaFilter.addEventListener('change', filterMarkers);
+  searchInput.addEventListener('input', () => filterMarkers({ typing: true }));
+  for (const select of [sectorFilter, districtFilter, spaFilter]) select.addEventListener('change', () => filterMarkers());
   clearSearch.addEventListener('click', clearSearchOnly);
   clearFilters.addEventListener('click', clearAllFilters);
 
@@ -162,7 +168,7 @@ const spas = [...spaLabels].sort(([a], [b]) => spaOrder(a) - spaOrder(b));
     sectorFilter.value = (event as CustomEvent<{ sector: string }>).detail.sector;
     filterMarkers();
   });
-  document.addEventListener('orgs:filter-request', filterMarkers);
+  document.addEventListener('orgs:filter-request', () => filterMarkers());
 
   filterMarkers();
 </script>

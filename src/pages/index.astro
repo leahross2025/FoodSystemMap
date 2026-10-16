@@ -64,16 +64,19 @@ function displayAddress(address: string, zip: string) {
 		
 		<div class="map-section">
 			<SearchFilters orgs={orgs} />
-			<MapContainer />
+			<div class="map-frame">
+				<a href="#sector-legend" class="skip-map">Skip map</a>
+				<MapContainer />
+			</div>
 			<p class="map-note">Data updates automatically from the stakeholder spreadsheet</p>
 		</div>
-		
+
 		<main>
 			<div class="info-section">
 				<SectorLegend orgs={orgs} />
-				
+
 				<div class="about">
-					<h3>About This Map</h3>
+					<h2>About This Map</h2>
 					<p>
 						This interactive map displays food systems stakeholder organizations across Los Angeles County. 
 						Each dot is colored by the organization's sector, as shown in the Sector Legend.
@@ -167,11 +170,50 @@ function displayAddress(address: string, zip: string) {
 		overflow: hidden;
 	}
 	
+	.map-frame {
+		position: relative;
+	}
+
+	/* Lets keyboard users jump past the map's dots to the Sector Legend. Shown only while it has the focus. */
+	.skip-map {
+		position: absolute;
+		top: 10px;
+		left: 50%;
+		z-index: 1001; /* above the map's zoom buttons */
+		transform: translateX(-50%);
+		padding: 6px 14px;
+		border-radius: 6px;
+		background: #383838;
+		color: white;
+		font-size: 0.9rem;
+		font-weight: 600;
+		line-height: 1.4;
+		white-space: nowrap;
+		text-decoration: none;
+	}
+
+	.skip-map:focus-visible {
+		outline: 2px solid #3182ce;
+		outline-offset: 2px;
+	}
+
+	.skip-map:not(:focus) {
+		width: 1px;
+		height: 1px;
+		padding: 0;
+		overflow: hidden;
+		clip-path: inset(50%);
+	}
+
 	.map-note {
 		margin: 8px 0 0 0;
 		font-size: 0.8rem;
 		line-height: 1.4;
 		color: #4a5568;
+	}
+
+	.about h2 {
+		font-size: 1.953em; /* the h3 size of the site's type scale */
 	}
 
 	.info-section {
@@ -208,7 +250,7 @@ function displayAddress(address: string, zip: string) {
 			padding: 15px;
 		}
 		
-		.about h3 {
+		.about h2 {
 			font-size: 1.4rem;
 			margin-bottom: 12px;
 		}
@@ -247,7 +289,7 @@ function displayAddress(address: string, zip: string) {
 			padding: 12px;
 		}
 		
-		.about h3 {
+		.about h2 {
 			font-size: 1.2rem;
 			margin-bottom: 10px;
 		}
