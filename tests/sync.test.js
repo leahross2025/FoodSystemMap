@@ -13,7 +13,7 @@ import { parseCSV } from '../src/lib/organizations.js';
 const SCRIPT = fileURLToPath(new URL('../scripts/sync.js', import.meta.url));
 const FIXTURE = fileURLToPath(new URL('./fixtures/sheet.csv', import.meta.url));
 const fixtureText = await readFile(FIXTURE, 'utf8');
-const PRIVATE_COLUMNS = ['Your Name (First/Last)', 'Additional questions or comments'];
+const PRIVATE_COLUMNS = ['Your Name (First/Last)', 'Email Address', 'Additional questions or comments'];
 
 const inCalifornia = (lat, lon) => ({ lat: String(lat), lon: String(lon), address: { state: 'California' } });
 
@@ -123,7 +123,7 @@ describe('createGeocoder', () => {
 });
 
 describe('toSnapshot', () => {
-  test('leaves out contact names and comments, keeping everything else and the row numbers', () => {
+  test('leaves out contact names, emails and comments, keeping everything else and the row numbers', () => {
     const { headers, rows } = parseCSV(fixtureText);
     const snapshot = toSnapshot(headers, rows, '2026-10-15T20:30:53.000Z');
     assert.equal(snapshot.generatedAt, '2026-10-15T20:30:53.000Z');
@@ -135,8 +135,8 @@ describe('toSnapshot', () => {
       assert.deepEqual(row, expected);
     });
     assert.equal(snapshot.rows[0].__row, 2);
-    // In the fixture, contact names and comments are all "Redacted".
-    assert.ok(!JSON.stringify(snapshot).includes('Redacted'));
+    // In the fixture, contact names and comments are all "Redacted" and emails are a placeholder.
+    assert.ok(!JSON.stringify(snapshot).includes('Redacted') && !JSON.stringify(snapshot).includes('redacted@'));
     assert.ok(PRIVATE_COLUMNS.every((column) => column in rows[0]), 'the parsed rows are left as they were');
   });
 });

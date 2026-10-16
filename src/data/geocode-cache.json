@@ -1,579 +1,215 @@
 {
-  "6141 barrows drive, los angeles, ca, 90048": [
-    34.0603082,
-    -118.3641137
-  ],
-  "2000 ave of the stars #1000s, los angeles, ca 90067, los angeles, ca, 90067": [
-    34.05758,
-    -118.416932
-  ],
-  "858 w jackman st., lancaster ca, los angeles, ca, 93534": [
-    34.686682,
-    -118.137425
-  ],
-  "517 w. glenoaks blvd., los angeles, ca, 91202": [
-    34.1593124,
-    -118.2646828
-  ],
-  "1919 e el segundo blvd compton ca 90222, los angeles, ca, 90222": [
-    33.916872,
-    -118.220062
-  ],
-  "2851 west 120th st, , hawthorne, ca, los angeles, ca, 90250": [
-    33.9244689,
-    -118.323944
-  ],
-  "9595 wilshire blvd., los angeles, ca, 90212": [
-    34.067321,
-    -118.398273
-  ],
-  "717 w. temple st., los angeles, ca, 90012": [
-    34.05758,
-    -118.2523
-  ],
-  "715 e mission rd, los angeles, ca, 91776": [
-    34.0917097,
-    -118.0926814
-  ],
-  "2533 w 3rd st los angeles, ca, los angeles, ca, 90057": [
-    34.0653322,
-    -118.2771994
-  ],
-  "3530 wilshire blvd, 8th floor, los angeles, ca 90010, los angeles, ca, 90010": [
-    34.061028,
-    -118.3012
-  ],
-  "alvarado and beverly, los angeles, ca, 90057": [
-    34.06485,
-    -118.278945
-  ],
-  "36355 russell blvd, davis, ca, los angeles, ca, 95616": [
-    38.539398,
-    -121.742897
-  ],
-  "510 s. vermont ave, 11th floor, los angeles, los angeles, ca, 90020": [
-    34.05758,
-    -118.2919
-  ],
-  "1517 ashland ave, los angeles, ca, 90405": [
-    34.025681,
-    -118.478065
-  ],
-  "500 w. temple street room 383 los angeles, ca, los angeles, ca, 90012": [
-    34.052895,
-    -118.243759
-  ],
-  "510 s. vermont ave., los angeles, ca 90020, los angeles, ca, 90020": [
-    34.0651468,
-    -118.2915495
-  ],
-  "3530 wilshire blvd., . los angeles, ca, los angeles, ca, 90010": [
-    34.0616527,
-    -118.3017696
-  ],
-  "12860 crossroads prkwy. south, los angeles, ca, 91746": [
-    34.028243,
-    -118.024345
-  ],
-  "4301 w 3rd street los angeles, ca 90020, los angeles, ca, 90020": [
-    34.06905,
-    -118.308047
-  ],
-  "701 hoefner ave los angeles ca 90022, los angeles, ca, 90022": [
-    34.0210673,
-    -118.1498999
-  ],
-  "4921 n cedar ave, los angeles, ca, el monte, ca 91732": [
-    34.0815179,
-    -118.0250151
-  ],
-  "11243 glenoaks blvd., los angeles, ca, 90038": [
-    34.274572,
-    -118.4127556
-  ],
-  "840 echo park ave, los angeles, ca, 90026": [
-    34.073635,
-    -118.2603
-  ],
-  "143 s alvarado st los angeles, los angeles, ca, 90057": [
-    34.0659047,
-    -118.2709077
-  ],
-  "750 north alameda street, los angeles, ca, los angeles, ca, 90012": [
-    34.0558851,
-    -118.2374432
-  ],
-  "1231 n. spring street, los angeles, ca, 90039": [
-    34.06985,
-    -118.236465
-  ],
-  "7412 fulton ave , north hollywood, ca, los angeles, ca, 91605": [
-    34.2047717,
-    -118.4224271
-  ],
-  "129 e 223rd street carson ca, los angeles, ca, 90745": [
-    33.8242844,
-    -118.2750167
-  ],
-  "222 e glenarm street  pasadena, ca 91106, los angeles, ca, 91106": [
-    34.1274655,
-    -118.1452655
-  ],
-  "250 e center street, los angeles, ca, 91767": [
-    34.061448,
-    -117.7469713
-  ],
-  "5600 rickenbacker road, bell, ca, los angeles, ca, 90201": [
-    33.9908781,
-    -118.1683167
-  ],
-  "po box 32861 long beach ca 90832, los angeles, ca, 90813": [
-    33.77005,
-    -118.193739
-  ],
-  "5939 hollywood blvd, los angeles, ca, 90028": [
-    34.100292,
-    -118.327759
-  ],
-  "961 s mariposa ave # 205, los angeles, ca, 90006": [
-    34.047825,
-    -118.304545
-  ],
-  "777 s alameda st, 2nd floor los angeles, ca 90021, los angeles, ca, 90021": [
-    34.044161,
-    -118.234436
-  ],
-  "244 s. san pedro street, los angeles, los angeles, ca, 90012": [
-    34.0473914,
-    -118.2419061
-  ],
-  "1000 n. alameda st., los angeles, ca, 90012": [
-    34.06485,
-    -118.2233
-  ],
-  "1734 east 41st street, los angeles ca 90058, los angeles, ca, 90058": [
-    34.0079733,
-    -118.2422964
-  ],
-  "65 pine ave., #898, long beach, ca 90802, los angeles, ca, 90802": [
-    33.7673865,
-    -118.1924793
-  ],
-  "515 s figueroa street, los angeles, ca, 90071": [
-    34.0520935,
-    -118.2580793
-  ],
-  "11031 camarillo st, los angeles, ca, 91602": [
-    34.237842,
-    -118.445123
-  ],
-  "15453 rayen street, los angeles, ca, 91343": [
-    34.2319908,
-    -118.4688207
-  ],
-  "10896 lehigh ave. pacoima, ca 91331, los angeles, ca, 91331": [
-    34.2678329,
-    -118.4151902
-  ],
-  "4103 w adams blvd, los angeles, ca, 90018": [
-    34.0326809,
-    -118.3297303
-  ],
-  "153 glendale blvd., los angeles, ca, los angeles, ca, 90007": [
-    34.0623324,
-    -118.2595889
-  ],
-  "922 vine street, los angeles, ca, 90038": [
-    34.100292,
-    -118.327759
-  ],
-  "905 e. 8th st., los angeles, ca 90021, los angeles, ca, 90021": [
-    34.0312699,
-    -118.2419335
-  ],
-  "675 s. carondelet street los angeles, ca, los angeles, ca, 90057": [
-    34.0593166,
-    -118.2811713
-  ],
-  "104 e avenue k-4, los angeles, ca, 93535": [
-    34.6707619,
-    -118.1296078
-  ],
-  "601 s. san pedro st., los angeles ca, los angeles, ca, 90014": [
-    34.0422635,
-    -118.2459874
-  ],
-  "825 e orange grove blvd, pasadena, ca, los angeles, ca, 91104": [
-    34.1579077,
-    -118.1334329
-  ],
-  "1150 s olive st, los angeles, ca 90015, los angeles, ca, 90015": [
-    34.0393986,
-    -118.261097
-  ],
-  "700 w main st alhambra, ca, los angeles, ca, 91801": [
-    34.0917776,
-    -118.1338951
-  ],
-  "3551 trousdale parkway, los angeles, ca, los angeles, ca, 90089": [
-    34.0208709,
-    -118.2855497
-  ],
-  "1600 campus road, los angeles, los angeles, ca, 90041": [
-    34.127195,
-    -118.2099203
-  ],
-  "1710 22nd street, santa monica, los angeles, ca, 90404": [
-    34.0252623,
-    -118.4728412
-  ],
-  "1969 s vermont ave, los angeles, ca, 90007": [
-    34.0386855,
-    -118.2916553
-  ],
-  "3100 venice blvd, los angeles, 90019 ca, los angeles, ca, 90019": [
-    34.043487,
-    -118.317859
-  ],
-  "5142 tujunga ave, north hollywood, los angeles, ca, 91601": [
-    34.1638153,
-    -118.3788763
-  ],
-  "2000 avenue of the stars, los angeles, ca 90067, los angeles, ca, 90067": [
-    34.0583138,
-    -118.4146758
-  ],
-  "36355 russell blvd, davis, ca 95616, los angeles, ca, 95616": null,
-  "510 south vermont ave,  los angeles, los angeles, ca, 90020": [
-    34.0651468,
-    -118.2915495
-  ],
-  "500 west temple street,  los angeles, ca, los angeles, ca, 90012": [
-    34.057276,
-    -118.245558
-  ],
-  "4301 west third street street los angeles, ca 90020, los angeles, ca, 90020": null,
-  "777 south alameda st,  los angeles, ca 90021, los angeles, ca, 90021": [
-    34.0336253,
-    -118.2413866
-  ],
-  "10896 lehigh ave. pacoima, ca, los angeles, ca, 91331": [
-    34.2678329,
-    -118.4151902
-  ],
-  "11031 camarillo st, north hollywood, ca 91602, los angeles, ca, 91602": [
-    34.1577268,
-    -118.3715649
-  ],
-  "13181 crossroads parkway north, city of industry, ca 91746, los angeles, ca, 91746": [
-    34.0296689,
-    -118.0147988
-  ],
-  "4301 west 3rd street los angeles, ca 90020, los angeles, ca, 90020": [
-    34.06905,
-    -118.308047
-  ],
-  "750 n alameda st, los angeles, ca, 90012": [
-    34.06485,
-    -118.2233
-  ],
-  "12820 crossroads pkwy south, city of industry, los angeles, ca, 91746": [
-    34.0289706,
-    -118.0255985
-  ],
-  "6636 selma avenue, los angeles ca, los angeles, ca, 90028": [
-    34.099617,
-    -118.334871
-  ],
-  "153 glendale blvd, los angeles, ca, 90026": [
-    34.0634381,
-    -118.2601764
-  ],
-  "675 s. carondelet st., los angeles, ca, 90057": [
-    34.0593166,
-    -118.2811713
-  ],
-  "box 951405 2231 murphy hall, los angeles, ca, 90095": [
-    34.068921,
-    -118.445245
-  ],
-  "1024 n. maclay ave. m-13 san fernando, ca 91340, los angeles, ca, 91340": [
-    34.28296,
-    -118.434558
-  ],
-  "13300 crossroads parkway north, los angeles, ca, 91746": [
-    34.0299355,
-    -118.0137179
-  ],
-  "711 w florence avenue, los angeles, ca, 90044": [
-    33.9747246,
-    -118.2861863
-  ],
-  "po box 338 rancho cucamonga, ca 91729, los angeles, ca, 91729": [
-    34.1064,
-    -117.5931
-  ],
-  "510 s vermont avenue, 11th floor. los angeles, ca, los angeles, ca, 90020": [
-    34.05758,
-    -118.2919
-  ],
-  "777 s alameda st, 2nd floor la ca 90021, los angeles, ca, 90021": [
-    34.044161,
-    -118.234436
-  ],
-  "244 s. san pedro street, los angeles, ca, 90012": [
-    34.0473915,
-    -118.2419061
-  ],
-  "2800 stanford ave, los angeles, ca, 90011": [
-    34.0192692,
-    -118.2602039
-  ],
-  "701 e. 28th street, , long beach, ca, los angeles, ca, 90806": [
-    33.8084754,
-    -118.1846035
-  ],
-  "1250 bellflower blvd, los angeles, ca, 90815": [
-    33.7874282,
-    -118.1144116
-  ],
-  "3070 santa fe ave, long beach, ca, los angeles, ca, 90810": [
-    33.8132627,
-    -118.2153509
-  ],
-  "10950 s central ave, los angeles, ca, 90059": [
-    33.9361241,
-    -118.2540934
-  ],
-  "4996 foothill rd, carpinteria, ca 93013, usa, los angeles, ca, 93013": null,
-  "750 chileno valley rd, petaluma, ca 94952, usa, los angeles, ca, 94952": null,
-  "13391 fargo ave, hanford, ca 93230, usa, los angeles, ca, 93230": null,
-  "18731 pine canyon rd, lake hughes, ca 93532, usa, los angeles, ca, 93532": null,
-  "890 oak ave, fillmore, ca 93015, usa, los angeles, ca, 93015": null,
-  "1311 w 35th pl, los angeles, ca 90007, usa, los angeles, ca, 90007": null,
-  "10279 ave 404, dinuba, ca 93618, usa, los angeles, ca, 93618": null,
-  "11342 sulphur mountain rd, ojai, ca 93023, usa, los angeles, ca, 93023": null,
-  "21661 carrolton rd, ripon, ca 95366, usa, los angeles, ca, 95366": null,
-  "3432 kraft ln, arvin, ca 93203, usa, los angeles, ca, 93203": null,
-  "2790 spring st, st helena, ca 94574, usa, los angeles, ca, 94574": null,
-  "33920 simpson rd, winchester, ca 92596, usa, los angeles, ca, 92596": null,
-  "182 torrey rd, fillmore, ca 93015, usa, los angeles, ca, 93015": null,
-  "1882 campus rd, los angeles, ca 90041, usa, los angeles, ca, 90041": null,
-  "4001 forbidden fruit ln, lompoc, ca 93436, usa, los angeles, ca, 93436": null,
-  "6701 casitas pass rd, carpinteria, ca 93013, usa, los angeles, ca, 93013": null,
-  "4019 clayton ave w, los angeles, ca 90027, usa, los angeles, ca, 90027": null,
-  "1315 n belmont rd, exeter, ca 93221, usa, los angeles, ca, 93221": null,
-  "23325 e south ave, reedley, ca 93654, usa, los angeles, ca, 93654": null,
-  "1133 n fairview ave, goleta, ca 93117, usa, los angeles, ca, 93117": null,
-  "5777 e vineyard ave, oxnard, ca 93036, usa, los angeles, ca, 93036": null,
-  "889 guadalupe rd, arroyo grande, ca 93420, usa, los angeles, ca, 93420": null,
-  "9856 everest st, downey, ca 90242, usa, los angeles, ca, 90242": null,
-  "1613 penny way, oxnard, ca 93030, usa, los angeles, ca, 93030": null,
-  "41272 de luz rd, fallbrook, ca 92028, usa, los angeles, ca, 92028": null,
-  "310 spruce dr, santa maria, ca 93454, usa, los angeles, ca, 93454": null,
-  "912 kingston dr, santa maria, ca 93458, usa, los angeles, ca, 93458": null,
-  "1834 ca-154, santa ynez, ca 93460, usa, los angeles, ca, 93460": null,
-  "41841 rd 142, orosi, ca 93647, usa, los angeles, ca, 93647": null,
-  "3255 los osos valley rd, los osos, ca 93402, usa, los angeles, ca, 93402": null,
-  "1621 pasadena ave, fillmore, ca 93015, usa, los angeles, ca, 93015": null,
-  "555 w 152nd st, gardena, ca 90248, usa, los angeles, ca, 90248": null,
-  "10863 fremont st, yucaipa, ca 92399, usa, los angeles, ca, 92399": null,
+  "1000 n. alameda st., los angeles, ca, 90012": [34.06485,-118.2233],
+  "1012 w ventura blvd, camarillo, ca 93010, los angeles, ca, 93010": [34.2168883,-119.0791278],
   "1012 w ventura blvd, camarillo, ca 93010, usa, los angeles, ca, 93010": null,
-  "broadway pl, escondido, ca 92025, usa, los angeles, ca, 92025": null,
-  "22447 buena vista blvd, arvin, ca 93203, usa, los angeles, ca, 93203": null,
-  "1569 helen dr, los angeles, ca 90063, usa, los angeles, ca, 90063": null,
-  "40822 vía ranchitos, fallbrook, ca 92028, usa, los angeles, ca, 92028": null,
-  "11515 w pico blvd, los angeles, ca 90064, usa, los angeles, ca, 90064": null,
-  "7337 gobernador canyon rd, carpinteria, ca 93013, usa, los angeles, ca, 93013": null,
-  "8555 rocky canyon rd, atascadero, ca 93422, usa, los angeles, ca, 93422": null,
-  "2071 statham blvd, oxnard, ca 93033, usa, los angeles, ca, 93033": null,
-  "7250 domingos rd, lompoc, ca 93436, usa, los angeles, ca, 93436": null,
-  "2745 grand ave, fillmore, ca 93015, usa, los angeles, ca, 93015": null,
-  "1961 foothill rd, cuyama, ca 93254, usa, los angeles, ca, 93254": null,
-  "1830 astoria pl, oxnard, ca 93030, usa, los angeles, ca, 93030": null,
-  "2470 vista del monte dr, acton, ca 93510, usa, los angeles, ca, 93510": null,
-  "4457 santa rosa rd, lompoc, ca 93436, usa, los angeles, ca, 93436": null,
-  "1358 deer canyon rd, arroyo grande, ca 93420, usa, los angeles, ca, 93420": null,
-  "3260 n greenwood ave, sanger, ca 93657, usa, los angeles, ca, 93657": null,
-  "2158 buena creek rd, vista, ca 92084, usa, los angeles, ca, 92084": null,
-  "525 guadalupe rd, arroyo grande, ca 93420, usa, los angeles, ca, 93420": null,
-  "24626 pala ln, apple valley, ca 92307, usa, los angeles, ca, 92307": null,
-  "19247 highline rd, tehachapi, ca 93561, usa, los angeles, ca, 93561": null,
-  "42204 rd 52, reedley, ca 93654, usa, los angeles, ca, 93654": null,
-  "98300 70th ave, mecca, ca 92254, usa, los angeles, ca, 92254": null,
-  "1834 w jefferson blvd, los angeles, ca 90018, usa, los angeles, ca, 90018": null,
-  "9643 santa rosa rd, camarillo, ca 93012, usa, los angeles, ca, 93012": null,
-  "9941 la docena ln, pico rivera, ca 90660, usa, los angeles, ca, 90660": null,
-  "37733 rd 76, dinuba, ca 93618, usa, los angeles, ca, 93618": null,
-  "4996 foothill rd, carpinteria, ca 93013, los angeles, ca, 93013": [
-    34.4084905,
-    -119.5149485
-  ],
-  "750 chileno valley rd, petaluma, ca 94952, los angeles, ca, 94952": null,
-  "13391 fargo ave, hanford, ca 93230, los angeles, ca, 93230": [
-    36.3572191,
-    -119.6543189
-  ],
-  "18731 pine canyon rd, lake hughes, ca 93532, los angeles, ca, 93532": [
-    34.6826032,
-    -118.4615897
-  ],
-  "890 oak ave, fillmore, ca 93015, los angeles, ca, 93015": null,
-  "1311 w 35th pl, los angeles, ca 90007, los angeles, ca, 90007": [
-    34.0237617,
-    -118.2976377
-  ],
+  "1024 n. maclay ave. m-13 san fernando, ca 91340, los angeles, ca, 91340": [34.28296,-118.434558],
   "10279 ave 404, dinuba, ca 93618, los angeles, ca, 93618": null,
+  "10279 ave 404, dinuba, ca 93618, usa, los angeles, ca, 93618": null,
+  "104 e avenue k-4, los angeles, ca, 93535": [34.6707619,-118.1296078],
+  "10863 fremont st, yucaipa, ca 92399, los angeles, ca, 92399": [34.0562247,-117.0256859],
+  "10863 fremont st, yucaipa, ca 92399, usa, los angeles, ca, 92399": null,
+  "10896 lehigh ave. pacoima, ca 91331, los angeles, ca, 91331": [34.2678329,-118.4151902],
+  "10896 lehigh ave. pacoima, ca, los angeles, ca, 91331": [34.2678329,-118.4151902],
+  "10950 s central ave, los angeles, ca, 90059": [33.9361241,-118.2540934],
+  "11031 camarillo st, los angeles, ca, 91602": [34.237842,-118.445123],
+  "11031 camarillo st, north hollywood, ca 91602, los angeles, ca, 91602": [34.1577268,-118.3715649],
+  "11243 glenoaks blvd., los angeles, ca, 90038": [34.274572,-118.4127556],
+  "1133 n fairview ave, goleta, ca 93117, los angeles, ca, 93117": [34.4585706,-119.8308988],
+  "1133 n fairview ave, goleta, ca 93117, usa, los angeles, ca, 93117": null,
   "11342 sulphur mountain rd, ojai, ca 93023, los angeles, ca, 93023": null,
-  "21661 carrolton rd, ripon, ca 95366, los angeles, ca, 95366": null,
-  "3432 kraft ln, arvin, ca 93203, los angeles, ca, 93203": null,
-  "2790 spring st, st helena, ca 94574, los angeles, ca, 94574": [
-    38.4907123,
-    -122.4787067
-  ],
-  "33920 simpson rd, winchester, ca 92596, los angeles, ca, 92596": [
-    33.7073889,
-    -117.069027
-  ],
-  "182 torrey rd, fillmore, ca 93015, los angeles, ca, 93015": null,
-  "1882 campus rd, los angeles, ca 90041, los angeles, ca, 90041": [
-    34.1304203,
-    -118.2092401
-  ],
-  "4001 forbidden fruit ln, lompoc, ca 93436, los angeles, ca, 93436": null,
-  "6701 casitas pass rd, carpinteria, ca 93013, los angeles, ca, 93013": [
-    34.394351,
-    -119.479138
-  ],
-  "4019 clayton ave w, los angeles, ca 90027, los angeles, ca, 90027": null,
-  "1315 n belmont rd, exeter, ca 93221, los angeles, ca, 93221": [
-    36.2835661,
-    -119.1540164
-  ],
-  "23325 e south ave, reedley, ca 93654, los angeles, ca, 93654": [
-    36.6186536,
-    -119.4398574
-  ],
-  "1133 n fairview ave, goleta, ca 93117, los angeles, ca, 93117": [
-    34.4585706,
-    -119.8308988
-  ],
-  "5777 e vineyard ave, oxnard, ca 93036, los angeles, ca, 93036": [
-    34.2266761,
-    -119.1770297
-  ],
-  "889 guadalupe rd, arroyo grande, ca 93420, los angeles, ca, 93420": null,
-  "9856 everest st, downey, ca 90242, los angeles, ca, 90242": [
-    33.9194712,
-    -118.117339
-  ],
-  "1613 penny way, oxnard, ca 93030, los angeles, ca, 93030": [
-    34.2135481,
-    -119.1961514
-  ],
-  "41272 de luz rd, fallbrook, ca 92028, los angeles, ca, 92028": [
-    33.463477,
-    -117.322654
-  ],
-  "310 spruce dr, santa maria, ca 93454, los angeles, ca, 93454": [
-    34.9552549,
-    -120.4049488
-  ],
-  "912 kingston dr, santa maria, ca 93458, los angeles, ca, 93458": [
-    34.9720355,
-    -120.4462269
-  ],
-  "1834 ca-154, santa ynez, ca 93460, los angeles, ca, 93460": [
-    34.6268813,
-    -120.074571
-  ],
-  "41841 rd 142, orosi, ca 93647, los angeles, ca, 93647": null,
-  "3255 los osos valley rd, los osos, ca 93402, los angeles, ca, 93402": [
-    35.2987998,
-    -120.7878647
-  ],
-  "1621 pasadena ave, fillmore, ca 93015, los angeles, ca, 93015": null,
-  "555 w 152nd st, gardena, ca 90248, los angeles, ca, 90248": [
-    33.8937006,
-    -118.3029743
-  ],
-  "10863 fremont st, yucaipa, ca 92399, los angeles, ca, 92399": [
-    34.0562247,
-    -117.0256859
-  ],
-  "1012 w ventura blvd, camarillo, ca 93010, los angeles, ca, 93010": [
-    34.2168883,
-    -119.0791278
-  ],
-  "broadway pl, escondido, ca 92025, los angeles, ca, 92025": [
-    33.1096483,
-    -117.0739086
-  ],
-  "22447 buena vista blvd, arvin, ca 93203, los angeles, ca, 93203": null,
-  "1569 helen dr, los angeles, ca 90063, los angeles, ca, 90063": [
-    34.0589652,
-    -118.1717415
-  ],
-  "40822 vía ranchitos, fallbrook, ca 92028, los angeles, ca, 92028": [
-    33.4181455,
-    -117.2277809
-  ],
-  "11515 w pico blvd, los angeles, ca 90064, los angeles, ca, 90064": [
-    34.0337133,
-    -118.4419199
-  ],
-  "7337 gobernador canyon rd, carpinteria, ca 93013, los angeles, ca, 93013": [
-    34.398823,
-    -119.457327
-  ],
-  "8555 rocky canyon rd, atascadero, ca 93422, los angeles, ca, 93422": null,
-  "2071 statham blvd, oxnard, ca 93033, los angeles, ca, 93033": [
-    34.1799057,
-    -119.1661519
-  ],
-  "7250 domingos rd, lompoc, ca 93436, los angeles, ca, 93436": null,
-  "2745 grand ave, fillmore, ca 93015, los angeles, ca, 93015": [
-    34.4141814,
-    -118.933647
-  ],
-  "1961 foothill rd, cuyama, ca 93254, los angeles, ca, 93254": null,
-  "1830 astoria pl, oxnard, ca 93030, los angeles, ca, 93030": [
-    34.2181677,
-    -119.1992762
-  ],
-  "2470 vista del monte dr, acton, ca 93510, los angeles, ca, 93510": null,
-  "4457 santa rosa rd, lompoc, ca 93436, los angeles, ca, 93436": [
-    34.6077745,
-    -120.352299
-  ],
+  "11342 sulphur mountain rd, ojai, ca 93023, usa, los angeles, ca, 93023": null,
+  "1150 s olive st, los angeles, ca 90015, los angeles, ca, 90015": [34.0393986,-118.261097],
+  "11515 w pico blvd, los angeles, ca 90064, los angeles, ca, 90064": [34.0337133,-118.4419199],
+  "11515 w pico blvd, los angeles, ca 90064, usa, los angeles, ca, 90064": null,
+  "1231 n. spring street, los angeles, ca, 90039": [34.06985,-118.236465],
+  "1250 bellflower blvd, los angeles, ca, 90815": [33.7874282,-118.1144116],
+  "12820 crossroads pkwy south, city of industry, los angeles, ca, 91746": [34.0289706,-118.0255985],
+  "12860 crossroads prkwy. south, los angeles, ca, 91746": [34.028243,-118.024345],
+  "129 e 223rd street carson ca, los angeles, ca, 90745": [33.8242844,-118.2750167],
+  "1311 w 35th pl, los angeles, ca 90007, los angeles, ca, 90007": [34.0237617,-118.2976377],
+  "1311 w 35th pl, los angeles, ca 90007, usa, los angeles, ca, 90007": null,
+  "1315 n belmont rd, exeter, ca 93221, los angeles, ca, 93221": [36.2835661,-119.1540164],
+  "1315 n belmont rd, exeter, ca 93221, usa, los angeles, ca, 93221": null,
+  "13181 crossroads parkway north, city of industry, ca 91746, los angeles, ca, 91746": [34.0296689,-118.0147988],
+  "13300 crossroads parkway north, los angeles, ca, 91746": [34.0299355,-118.0137179],
+  "13391 fargo ave, hanford, ca 93230, los angeles, ca, 93230": [36.3572191,-119.6543189],
+  "13391 fargo ave, hanford, ca 93230, usa, los angeles, ca, 93230": null,
   "1358 deer canyon rd, arroyo grande, ca 93420, los angeles, ca, 93420": null,
-  "3260 n greenwood ave, sanger, ca 93657, los angeles, ca, 93657": null,
-  "2158 buena creek rd, vista, ca 92084, los angeles, ca, 92084": [
-    33.180504,
-    -117.204175
-  ],
-  "525 guadalupe rd, arroyo grande, ca 93420, los angeles, ca, 93420": null,
+  "1358 deer canyon rd, arroyo grande, ca 93420, usa, los angeles, ca, 93420": null,
+  "143 s alvarado st los angeles, los angeles, ca, 90057": [34.0659047,-118.2709077],
+  "1517 ashland ave, los angeles, ca, 90405": [34.025681,-118.478065],
+  "153 glendale blvd, los angeles, ca, 90026": [34.0634381,-118.2601764],
+  "153 glendale blvd., los angeles, ca, los angeles, ca, 90007": [34.0623324,-118.2595889],
+  "15453 rayen street, los angeles, ca, 91343": [34.2319908,-118.4688207],
+  "1569 helen dr, los angeles, ca 90063, los angeles, ca, 90063": [34.0589652,-118.1717415],
+  "1569 helen dr, los angeles, ca 90063, usa, los angeles, ca, 90063": null,
+  "1600 campus road, los angeles, los angeles, ca, 90041": [34.127195,-118.2099203],
+  "1613 penny way, oxnard, ca 93030, los angeles, ca, 93030": [34.2135481,-119.1961514],
+  "1613 penny way, oxnard, ca 93030, usa, los angeles, ca, 93030": null,
+  "1621 pasadena ave, fillmore, ca 93015, los angeles, ca, 93015": null,
+  "1621 pasadena ave, fillmore, ca 93015, usa, los angeles, ca, 93015": null,
+  "1710 22nd street, santa monica, los angeles, ca, 90404": [34.0252623,-118.4728412],
+  "1734 east 41st street, los angeles ca 90058, los angeles, ca, 90058": [34.0079733,-118.2422964],
+  "182 torrey rd, fillmore, ca 93015, los angeles, ca, 93015": null,
+  "182 torrey rd, fillmore, ca 93015, usa, los angeles, ca, 93015": null,
+  "1830 astoria pl, oxnard, ca 93030, los angeles, ca, 93030": [34.2181677,-119.1992762],
+  "1830 astoria pl, oxnard, ca 93030, usa, los angeles, ca, 93030": null,
+  "1834 ca-154, santa ynez, ca 93460, los angeles, ca, 93460": [34.6268813,-120.074571],
+  "1834 ca-154, santa ynez, ca 93460, usa, los angeles, ca, 93460": null,
+  "1834 w jefferson blvd, los angeles, ca 90018, los angeles, ca, 90018": [34.0254696,-118.3099776],
+  "1834 w jefferson blvd, los angeles, ca 90018, usa, los angeles, ca, 90018": null,
+  "1847 w 43rd street, los angeles, ca, 90062": [34.0055722,-118.3125053],
+  "18731 pine canyon rd, lake hughes, ca 93532, los angeles, ca, 93532": [34.6826032,-118.4615897],
+  "18731 pine canyon rd, lake hughes, ca 93532, usa, los angeles, ca, 93532": null,
+  "1882 campus rd, los angeles, ca 90041, los angeles, ca, 90041": [34.1304203,-118.2092401],
+  "1882 campus rd, los angeles, ca 90041, usa, los angeles, ca, 90041": null,
+  "1919 e el segundo blvd compton ca 90222, los angeles, ca, 90222": [33.916872,-118.220062],
+  "19247 highline rd, tehachapi, ca 93561, los angeles, ca, 93561": [35.1090999,-118.5884843],
+  "19247 highline rd, tehachapi, ca 93561, usa, los angeles, ca, 93561": null,
+  "1961 foothill rd, cuyama, ca 93254, los angeles, ca, 93254": null,
+  "1961 foothill rd, cuyama, ca 93254, usa, los angeles, ca, 93254": null,
+  "1969 s vermont ave, los angeles, ca, 90007": [34.0386855,-118.2916553],
+  "2000 ave of the stars #1000s, los angeles, ca 90067, los angeles, ca, 90067": [34.05758,-118.416932],
+  "2000 avenue of the stars, los angeles, ca 90067, los angeles, ca, 90067": [34.0583138,-118.4146758],
+  "2071 statham blvd, oxnard, ca 93033, los angeles, ca, 93033": [34.1799057,-119.1661519],
+  "2071 statham blvd, oxnard, ca 93033, usa, los angeles, ca, 93033": null,
+  "2158 buena creek rd, vista, ca 92084, los angeles, ca, 92084": [33.180504,-117.204175],
+  "2158 buena creek rd, vista, ca 92084, usa, los angeles, ca, 92084": null,
+  "21661 carrolton rd, ripon, ca 95366, los angeles, ca, 95366": null,
+  "21661 carrolton rd, ripon, ca 95366, usa, los angeles, ca, 95366": null,
+  "222 e glenarm street  pasadena, ca 91106, los angeles, ca, 91106": [34.1274655,-118.1452655],
+  "22447 buena vista blvd, arvin, ca 93203, los angeles, ca, 93203": null,
+  "22447 buena vista blvd, arvin, ca 93203, usa, los angeles, ca, 93203": null,
+  "23325 e south ave, reedley, ca 93654, los angeles, ca, 93654": [36.6186536,-119.4398574],
+  "23325 e south ave, reedley, ca 93654, usa, los angeles, ca, 93654": null,
+  "244 s. san pedro street, los angeles, ca, 90012": [34.0473915,-118.2419061],
+  "244 s. san pedro street, los angeles, los angeles, ca, 90012": [34.0473914,-118.2419061],
   "24626 pala ln, apple valley, ca 92307, los angeles, ca, 92307": null,
-  "19247 highline rd, tehachapi, ca 93561, los angeles, ca, 93561": [
-    35.1090999,
-    -118.5884843
-  ],
+  "24626 pala ln, apple valley, ca 92307, usa, los angeles, ca, 92307": null,
+  "2470 vista del monte dr, acton, ca 93510, los angeles, ca, 93510": null,
+  "2470 vista del monte dr, acton, ca 93510, usa, los angeles, ca, 93510": null,
+  "250 e center street, los angeles, ca, 91767": [34.061448,-117.7469713],
+  "2533 w 3rd st los angeles, ca, los angeles, ca, 90057": [34.0653322,-118.2771994],
+  "2745 grand ave, fillmore, ca 93015, los angeles, ca, 93015": [34.4141814,-118.933647],
+  "2745 grand ave, fillmore, ca 93015, usa, los angeles, ca, 93015": null,
+  "2790 spring st, st helena, ca 94574, los angeles, ca, 94574": [38.4907123,-122.4787067],
+  "2790 spring st, st helena, ca 94574, usa, los angeles, ca, 94574": null,
+  "2800 stanford ave, los angeles, ca, 90011": [34.0192692,-118.2602039],
+  "2851 west 120th st, , hawthorne, ca, los angeles, ca, 90250": [33.9244689,-118.323944],
+  "3070 santa fe ave, long beach, ca, los angeles, ca, 90810": [33.8132627,-118.2153509],
+  "310 spruce dr, santa maria, ca 93454, los angeles, ca, 93454": [34.9552549,-120.4049488],
+  "310 spruce dr, santa maria, ca 93454, usa, los angeles, ca, 93454": null,
+  "3100 venice blvd, los angeles, 90019 ca, los angeles, ca, 90019": [34.043487,-118.317859],
+  "3255 los osos valley rd, los osos, ca 93402, los angeles, ca, 93402": [35.2987998,-120.7878647],
+  "3255 los osos valley rd, los osos, ca 93402, usa, los angeles, ca, 93402": null,
+  "3260 n greenwood ave, sanger, ca 93657, los angeles, ca, 93657": null,
+  "3260 n greenwood ave, sanger, ca 93657, usa, los angeles, ca, 93657": null,
+  "32712 el sastre rd acton ca 93510, los angeles, ca, 93510": null,
+  "33920 simpson rd, winchester, ca 92596, los angeles, ca, 92596": [33.7073889,-117.069027],
+  "33920 simpson rd, winchester, ca 92596, usa, los angeles, ca, 92596": null,
+  "3432 kraft ln, arvin, ca 93203, los angeles, ca, 93203": null,
+  "3432 kraft ln, arvin, ca 93203, usa, los angeles, ca, 93203": null,
+  "3530 wilshire blvd, 8th floor, los angeles, ca 90010, los angeles, ca, 90010": [34.061028,-118.3012],
+  "3530 wilshire blvd., . los angeles, ca, los angeles, ca, 90010": [34.0616527,-118.3017696],
+  "3551 trousdale parkway, los angeles, ca, los angeles, ca, 90089": [34.0208709,-118.2855497],
+  "36355 russell blvd, davis, ca 95616, los angeles, ca, 95616": null,
+  "36355 russell blvd, davis, ca, los angeles, ca, 95616": [38.539398,-121.742897],
+  "37733 rd 76, dinuba, ca 93618, los angeles, ca, 93618": [36.5695581,-119.4040608],
+  "37733 rd 76, dinuba, ca 93618, usa, los angeles, ca, 93618": null,
+  "4001 forbidden fruit ln, lompoc, ca 93436, los angeles, ca, 93436": null,
+  "4001 forbidden fruit ln, lompoc, ca 93436, usa, los angeles, ca, 93436": null,
+  "4019 clayton ave w, los angeles, ca 90027, los angeles, ca, 90027": null,
+  "4019 clayton ave w, los angeles, ca 90027, usa, los angeles, ca, 90027": null,
+  "40822 vía ranchitos, fallbrook, ca 92028, los angeles, ca, 92028": [33.4181455,-117.2277809],
+  "40822 vía ranchitos, fallbrook, ca 92028, usa, los angeles, ca, 92028": null,
+  "4103 w adams blvd, los angeles, ca, 90018": [34.0326809,-118.3297303],
+  "41272 de luz rd, fallbrook, ca 92028, los angeles, ca, 92028": [33.463477,-117.322654],
+  "41272 de luz rd, fallbrook, ca 92028, usa, los angeles, ca, 92028": null,
+  "41841 rd 142, orosi, ca 93647, los angeles, ca, 93647": null,
+  "41841 rd 142, orosi, ca 93647, usa, los angeles, ca, 93647": null,
   "42204 rd 52, reedley, ca 93654, los angeles, ca, 93654": null,
+  "42204 rd 52, reedley, ca 93654, usa, los angeles, ca, 93654": null,
+  "4301 w 3rd street los angeles, ca 90020, los angeles, ca, 90020": [34.06905,-118.308047],
+  "4301 west 3rd street los angeles, ca 90020, los angeles, ca, 90020": [34.06905,-118.308047],
+  "4301 west third street street los angeles, ca 90020, los angeles, ca, 90020": null,
+  "4457 santa rosa rd, lompoc, ca 93436, los angeles, ca, 93436": [34.6077745,-120.352299],
+  "4457 santa rosa rd, lompoc, ca 93436, usa, los angeles, ca, 93436": null,
+  "490 43rd st, unit 332, oakland, ca 94609, los angeles, ca, 94609": null,
+  "4921 n cedar ave, los angeles, ca, el monte, ca 91732": [34.0815179,-118.0250151],
+  "4996 foothill rd, carpinteria, ca 93013, los angeles, ca, 93013": [34.4084905,-119.5149485],
+  "4996 foothill rd, carpinteria, ca 93013, usa, los angeles, ca, 93013": null,
+  "500 w. temple street room 383 los angeles, ca, los angeles, ca, 90012": [34.052895,-118.243759],
+  "500 west temple street,  los angeles, ca, los angeles, ca, 90012": [34.057276,-118.245558],
+  "510 s vermont avenue, 11th floor. los angeles, ca, los angeles, ca, 90020": [34.05758,-118.2919],
+  "510 s. vermont ave, 11th floor, los angeles, los angeles, ca, 90020": [34.05758,-118.2919],
+  "510 s. vermont ave., los angeles, ca 90020, los angeles, ca, 90020": [34.0651468,-118.2915495],
+  "510 south vermont ave,  los angeles, los angeles, ca, 90020": [34.0651468,-118.2915495],
+  "5142 tujunga ave, north hollywood, los angeles, ca, 91601": [34.1638153,-118.3788763],
+  "515 s figueroa street, los angeles, ca, 90071": [34.0520935,-118.2580793],
+  "517 w. glenoaks blvd., los angeles, ca, 91202": [34.1593124,-118.2646828],
+  "525 guadalupe rd, arroyo grande, ca 93420, los angeles, ca, 93420": null,
+  "525 guadalupe rd, arroyo grande, ca 93420, usa, los angeles, ca, 93420": null,
+  "555 w 152nd st, gardena, ca 90248, los angeles, ca, 90248": [33.8937006,-118.3029743],
+  "555 w 152nd st, gardena, ca 90248, usa, los angeles, ca, 90248": null,
+  "5600 rickenbacker road, bell, ca, los angeles, ca, 90201": [33.9908781,-118.1683167],
+  "5777 e vineyard ave, oxnard, ca 93036, los angeles, ca, 93036": [34.2266761,-119.1770297],
+  "5777 e vineyard ave, oxnard, ca 93036, usa, los angeles, ca, 93036": null,
+  "5939 hollywood blvd, los angeles, ca, 90028": [34.100292,-118.327759],
+  "601 s. san pedro st., los angeles ca, los angeles, ca, 90014": [34.0422635,-118.2459874],
+  "6141 barrows drive, los angeles, ca, 90048": [34.0603082,-118.3641137],
+  "65 pine ave., #898, long beach, ca 90802, los angeles, ca, 90802": [33.7673865,-118.1924793],
+  "6636 selma avenue, los angeles ca, los angeles, ca, 90028": [34.099617,-118.334871],
+  "6701 casitas pass rd, carpinteria, ca 93013, los angeles, ca, 93013": [34.394351,-119.479138],
+  "6701 casitas pass rd, carpinteria, ca 93013, usa, los angeles, ca, 93013": null,
+  "675 s. carondelet st., los angeles, ca, 90057": [34.0593166,-118.2811713],
+  "675 s. carondelet street los angeles, ca, los angeles, ca, 90057": [34.0593166,-118.2811713],
+  "700 w main st alhambra, ca, los angeles, ca, 91801": [34.0917776,-118.1338951],
+  "701 e. 28th street, , long beach, ca, los angeles, ca, 90806": [33.8084754,-118.1846035],
+  "701 hoefner ave los angeles ca 90022, los angeles, ca, 90022": [34.0210673,-118.1498999],
+  "711 w florence avenue, los angeles, ca, 90044": [33.9747246,-118.2861863],
+  "715 e mission rd, los angeles, ca, 91776": [34.0917097,-118.0926814],
+  "717 w. temple st., los angeles, ca, 90012": [34.05758,-118.2523],
+  "7250 domingos rd, lompoc, ca 93436, los angeles, ca, 93436": null,
+  "7250 domingos rd, lompoc, ca 93436, usa, los angeles, ca, 93436": null,
+  "7337 gobernador canyon rd, carpinteria, ca 93013, los angeles, ca, 93013": [34.398823,-119.457327],
+  "7337 gobernador canyon rd, carpinteria, ca 93013, usa, los angeles, ca, 93013": null,
+  "7412 fulton ave , north hollywood, ca, los angeles, ca, 91605": [34.2047717,-118.4224271],
+  "750 chileno valley rd, petaluma, ca 94952, los angeles, ca, 94952": null,
+  "750 chileno valley rd, petaluma, ca 94952, usa, los angeles, ca, 94952": null,
+  "750 n alameda st, los angeles, ca, 90012": [34.06485,-118.2233],
+  "750 north alameda street, los angeles, ca, los angeles, ca, 90012": [34.0558851,-118.2374432],
+  "777 s alameda st, 2nd floor la ca 90021, los angeles, ca, 90021": [34.044161,-118.234436],
+  "777 s alameda st, 2nd floor los angeles, ca 90021, los angeles, ca, 90021": [34.044161,-118.234436],
+  "777 south alameda st,  los angeles, ca 90021, los angeles, ca, 90021": [34.0336253,-118.2413866],
+  "825 e orange grove blvd, pasadena, ca, los angeles, ca, 91104": [34.1579077,-118.1334329],
+  "840 echo park ave, los angeles, ca, 90026": [34.073635,-118.2603],
+  "8555 rocky canyon rd, atascadero, ca 93422, los angeles, ca, 93422": null,
+  "8555 rocky canyon rd, atascadero, ca 93422, usa, los angeles, ca, 93422": null,
+  "858 w jackman st., lancaster ca, los angeles, ca, 93534": [34.686682,-118.137425],
+  "889 guadalupe rd, arroyo grande, ca 93420, los angeles, ca, 93420": null,
+  "889 guadalupe rd, arroyo grande, ca 93420, usa, los angeles, ca, 93420": null,
+  "890 oak ave, fillmore, ca 93015, los angeles, ca, 93015": null,
+  "890 oak ave, fillmore, ca 93015, usa, los angeles, ca, 93015": null,
+  "905 e. 8th st., los angeles, ca 90021, los angeles, ca, 90021": [34.0312699,-118.2419335],
+  "912 kingston dr, santa maria, ca 93458, los angeles, ca, 93458": [34.9720355,-120.4462269],
+  "912 kingston dr, santa maria, ca 93458, usa, los angeles, ca, 93458": null,
+  "922 vine street, los angeles, ca, 90038": [34.100292,-118.327759],
+  "9415 culver blvd #368, los angeles, ca, 90232": [34.024047,-118.3940857],
+  "9595 wilshire blvd., los angeles, ca, 90212": [34.067321,-118.398273],
+  "961 s mariposa ave # 205, los angeles, ca, 90006": [34.047825,-118.304545],
+  "9643 santa rosa rd, camarillo, ca 93012, los angeles, ca, 93012": [34.2360077,-118.9686589],
+  "9643 santa rosa rd, camarillo, ca 93012, usa, los angeles, ca, 93012": null,
   "98300 70th ave, mecca, ca 92254, los angeles, ca, 92254": null,
-  "1834 w jefferson blvd, los angeles, ca 90018, los angeles, ca, 90018": [
-    34.0254696,
-    -118.3099776
-  ],
-  "9643 santa rosa rd, camarillo, ca 93012, los angeles, ca, 93012": [
-    34.2360077,
-    -118.9686589
-  ],
-  "9941 la docena ln, pico rivera, ca 90660, los angeles, ca, 90660": [
-    33.9589851,
-    -118.0895169
-  ],
-  "37733 rd 76, dinuba, ca 93618, los angeles, ca, 93618": [
-    36.5695581,
-    -119.4040608
-  ]
+  "98300 70th ave, mecca, ca 92254, usa, los angeles, ca, 92254": null,
+  "9856 everest st, downey, ca 90242, los angeles, ca, 90242": [33.9194712,-118.117339],
+  "9856 everest st, downey, ca 90242, usa, los angeles, ca, 90242": null,
+  "9941 la docena ln, pico rivera, ca 90660, los angeles, ca, 90660": [33.9589851,-118.0895169],
+  "9941 la docena ln, pico rivera, ca 90660, usa, los angeles, ca, 90660": null,
+  "alvarado and beverly, los angeles, ca, 90057": [34.06485,-118.278945],
+  "box 951405 2231 murphy hall, los angeles, ca, 90095": [34.068921,-118.445245],
+  "broadway pl, escondido, ca 92025, los angeles, ca, 92025": [33.1096483,-117.0739086],
+  "broadway pl, escondido, ca 92025, usa, los angeles, ca, 92025": null,
+  "po box 32861 long beach ca 90832, los angeles, ca, 90813": [33.77005,-118.193739],
+  "po box 338 rancho cucamonga, ca 91729, los angeles, ca, 91729": [34.1064,-117.5931],
+  "texas, los angeles, ca, 90277": [33.935798,-118.1350009]
 }

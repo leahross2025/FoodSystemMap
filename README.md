@@ -59,7 +59,7 @@ src/
   data/
     districts.json                  simplified district boundaries (same as public/districts.geojson)
     geocode-cache.json              address → [lat, lng], or null when not found (written by sync)
-    snapshot.json                   saved copy of the sheet, without contact names or comments (written by sync)
+    snapshot.json                   saved copy of the sheet, without contact names, emails or comments (written by sync)
   lib/
     sectors.js                      sector list, dot colors and legend order
     columns.js                      tolerant header matching
@@ -136,7 +136,7 @@ same page.
 `npm test` runs the `node:test` suites in `tests/`. They never fetch the live sheet; use
 `tests/fixtures/sheet.csv`, a copy of the sheet with names, emails and comments redacted.
 
-Organizations never carry contact names or survey comments, and the snapshot leaves those columns out. Don't
+Organizations never carry contact names or survey comments, and the snapshot also leaves out email addresses. Don't
 commit raw survey exports: they contain respondents' names and email addresses.
 
 Built with [Astro](https://astro.build) and [Leaflet](https://leafletjs.com).

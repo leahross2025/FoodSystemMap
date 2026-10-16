@@ -140,12 +140,13 @@ export function createGeocoder({ fetch = globalThis.fetch, sleep = wait } = {}) 
 }
 
 /**
- * The sheet as saved in src/data/snapshot.json. Contact names and comments are left out: the file is
- * committed to the repository and nothing on the site uses them.
+ * The sheet as saved in src/data/snapshot.json. Contact names, email addresses and comments are left
+ * out: the file is committed to a public repository. (Only the fallback copy loses emails; the live
+ * site still reads them from the sheet.)
  */
 export function toSnapshot(headers, rows, generatedAt) {
   const { map } = resolveColumns(headers);
-  const privateColumns = new Set([map.contactName, map.comments].filter(Boolean));
+  const privateColumns = new Set([map.contactName, map.email, map.comments].filter(Boolean));
   return {
     generatedAt,
     headers: headers.filter((header) => !privateColumns.has(header)),
