@@ -102,6 +102,6 @@ the Actions page says the workflow is disabled, click **Enable workflow**.
 ## Changing sector colors
 
 The colors and the legend order are in the file `src/lib/sectors.js`. On GitHub, open that file, click the
-pencil icon (Edit), change a color code such as `#2F855A` (any hex color works), and click **Commit changes**.
+pencil icon (Edit), change a color code such as `#009E73` (any hex color works), and click **Commit changes**.
 The website updates by itself within a few minutes. Adding or renaming a sector also means changing the sheet
 and the form, so ask a developer for that.
