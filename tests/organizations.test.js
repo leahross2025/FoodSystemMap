@@ -422,6 +422,15 @@ describe('report', () => {
     assertInvariants({ organizations, report });
   });
 
+  test('both numbers pasted into the lat cell: placed from the sheet, with a note', () => {
+    const { organizations, report } = build([{ name: 'Pasted', sector: 'Farm', lat: '34.40740, -118.94461' }]);
+    assert.deepEqual([organizations[0].coordinates, organizations[0].coordSource], [[34.4074, -118.94461], 'sheet']);
+    assert.deepEqual(report.coordinateIssues, [
+      { row: 2, name: 'Pasted', issue: 'Both numbers are in the lat column — the map uses them, so you can leave it' },
+    ]);
+    assert.deepEqual(report.missingLocation, []);
+  });
+
   test('missingColumns names expected columns the sheet lacks', () => {
     assert.deepEqual(buildDataset(['Organization Name', 'Sector', 'Latitude', 'Longitude'], []).report.missingColumns, ['address', 'website']);
     assert.deepEqual(build([]).report.missingColumns, []);

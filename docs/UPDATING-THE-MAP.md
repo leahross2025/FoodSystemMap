@@ -59,8 +59,10 @@ page so you can fix it.
    that is missing a location).
 2. Right-click the spot. The first line of the menu shows two numbers, like `34.05223, -118.24368`. Click them
    to copy them.
-3. In the sheet, paste the first number into **lat** and the second into **lng**. In Los Angeles, lat is about
-   34 and lng is about -118 (with the minus sign).
+3. In the sheet, paste them into the **lat** cell of that row. Both numbers in one cell is fine: the map uses
+   them, and the data check page notes that you can leave them that way. (Putting the first number in **lat**
+   and the second in **lng** works too.) In Los Angeles, lat is about 34 and lng is about -118 (with the minus
+   sign).
 
 Coordinates typed into the sheet always win over the automatic address lookup, so you can also use them to
 move a dot that is in the wrong place.
@@ -71,7 +73,8 @@ https://lacofsfoodsystemmap.lross.workers.dev/data-check shows how many rows the
 organizations are on the map, and what needs attention:
 
 - **Missing a location**: no lat/lng and no address the map could find. Each row says why.
-- **Coordinate problems**: a lat or lng value that doesn't look right.
+- **Coordinate problems**: a lat or lng value that doesn't look right, and what the map did with it. "Both
+  numbers are in the lat column" just means you pasted both into lat, which is fine.
 - **Duplicates**: the same name on more than one row. The map shows the organization once, using its most
   recent survey answer. Nothing to do unless they are different organizations.
 - **Possible duplicates**: names that look alike. If they are the same organization, give both rows exactly

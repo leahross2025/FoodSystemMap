@@ -44,6 +44,30 @@ test('parseManualCoords repairs swapped lat/lng and a missing minus sign, with a
   assert.match(positive.issue, /negative/);
 });
 
+test('parseManualCoords reads both numbers pasted into one cell, with a note that this is fine', () => {
+  const inLat = parseManualCoords('34.05223, -118.24368', '');
+  assert.deepEqual(inLat.coords, [34.05223, -118.24368]);
+  assert.equal(inLat.issue, 'Both numbers are in the lat column — the map uses them, so you can leave it');
+  const inLng = parseManualCoords(undefined, ' 34.05223,-118.24368 ');
+  assert.deepEqual(inLng.coords, [34.05223, -118.24368]);
+  assert.match(inLng.issue, /^Both numbers are in the lng column/);
+  assert.deepEqual(parseManualCoords('(34.4074 -118.9446)', '').coords, [34.4074, -118.9446]);
+});
+
+test('parseManualCoords checks a pasted pair like two separate cells', () => {
+  const swapped = parseManualCoords('-118.24368, 34.05223', '');
+  assert.deepEqual(swapped.coords, [34.05223, -118.24368]);
+  assert.match(swapped.issue, /swapped/);
+  const westward = parseManualCoords('34.05223° N, 118.24368° W', '');
+  assert.deepEqual(westward.coords, [34.05223, -118.24368]);
+  assert.match(westward.issue, /negative/);
+  assert.match(parseManualCoords('40.7128, -74.0060', '').issue, /outside California/);
+  // Anything other than exactly two numbers is still incomplete.
+  for (const cell of ['34.05223', '34°03\'08.0"N 118°14\'37.3"W', 'see Google Maps']) {
+    assert.match(parseManualCoords(cell, '').issue, /missing or not a number/, cell);
+  }
+});
+
 test('parseManualCoords rejects incomplete, non-numeric and far-away values', () => {
   for (const [lat, lng] of [['34.05', ''], ['', '-118.24'], ['abc', '-118.24']]) {
     const { coords, issue } = parseManualCoords(lat, lng);

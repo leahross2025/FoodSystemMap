@@ -141,8 +141,8 @@ const counts = Object.fromEntries(checks.map((c) => [c.id, c.count]));
 						<p>
 							{missing.length} {plural(missing.length, 'organization isn’t', 'organizations aren’t')} on the map yet. To place one: click
 							<b>Find on Google Maps</b>, right-click the organization’s pin, and click the numbers at the top of the menu to copy them
-							(for example <code>34.05223, -118.24368</code>). In that row of the spreadsheet, paste the first number into <b>lat</b> and the
-							second into <b>lng</b>.
+							(for example <code>34.05223, -118.24368</code>). In that row of the spreadsheet, paste them into the <b>lat</b> cell. Both
+							numbers in one cell is fine.
 						</p>
 						<table class="table">
 							<thead>
@@ -177,7 +177,10 @@ const counts = Object.fromEntries(checks.map((c) => [c.id, c.count]));
 					<p class="all-good">✓ All good</p>
 				) : (
 					<Fragment>
-						<p>The <b>lat</b> or <b>lng</b> cell in these rows needs a look. Latitude is around 34 and longitude around -118 in Los Angeles.</p>
+						<p>
+							The <b>lat</b> or <b>lng</b> cell in these rows is unusual. Each row says what the map made of it. Latitude is around 34 and
+							longitude around -118 in Los Angeles.
+						</p>
 						<table class="table">
 							<thead>
 								<tr><th scope="col">Row</th><th scope="col">Organization</th><th scope="col">Problem</th></tr>
@@ -335,7 +338,11 @@ const counts = Object.fromEntries(checks.map((c) => [c.id, c.count]));
 						</ul>
 					</li>
 					<li>If you have them, add the <b>Website</b> and the <b>Activity</b> (Kumu Service Category).</li>
-					<li>For farms and places outside Los Angeles, also fill in <b>lat</b> and <b>lng</b> (see “Missing a location” above).</li>
+					<li>
+						For farms and places outside Los Angeles, also add the map location: find the place on Google Maps, right-click it, and click
+						the numbers at the top of the menu to copy them (for example <code>34.05223, -118.24368</code>). Paste them into the <b>lat</b>
+						cell; both numbers in one cell is fine.
+					</li>
 					<li>Check this page again in about 10 minutes.</li>
 				</ol>
 				<p class="more">

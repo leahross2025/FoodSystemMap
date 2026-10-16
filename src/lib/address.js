@@ -30,12 +30,22 @@ const inCA = (lat, lng) => lat >= CA.latMin && lat <= CA.latMax && lng >= CA.lng
  * @returns {{ coords: [number, number] | null, issue: string | null }}
  */
 export function parseManualCoords(latRaw, lngRaw) {
-  const hasLat = String(latRaw ?? '').trim() !== '';
-  const hasLng = String(lngRaw ?? '').trim() !== '';
-  if (!hasLat && !hasLng) return { coords: null, issue: null };
-  const lat = parseFloat(String(latRaw).replace(/[^\d.\-]/g, ''));
-  const lng = parseFloat(String(lngRaw).replace(/[^\d.\-]/g, ''));
-  if (!hasLat || !hasLng || Number.isNaN(lat) || Number.isNaN(lng)) {
+  const latText = String(latRaw ?? '').trim();
+  const lngText = String(lngRaw ?? '').trim();
+  if (!latText && !lngText) return { coords: null, issue: null };
+  if (!latText || !lngText) {
+    // Google Maps copies both numbers at once ("34.05223, -118.24368"), so they often go into one cell.
+    const pair = (latText || lngText).match(/-?\d+(?:\.\d+)?/g);
+    if (pair?.length === 2) {
+      const both = parseManualCoords(pair[0], pair[1]);
+      if (!both.coords || both.issue) return both;
+      return { coords: both.coords, issue: `Both numbers are in the ${latText ? 'lat' : 'lng'} column — the map uses them, so you can leave it` };
+    }
+    return { coords: null, issue: 'Latitude or longitude is missing or not a number' };
+  }
+  const lat = parseFloat(latText.replace(/[^\d.\-]/g, ''));
+  const lng = parseFloat(lngText.replace(/[^\d.\-]/g, ''));
+  if (Number.isNaN(lat) || Number.isNaN(lng)) {
     return { coords: null, issue: 'Latitude or longitude is missing or not a number' };
   }
   if (inCA(lat, lng)) return { coords: [lat, lng], issue: null };
