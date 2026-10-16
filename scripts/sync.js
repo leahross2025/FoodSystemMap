@@ -13,7 +13,7 @@ import { readFile, writeFile } from 'node:fs/promises';
 import { setTimeout as wait } from 'node:timers/promises';
 import { fileURLToPath } from 'node:url';
 import { SHEET_CSV_URL } from '../src/config/googleSheets.js';
-import { cleanAddress, geocodeCacheKey } from '../src/lib/address.js';
+import { cleanAddress, geocodeCacheKey, parseManualCoords } from '../src/lib/address.js';
 import { resolveColumns } from '../src/lib/columns.js';
 import { buildDataset, parseCSV } from '../src/lib/organizations.js';
 
@@ -111,33 +111,46 @@ export function knownCoords(street, zip) {
 }
 
 /**
+ * Whether an address is worth searching for. Without a street number Nominatim settles for some
+ * same-named street: "Texas" with zip code 90277 came back as a street in Downey.
+ */
+export const hasStreetNumber = (street) => /\d/.test(cleanAddress(street) ?? '');
+
+/**
  * Address lookups on Nominatim, at most one request per 1.1 s. The returned function resolves to
- * [lat, lng], or null when there's no match in California; it throws when Nominatim can't be reached,
- * so that address is simply tried again next time.
+ * [lat, lng], or null when there's no match in California with the sheet's zip code; it throws when
+ * Nominatim can't be reached, so that address is simply tried again next time.
  */
 export function createGeocoder({ fetch = globalThis.fetch, sleep = wait } = {}) {
   let requests = 0;
 
-  async function search(query) {
+  async function search(query, sheetZip) {
     if (requests++ > 0) await sleep(REQUEST_GAP_MS);
     const url = `${NOMINATIM_URL}?format=json&q=${encodeURIComponent(query)}&addressdetails=1&limit=1`;
     const res = await fetch(url, { headers: { 'User-Agent': USER_AGENT }, signal: AbortSignal.timeout(TIMEOUT_MS) });
     if (!res.ok) throw new Error(`Nominatim answered HTTP ${res.status}`);
     const [hit] = await res.json();
-    // Only California counts, so a bare "Texas" or a same-named street in another state never lands on the map.
+    // Only California counts, so a same-named street in another state never lands on the map.
     if (hit?.address?.state !== 'California') return null;
+    // Nor does a match in another zip code than the sheet's: that's a different place with a similar name.
+    const postcode = hit.address.postcode;
+    if (sheetZip && postcode && !zipCodes(postcode).includes(sheetZip)) return null;
     const coords = [parseFloat(hit.lat), parseFloat(hit.lon)];
     return coords.every(Number.isFinite) ? coords : null;
   }
 
   return async function geocode(street, zip) {
+    const sheetZip = zipCodes(zip)[0];
     for (const query of geocodeQueries(street, zip)) {
-      const coords = await search(query);
+      const coords = await search(query, sheetZip);
       if (coords) return coords;
     }
     return null;
   };
 }
+
+/** The 5-digit zip codes in a text: "90277-1234" → ["90277"]. */
+const zipCodes = (text) => String(text ?? '').match(/\b\d{5}\b/g) ?? [];
 
 /**
  * The sheet as saved in src/data/snapshot.json. Contact names, email addresses and comments are left
@@ -188,30 +201,37 @@ export async function sync({
   const cacheText = await readIfExists(cachePath);
   const cache = cacheText ? JSON.parse(cacheText) : {};
 
-  // Organizations that aren't on the map and whose address has never been looked up. Addresses that
+  // Addresses that have never been looked up, from every row without usable lat/lng. Each row counts,
+  // not just the organizations missing from the map: a merged organization shows its latest row's
+  // address, which may be new even though an older row already puts a dot on the map. Addresses that
   // were looked up and not found are cached as null and not retried: add lat/lng in the sheet instead.
-  const { organizations } = buildDataset(headers, rows, { geocodeCache: cache });
+  const cols = resolveColumns(headers);
   const toLookUp = new Map();
-  for (const org of organizations) {
-    const key = org.coordinates ? null : geocodeCacheKey(org.address, org.zip);
-    if (key && !Object.hasOwn(cache, key) && !toLookUp.has(key)) toLookUp.set(key, org);
+  for (const row of rows) {
+    if (parseManualCoords(cols.get(row, 'lat'), cols.get(row, 'lng')).coords) continue;
+    const place = { row: row.__row, name: cols.get(row, 'name'), address: cols.get(row, 'address'), zip: cols.get(row, 'zip') };
+    const key = geocodeCacheKey(place.address, place.zip);
+    if (key && !Object.hasOwn(cache, key) && !toLookUp.has(key)) toLookUp.set(key, place);
   }
 
   if (toLookUp.size) {
     log(`\n${count(toLookUp.size, 'new address', 'new addresses')} to look up${dryRun ? ' (dry run: skipped)' : ''}:`);
   }
   const geocode = createGeocoder({ fetch, sleep });
-  for (const [key, org] of toLookUp) {
-    const label = `  row ${org.row}  ${org.name} — ${addressText(org)}`;
-    const known = knownCoords(org.address, org.zip);
+  for (const [key, place] of toLookUp) {
+    const label = `  row ${place.row}  ${place.name} — ${addressText(place)}`;
+    const known = knownCoords(place.address, place.zip);
     if (known) {
       cache[key] = known;
       log(`${label}: found in the built-in address list`);
+    } else if (!hasStreetNumber(place.address)) {
+      cache[key] = null;
+      log(`${label}: no street number, so not looked up (add lat/lng in the sheet)`);
     } else if (dryRun) {
       log(label);
     } else {
       try {
-        cache[key] = await geocode(org.address, org.zip);
+        cache[key] = await geocode(place.address, place.zip);
         log(`${label}: ${cache[key] ? 'found' : 'not found (add lat/lng in the sheet)'}`);
       } catch (err) {
         log(`${label}: lookup failed, will retry next time (${err.message})`);

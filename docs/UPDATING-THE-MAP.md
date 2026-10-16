@@ -23,7 +23,7 @@ from Kumu go in the same columns as everyone else; don't add a second name or ad
 | --- | --- |
 | Organization Name | The organization's name (required). |
 | Sector | One of the sectors listed below. |
-| Main Org Street Address (headquarters) | Street address. For places outside Los Angeles, include the city, e.g. `889 Guadalupe Rd, Arroyo Grande, CA`. |
+| Main Org Street Address (headquarters) | Street address with its number. For places outside Los Angeles, include the city, e.g. `889 Guadalupe Rd, Arroyo Grande, CA`. |
 | Main Org Zip Code | Zip code. |
 | lat and lng | Map coordinates. Optional, but needed for farms and for any address the map can't find on its own. |
 | Website | The website, e.g. `www.example.org`. |

@@ -107,12 +107,14 @@ SHEET_CSV_PATH=tests/fixtures/sheet.csv npm run sync -- --dry-run  # read a loca
 
 - It prints the same summary as `/data-check` (rows → duplicates merged → organizations → on the map +
   missing a location) and lists the rows that need attention.
-- Only organizations without coordinates whose address isn't in the cache yet are looked up, using
-  OpenStreetMap's Nominatim (at most one request per 1.1 s; only results in California count). Addresses
-  that weren't found are cached as `null` and not tried again: the fix is `lat`/`lng` in the sheet, or
-  deleting that line from `geocode-cache.json` to retry. Lookups that fail (network, rate limit) aren't
-  cached and are retried on the next run. A few hand-located addresses from the original geocoding script
-  are built in (`FALLBACK_COORDS`).
+- Each row's address that isn't in the cache yet is looked up (rows with usable `lat`/`lng` are skipped),
+  using OpenStreetMap's Nominatim, at most one request per 1.1 s. A merged organization's older rows count
+  too, and its latest row's address is looked up even when an older row already puts it on the map.
+  Only results in California and in the row's zip code count; addresses without a street number
+  ("Texas") aren't searched for. Addresses that weren't found are cached as `null` and not tried again:
+  the fix is `lat`/`lng` in the sheet, or a corrected address. Lookups that fail (network, rate limit)
+  aren't cached and are retried on the next run. A few hand-located addresses from the original geocoding
+  script are built in (`FALLBACK_COORDS`).
 - `snapshot.json` is rewritten only when the sheet's content changed, so an unchanged sheet doesn't create
   a commit every night. The contact name and comments columns are left out.
 - If the sheet can't be downloaded or has no rows, nothing is written and the script exits with an error.
