@@ -79,7 +79,8 @@ organizations are on the map, and what needs attention:
   recent survey answer. Nothing to do unless they are different organizations.
 - **Possible duplicates**: names that look alike. If they are the same organization, give both rows exactly
   the same name.
-- **Sector not in the list** and **Blank sector**: shown as Other until fixed.
+- **Sector not in the list** and **Blank sector**: shown as Other until fixed, unless another row of the same
+  organization has a sector from the list.
 - **Missing columns**: a column the map looks for but can't find.
 
 The page isn't linked from the website and is hidden from search engines. Bookmark it.
@@ -99,8 +100,9 @@ map data** → **Run workflow** → **Run workflow**. It takes a few minutes, an
 after that.
 
 A run that fails shows a red ✗ on the Actions page. The website keeps working either way, and the next night's
-run tries again. GitHub may pause the nightly refresh when the repository has had no activity for 60 days: if
-the Actions page says the workflow is disabled, click **Enable workflow**.
+run tries again. If it fails two nights in a row, tell the developer. GitHub may pause the nightly refresh when
+the repository has had no activity for 60 days: if the Actions page says the workflow is disabled, click
+**Enable workflow**.
 
 ## Changing sector colors
 

@@ -214,7 +214,7 @@ describe('sync', () => {
     assert.equal(report.sheetRows, 148);
     assert.equal(report.onMap + report.missingLocation.length, 143);
     const output = lines.join('\n');
-    assert.match(output, /148 rows in the spreadsheet → 5 duplicates merged → 143 organizations → 122 on the map \+ 21 missing a location/);
+    assert.match(output, /148 rows in the spreadsheet → 5 duplicate rows merged → 143 organizations → 122 on the map \+ 21 missing a location/);
     assert.match(output, /row 84 {2}Common Threads — Texas, 90277: no street number, so not looked up \(add lat\/lng in the sheet\)/);
     assert.match(output, /row 85 {2}Calibbean Farm\/UFEI of GLA\/Bloom Ranch — 32712 El Sastre Rd Acton Ca 93510\n/);
     assert.match(output, /Dry run: no files written\./);

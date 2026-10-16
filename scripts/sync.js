@@ -283,7 +283,7 @@ async function readIfExists(path) {
 function printReport(report, log) {
   const merged = report.sheetRows - report.uniqueOrganizations;
   log(
-    `\n${count(report.sheetRows, 'row')} in the spreadsheet → ${count(merged, 'duplicate')} merged → ` +
+    `\n${count(report.sheetRows, 'row')} in the spreadsheet → ${count(merged, 'duplicate row')} merged → ` +
       `${count(report.uniqueOrganizations, 'organization')} → ${report.onMap} on the map + ` +
       `${report.missingLocation.length} missing a location`,
   );
@@ -295,9 +295,9 @@ function printReport(report, log) {
   };
   section('Missing a location', report.missingLocation, (m) => `row ${m.row}  ${m.name} — ${addressText(m) || 'no address'}`);
   section('Coordinate problems', report.coordinateIssues, (c) => `row ${c.row}  ${c.name} — ${c.issue}`);
-  section('Sector not in the list (shown as Other)', report.unrecognizedSectors, (s) => `row ${s.row}  ${s.name} — "${s.value}"`);
-  section('Blank sector (shown as Other)', report.blankSector, (s) => `row ${s.row}  ${s.name}`);
-  section('Duplicates merged', report.duplicates, (d) => `rows ${d.rows.join(', ')}  ${d.name} (showing row ${d.keptRow})`);
+  section('Sector not in the list', report.unrecognizedSectors, (s) => `row ${s.row}  ${s.name} — "${s.value}"`);
+  section('Blank sector', report.blankSector, (s) => `row ${s.row}  ${s.name}`);
+  section('Duplicates', report.duplicates, (d) => `rows ${d.rows.join(', ')}  ${d.name} (showing row ${d.keptRow})`);
   log(`\nMissing columns: ${report.missingColumns.join(', ') || 'none'}`);
 }
 

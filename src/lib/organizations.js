@@ -59,8 +59,9 @@ const SURVEY_FIELDS = ['groups', 'goals', 'topGoal', 'objectives', 'topObjective
  * @property {{ name: string, rows: number[], keptRow: number }[]} duplicates
  * @property {{ row: number, name: string, address: string, zip: string, sector: string }[]} missingLocation
  * @property {{ row: number, name: string, issue: string }[]} coordinateIssues
- * @property {{ row: number, name: string, value: string }[]} unrecognizedSectors  shown as Other
- * @property {{ row: number, name: string }[]} blankSector
+ * @property {{ row: number, name: string, value: string }[]} unrecognizedSectors  shown as Other, unless
+ *   another row of the same organization has a known sector
+ * @property {{ row: number, name: string }[]} blankSector  same
  * @property {string[]} missingColumns
  */
 

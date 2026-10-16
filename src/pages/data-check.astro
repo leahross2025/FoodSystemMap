@@ -8,7 +8,7 @@ import geocodeCache from '../data/geocode-cache.json';
 import { geocodeCacheKey } from '../lib/address.js';
 import { loadData } from '../lib/data.server.js';
 import { dedupeKey } from '../lib/organizations.js';
-import { SECTOR_COLORS, SECTORS } from '../lib/sectors.js';
+import { OTHER_SECTOR, SECTOR_COLORS, SECTORS } from '../lib/sectors.js';
 
 export const prerender = false;
 
@@ -32,12 +32,22 @@ const mapsSearch = (m) => `https://www.google.com/maps/search/?api=1&query=${enc
 
 const coordinateProblemRows = new Set(report.coordinateIssues.map((c) => c.row));
 
+// The sector the map shows for a spreadsheet row. A row merged with others shows as its organization,
+// which takes a sector from another of its rows when its own isn't in the list.
+const orgOfRow = new Map(organizations.map((org) => [org.row, org]));
+for (const d of report.duplicates) for (const row of d.rows) orgOfRow.set(row, orgOfRow.get(d.keptRow));
+const shownAs = (row) => orgOfRow.get(row)?.sector ?? OTHER_SECTOR;
+const sectorFromOtherRow = (listed) => listed.some((s) => shownAs(s.row) !== OTHER_SECTOR);
+const SECTOR_FROM_OTHER_ROW = 'Where the map shows another sector, it took it from another row of the same organization (see Duplicates).';
+
 /** Why an organization has no map location (the nightly update only tries each address once). */
 function whyMissing(m) {
   if (coordinateProblemRows.has(m.row)) return 'The lat/lng in this row can’t be used: see Coordinate problems below.';
   const key = geocodeCacheKey(m.address, m.zip);
   if (!key) return 'No address in the sheet.';
-  if (!Object.hasOwn(geocodeCache, key)) return 'New address: the nightly update will try to place it.';
+  if (!Object.hasOwn(geocodeCache, key)) {
+    return 'New address: the nightly update will try to place it. If it’s still here tomorrow, add lat/lng.';
+  }
   return "This address couldn't be found automatically.";
 }
 
@@ -101,7 +111,7 @@ const counts = Object.fromEntries(checks.map((c) => [c.id, c.count]));
 				<p class="flow">
 					<span class="step"><strong>{report.sheetRows}</strong> {plural(report.sheetRows, 'row')} in the spreadsheet</span>
 					<span class="op"><span aria-hidden="true">→</span><span class="sr-only">, then</span></span>
-					<span class="step"><strong>{merged}</strong> {plural(merged, 'duplicate')} merged</span>
+					<span class="step"><strong>{merged}</strong> {plural(merged, 'duplicate row')} merged</span>
 					<span class="op"><span aria-hidden="true">→</span><span class="sr-only">, giving</span></span>
 					<span class="step"><strong>{report.uniqueOrganizations}</strong> {plural(report.uniqueOrganizations, 'organization')}</span>
 					<span class="op"><span aria-hidden="true">→</span><span class="sr-only">:</span></span>
@@ -260,13 +270,13 @@ const counts = Object.fromEntries(checks.map((c) => [c.id, c.count]));
 					<p class="all-good">✓ All good</p>
 				) : (
 					<Fragment>
-						<p>These rows are shown as <b>Other</b> on the map. Change the <b>Sector</b> cell to one of these, spelled the same way:</p>
+						<p>The map can’t use the <b>Sector</b> in these rows. Change it to one of these, spelled the same way:</p>
 						<ul class="sector-list">
 							{SECTORS.map((s) => <li><span class="dot" style={{ background: s.color }}></span>{s.key}</li>)}
 						</ul>
 						<table class="table">
 							<thead>
-								<tr><th scope="col">Row</th><th scope="col">Organization</th><th scope="col">Sector in the sheet</th></tr>
+								<tr><th scope="col">Row</th><th scope="col">Organization</th><th scope="col">Sector in the sheet</th><th scope="col">Map shows</th></tr>
 							</thead>
 							<tbody>
 								{report.unrecognizedSectors.map((s) => (
@@ -274,10 +284,12 @@ const counts = Object.fromEntries(checks.map((c) => [c.id, c.count]));
 										<td class="row-number" data-label="Row">{s.row}</td>
 										<td data-label="Organization"><b>{s.name}</b></td>
 										<td data-label="Sector in the sheet">“{s.value}”</td>
+										<td data-label="Map shows"><span class="dot" style={{ background: SECTOR_COLORS[shownAs(s.row)] }}></span>{shownAs(s.row)}</td>
 									</tr>
 								))}
 							</tbody>
 						</table>
+						{sectorFromOtherRow(report.unrecognizedSectors) && <p class="note">{SECTOR_FROM_OTHER_ROW}</p>}
 					</Fragment>
 				)}
 			</section>
@@ -288,20 +300,22 @@ const counts = Object.fromEntries(checks.map((c) => [c.id, c.count]));
 					<p class="all-good">✓ All good</p>
 				) : (
 					<Fragment>
-						<p>These rows have no sector, so they’re shown as <b>Other</b>. Fill in the <b>Sector</b> cell.</p>
+						<p>These rows have no sector. Fill in the <b>Sector</b> cell.</p>
 						<table class="table">
 							<thead>
-								<tr><th scope="col">Row</th><th scope="col">Organization</th></tr>
+								<tr><th scope="col">Row</th><th scope="col">Organization</th><th scope="col">Map shows</th></tr>
 							</thead>
 							<tbody>
 								{report.blankSector.map((s) => (
 									<tr>
 										<td class="row-number" data-label="Row">{s.row}</td>
 										<td data-label="Organization"><b>{s.name}</b></td>
+										<td data-label="Map shows"><span class="dot" style={{ background: SECTOR_COLORS[shownAs(s.row)] }}></span>{shownAs(s.row)}</td>
 									</tr>
 								))}
 							</tbody>
 						</table>
+						{sectorFromOtherRow(report.blankSector) && <p class="note">{SECTOR_FROM_OTHER_ROW}</p>}
 					</Fragment>
 				)}
 			</section>
@@ -613,6 +627,12 @@ const counts = Object.fromEntries(checks.map((c) => [c.id, c.count]));
 	.column-list {
 		margin: 0;
 		padding-left: 1.2em;
+	}
+
+	.card .note {
+		margin: 10px 0 0;
+		font-size: 0.85rem;
+		color: #4a5568;
 	}
 
 	.howto {

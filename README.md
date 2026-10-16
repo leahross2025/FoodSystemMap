@@ -107,7 +107,7 @@ npm run sync -- --dry-run                                          # report only
 SHEET_CSV_PATH=tests/fixtures/sheet.csv npm run sync -- --dry-run  # read a local CSV instead of the sheet
 ```
 
-- It prints the same summary as `/data-check` (rows → duplicates merged → organizations → on the map +
+- It prints the same summary as `/data-check` (rows → duplicate rows merged → organizations → on the map +
   missing a location) and lists the rows that need attention.
 - Each row's address that isn't in the cache yet is looked up (rows with usable `lat`/`lng` are skipped),
   using OpenStreetMap's Nominatim, at most one request per 1.1 s. A merged organization's older rows count
@@ -118,8 +118,11 @@ SHEET_CSV_PATH=tests/fixtures/sheet.csv npm run sync -- --dry-run  # read a loca
   aren't cached and are retried on the next run. A few hand-located addresses from the original geocoding
   script are built in (`FALLBACK_COORDS`).
 - `snapshot.json` is rewritten only when the sheet's content changed, so an unchanged sheet doesn't create
-  a commit every night. The contact name and comments columns are left out.
+  a commit every night. The contact name, email and comments columns are left out.
 - If the sheet can't be downloaded or has no rows, nothing is written and the script exits with an error.
+- Let the nightly workflow commit `geocode-cache.json` and `snapshot.json`. If you do change one by hand
+  (say, deleting a `null` line so that address is looked up again), don't push it while the job is running:
+  the job's `git pull --rebase` would conflict and that night's refresh would fail.
 
 ## Deployment
 
