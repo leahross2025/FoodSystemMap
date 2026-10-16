@@ -19,11 +19,9 @@
     "@astrojs/rss": "4.0.11",
     "@astrojs/sitemap": "3.4.1",
     "astro": "5.10.1",
-    "d3": "^7.9.0",
     "leaflet": "^1.9.4",
     "papaparse": "^5.5.3",
-    "typescript": "5.8.3",
-    "xlsx": "^0.18.5"
+    "typescript": "5.8.3"
   },
   "devDependencies": {
     "wrangler": "4.21.x"
@@ -36,8 +34,8 @@
     "deploy": "wrangler deploy",
     "dev": "astro dev",
     "preview": "astro build && wrangler dev",
-    "sync": "node src/scripts/geocode.js",
-    "sync:build": "npm run sync && npm run build"
+    "sync": "node scripts/sync.js",
+    "test": "node --test tests/*.test.js"
   },
   "type": "module"
 }
