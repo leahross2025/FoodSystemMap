@@ -1,0 +1,711 @@
+---
+// /data-check — for whoever keeps the stakeholder spreadsheet up to date: how the sheet's rows became
+// the map, and which rows need attention (by spreadsheet row number). Not linked from the site.
+import BaseHead from '../components/BaseHead.astro';
+import Footer from '../components/Footer.astro';
+import { SITE_TITLE } from '../consts';
+import geocodeCache from '../data/geocode-cache.json';
+import { geocodeCacheKey } from '../lib/address.js';
+import { loadData } from '../lib/data.server.js';
+import { dedupeKey } from '../lib/organizations.js';
+import { SECTOR_COLORS, SECTORS } from '../lib/sectors.js';
+
+export const prerender = false;
+
+Astro.response.headers.set('Cache-Control', 'no-store'); // always show the sheet as it is now
+
+const { organizations, report } = await loadData();
+const merged = report.sheetRows - report.uniqueOrganizations;
+const missing = report.missingLocation;
+
+const plural = (n, one, many = `${one}s`) => (n === 1 ? one : many);
+
+const fetchedAt = new Date(report.fetchedAt);
+const fetchedText = Number.isNaN(fetchedAt.getTime())
+  ? 'an unknown time'
+  : fetchedAt.toLocaleString('en-US', { timeZone: 'America/Los_Angeles', dateStyle: 'medium', timeStyle: 'short' });
+
+/** Address and zip code, without repeating a zip code that's already in the address. */
+const addressText = ({ address, zip }) => (zip && !address.includes(zip) ? [address, zip].filter(Boolean).join(', ') : address);
+
+const mapsSearch = (m) => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${m.name} ${addressText(m)}`.trim())}`;
+
+const coordinateProblemRows = new Set(report.coordinateIssues.map((c) => c.row));
+
+/** Why an organization has no map location (the nightly update only tries each address once). */
+function whyMissing(m) {
+  if (coordinateProblemRows.has(m.row)) return 'The lat/lng in this row can’t be used: see Coordinate problems below.';
+  const key = geocodeCacheKey(m.address, m.zip);
+  if (!key) return 'No address in the sheet.';
+  if (!Object.hasOwn(geocodeCache, key)) return 'New address: the nightly update will try to place it.';
+  return "This address couldn't be found automatically.";
+}
+
+// Names that might be one organization typed two ways ("First 5 LA" / "First 5 Los Angeles"): one name
+// starts with the other, or they start with the same three words once common ones like "Los Angeles
+// County" are skipped. Rows with exactly the same name are merged anyway and aren't listed here.
+const COMMON_WORDS = new Set(['the', 'of', 'and', 'inc', 'los', 'angeles', 'la', 'county', 'city']);
+const firstWords = (name) =>
+  name.toLowerCase().split(/[^\p{L}\p{N}]+/u).filter((w) => w && !COMMON_WORDS.has(w)).slice(0, 3).join(' ');
+const named = organizations.map((org) => ({ org, key: dedupeKey(org.name), start: firstWords(org.name) }));
+const possibleDuplicates = named.flatMap((a, i) =>
+  named
+    .slice(i + 1)
+    .filter((b) => {
+      const [shorter, longer] = a.key.length <= b.key.length ? [a.key, b.key] : [b.key, a.key];
+      return (shorter.length >= 4 && longer.startsWith(shorter)) || (a.start.includes(' ') && a.start === b.start);
+    })
+    .map((b) => [a.org, b.org]),
+);
+
+const COLUMNS = {
+  name: { header: 'Organization Name', effect: 'rows can’t be read without it' },
+  sector: { header: 'Sector', effect: 'every organization is shown as Other' },
+  address: { header: 'Main Org Street Address (headquarters)', effect: 'only rows with lat/lng can be placed on the map' },
+  lat: { header: 'lat', effect: 'coordinates typed into the sheet are ignored' },
+  lng: { header: 'lng', effect: 'coordinates typed into the sheet are ignored' },
+  website: { header: 'Website', effect: 'map popups won’t show website links' },
+};
+
+// Duplicates are merged automatically, so they're shown as information rather than as problems.
+const checks = [
+  { id: 'missing-location', title: 'Missing a location', count: missing.length },
+  { id: 'coordinates', title: 'Coordinate problems', count: report.coordinateIssues.length },
+  { id: 'duplicates', title: 'Duplicates', count: report.duplicates.length, info: true },
+  { id: 'possible-duplicates', title: 'Possible duplicates', count: possibleDuplicates.length, info: true },
+  { id: 'sector', title: 'Sector not in the list', count: report.unrecognizedSectors.length },
+  { id: 'blank-sector', title: 'Blank sector', count: report.blankSector.length },
+  { id: 'columns', title: 'Missing columns', count: report.missingColumns.length },
+];
+const status = (check) => (check.count === 0 ? 'ok' : check.info ? 'info' : 'todo');
+const counts = Object.fromEntries(checks.map((c) => [c.id, c.count]));
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<BaseHead title={`Data check — ${SITE_TITLE}`} description="Problems to fix in the stakeholder spreadsheet." />
+		<meta name="robots" content="noindex" />
+	</head>
+	<body>
+		<header class="page-header">
+			<div class="wrap">
+				<a href="/" class="back">← Back to Map</a>
+				<h1>Data check</h1>
+				<p>How the stakeholder spreadsheet turns into the map, and which rows need attention. Row numbers match the spreadsheet.</p>
+			</div>
+		</header>
+
+		<main class="wrap">
+			<section class="card overview" aria-label="Summary">
+				<p class="flow">
+					<span class="step"><strong>{report.sheetRows}</strong> {plural(report.sheetRows, 'row')} in the spreadsheet</span>
+					<span class="op"><span aria-hidden="true">→</span><span class="sr-only">, then</span></span>
+					<span class="step"><strong>{merged}</strong> {plural(merged, 'duplicate')} merged</span>
+					<span class="op"><span aria-hidden="true">→</span><span class="sr-only">, giving</span></span>
+					<span class="step"><strong>{report.uniqueOrganizations}</strong> {plural(report.uniqueOrganizations, 'organization')}</span>
+					<span class="op"><span aria-hidden="true">→</span><span class="sr-only">:</span></span>
+					<span class="step ok"><strong>{report.onMap}</strong> on the map</span>
+					<span class="op plus"><span aria-hidden="true">+</span><span class="sr-only">and</span></span>
+					<span class:list={['step', missing.length ? 'todo' : 'ok']}><strong>{missing.length}</strong> missing a location</span>
+				</p>
+				<p class="detail">
+					{report.surveyRespondents} answered the survey · {report.mapOnly} added for the map only
+				</p>
+				{report.source === 'live' ? (
+					<p class="source">
+						✓ Read live from the spreadsheet on {fetchedText} (Pacific time). Changes to the sheet show up here and on the map within about 5–10 minutes.
+					</p>
+				) : (
+					<p class="source saved">
+						⚠ The spreadsheet couldn’t be read just now, so this page shows the saved copy from {fetchedText} (Pacific time). Reload in a few minutes to try again.
+						If this keeps happening, check that the spreadsheet is still published to the web and still has its <b>Organization Name</b> column.
+					</p>
+				)}
+				<ul class="checks">
+					{checks.map((check) => (
+						<li class={status(check)}>
+							<a href={`#${check.id}`}>{check.title}</a>
+							<span class="badge">{check.count === 0 ? '✓' : check.count}</span>
+						</li>
+					))}
+				</ul>
+			</section>
+
+			<section id="missing-location" class="card">
+				<h2>Missing a location</h2>
+				{missing.length === 0 ? (
+					<p class="all-good">✓ All good: every organization is on the map.</p>
+				) : (
+					<Fragment>
+						<p>
+							{missing.length} {plural(missing.length, 'organization isn’t', 'organizations aren’t')} on the map yet. To place one: click
+							<b>Find on Google Maps</b>, right-click the organization’s pin, and click the numbers at the top of the menu to copy them
+							(for example <code>34.05223, -118.24368</code>). In that row of the spreadsheet, paste the first number into <b>lat</b> and the
+							second into <b>lng</b>.
+						</p>
+						<table class="table">
+							<thead>
+								<tr><th scope="col">Row</th><th scope="col">Organization</th><th scope="col">Address</th><th scope="col"><span class="sr-only">Map search</span></th></tr>
+							</thead>
+							<tbody>
+								{missing.map((m) => (
+									<tr>
+										<td class="row-number" data-label="Row">{m.row}</td>
+										<td data-label="Organization">
+											<b>{m.name}</b>
+											<span class="sector"><span class="dot" style={{ background: SECTOR_COLORS[m.sector] }}></span>{m.sector}</span>
+										</td>
+										<td data-label="Address">
+											{addressText(m) || '—'}
+											<span class="hint">{whyMissing(m)}</span>
+										</td>
+										<td>
+											<a href={mapsSearch(m)} target="_blank" rel="noopener">Find on Google Maps<span class="sr-only">: {m.name}</span></a>
+										</td>
+									</tr>
+								))}
+							</tbody>
+						</table>
+					</Fragment>
+				)}
+			</section>
+
+			<section id="coordinates" class="card">
+				<h2>Coordinate problems</h2>
+				{counts.coordinates === 0 ? (
+					<p class="all-good">✓ All good</p>
+				) : (
+					<Fragment>
+						<p>The <b>lat</b> or <b>lng</b> cell in these rows needs a look. Latitude is around 34 and longitude around -118 in Los Angeles.</p>
+						<table class="table">
+							<thead>
+								<tr><th scope="col">Row</th><th scope="col">Organization</th><th scope="col">Problem</th></tr>
+							</thead>
+							<tbody>
+								{report.coordinateIssues.map((c) => (
+									<tr>
+										<td class="row-number" data-label="Row">{c.row}</td>
+										<td data-label="Organization"><b>{c.name}</b></td>
+										<td data-label="Problem">{c.issue}</td>
+									</tr>
+								))}
+							</tbody>
+						</table>
+					</Fragment>
+				)}
+			</section>
+
+			<section id="duplicates" class="card">
+				<h2>Duplicates</h2>
+				{counts.duplicates === 0 ? (
+					<p class="all-good">✓ All good: no organization is on more than one row.</p>
+				) : (
+					<Fragment>
+						<p>
+							These organizations are on more than one row. The map shows each one once, using its most recent survey answer, and fills any
+							blanks from the other rows. Nothing to do, unless they’re really different organizations: then make their names different.
+						</p>
+						<table class="table">
+							<thead>
+								<tr><th scope="col">Organization</th><th scope="col">Rows</th><th scope="col">Map uses row</th></tr>
+							</thead>
+							<tbody>
+								{report.duplicates.map((d) => (
+									<tr>
+										<td data-label="Organization"><b>{d.name}</b></td>
+										<td data-label="Rows">{d.rows.join(', ')}</td>
+										<td data-label="Map uses row">{d.keptRow}</td>
+									</tr>
+								))}
+							</tbody>
+						</table>
+					</Fragment>
+				)}
+			</section>
+
+			<section id="possible-duplicates" class="card">
+				<h2>Possible duplicates</h2>
+				{counts['possible-duplicates'] === 0 ? (
+					<p class="all-good">✓ All good: no names look alike.</p>
+				) : (
+					<Fragment>
+						<p>
+							These names look alike. If two rows are the same organization, give them exactly the same name and the map will show it once.
+							If they’re different organizations, there’s nothing to do.
+						</p>
+						<table class="table">
+							<thead>
+								<tr><th scope="col">Rows</th><th scope="col">Names</th></tr>
+							</thead>
+							<tbody>
+								{possibleDuplicates.map(([a, b]) => (
+									<tr>
+										<td class="row-number" data-label="Rows">{a.row} and {b.row}</td>
+										<td data-label="Names"><b>{a.name}</b><br /><b>{b.name}</b></td>
+									</tr>
+								))}
+							</tbody>
+						</table>
+					</Fragment>
+				)}
+			</section>
+
+			<section id="sector" class="card">
+				<h2>Sector not in the list</h2>
+				{counts.sector === 0 ? (
+					<p class="all-good">✓ All good</p>
+				) : (
+					<Fragment>
+						<p>These rows are shown as <b>Other</b> on the map. Change the <b>Sector</b> cell to one of these, spelled the same way:</p>
+						<ul class="sector-list">
+							{SECTORS.map((s) => <li><span class="dot" style={{ background: s.color }}></span>{s.key}</li>)}
+						</ul>
+						<table class="table">
+							<thead>
+								<tr><th scope="col">Row</th><th scope="col">Organization</th><th scope="col">Sector in the sheet</th></tr>
+							</thead>
+							<tbody>
+								{report.unrecognizedSectors.map((s) => (
+									<tr>
+										<td class="row-number" data-label="Row">{s.row}</td>
+										<td data-label="Organization"><b>{s.name}</b></td>
+										<td data-label="Sector in the sheet">“{s.value}”</td>
+									</tr>
+								))}
+							</tbody>
+						</table>
+					</Fragment>
+				)}
+			</section>
+
+			<section id="blank-sector" class="card">
+				<h2>Blank sector</h2>
+				{counts['blank-sector'] === 0 ? (
+					<p class="all-good">✓ All good</p>
+				) : (
+					<Fragment>
+						<p>These rows have no sector, so they’re shown as <b>Other</b>. Fill in the <b>Sector</b> cell.</p>
+						<table class="table">
+							<thead>
+								<tr><th scope="col">Row</th><th scope="col">Organization</th></tr>
+							</thead>
+							<tbody>
+								{report.blankSector.map((s) => (
+									<tr>
+										<td class="row-number" data-label="Row">{s.row}</td>
+										<td data-label="Organization"><b>{s.name}</b></td>
+									</tr>
+								))}
+							</tbody>
+						</table>
+					</Fragment>
+				)}
+			</section>
+
+			<section id="columns" class="card">
+				<h2>Missing columns</h2>
+				{counts.columns === 0 ? (
+					<p class="all-good">✓ All good: the spreadsheet has every column the map uses.</p>
+				) : (
+					<Fragment>
+						<p>The map looks for these columns but couldn’t find them in the spreadsheet:</p>
+						<ul class="column-list">
+							{report.missingColumns.map((field) => (
+								<li><b>{COLUMNS[field]?.header ?? field}</b>: until it’s added, {COLUMNS[field]?.effect ?? 'this information is missing'}.</li>
+							))}
+						</ul>
+					</Fragment>
+				)}
+			</section>
+
+			<section id="how-to-add" class="card howto">
+				<h2>How to add an organization</h2>
+				<ol>
+					<li>Add a row at the bottom of the spreadsheet.</li>
+					<li>
+						Type the name in the existing <b>Organization Name</b> column and the street address in <b>Main Org Street Address
+						(headquarters)</b>, with the zip code in <b>Main Org Zip Code</b>. Organizations from Kumu go in these same columns, one
+						piece of information per column.
+					</li>
+					<li>
+						Choose a <b>Sector</b>:
+						<ul class="sector-list">
+							{SECTORS.map((s) => <li><span class="dot" style={{ background: s.color }}></span>{s.key}</li>)}
+						</ul>
+					</li>
+					<li>If you have them, add the <b>Website</b> and the <b>Activity</b> (Kumu Service Category).</li>
+					<li>For farms and places outside Los Angeles, also fill in <b>lat</b> and <b>lng</b> (see “Missing a location” above).</li>
+					<li>Check this page again in about 10 minutes.</li>
+				</ol>
+				<p class="more">
+					More help: <a href="https://github.com/leahross2025/FoodSystemMap/blob/main/docs/UPDATING-THE-MAP.md" target="_blank" rel="noopener">Updating the map</a> (guide on GitHub).
+				</p>
+			</section>
+		</main>
+		<Footer />
+	</body>
+</html>
+
+<style>
+	.wrap {
+		max-width: 1100px;
+		margin: 0 auto;
+		padding-left: 20px;
+		padding-right: 20px;
+		box-sizing: border-box;
+	}
+
+	.page-header {
+		background: #383838;
+		color: white;
+		padding: 20px 0 28px;
+	}
+
+	.back {
+		color: #90cdf4;
+		text-decoration: none;
+		font-size: 0.95rem;
+	}
+
+	.back:hover {
+		color: white;
+	}
+
+	.page-header h1 {
+		color: white;
+		font-size: 2.2rem;
+		margin: 8px 0 4px;
+	}
+
+	.page-header p {
+		margin: 0;
+		font-size: 0.95rem;
+		color: #e2e8f0;
+		max-width: 46em;
+	}
+
+	main {
+		width: auto;
+		padding-top: 24px;
+		padding-bottom: 48px;
+		font-size: 1rem;
+		line-height: 1.55;
+	}
+
+	.card {
+		background: white;
+		border-radius: 12px;
+		box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+		padding: 20px 24px;
+		margin-bottom: 20px;
+	}
+
+	.card h2 {
+		font-size: 1.35rem;
+		color: #2d3748;
+		margin: 0 0 8px;
+	}
+
+	.card p {
+		margin: 0 0 12px;
+	}
+
+	.all-good {
+		color: #2f855a;
+		font-weight: 700;
+		margin: 0;
+	}
+
+	/* Summary: rows → duplicates → organizations → on the map + missing */
+	.flow {
+		display: flex;
+		align-items: stretch;
+		gap: 8px;
+		margin: 0 0 12px;
+	}
+
+	.step {
+		flex: 1 1 0;
+		background: #f7fafc;
+		border: 1px solid #e2e8f0;
+		border-radius: 10px;
+		padding: 12px;
+		text-align: center;
+		line-height: 1.3;
+		color: #4a5568;
+	}
+
+	.step strong {
+		display: block;
+		font-size: 2.2rem;
+		line-height: 1.1;
+		color: #2d3748;
+	}
+
+	.step.ok {
+		background: #f0fff4;
+		border-color: #9ae6b4;
+	}
+
+	.step.ok strong {
+		color: #2f855a;
+	}
+
+	.step.todo {
+		background: #fffaf0;
+		border-color: #f6ad55;
+	}
+
+	.step.todo strong {
+		color: #c05621;
+	}
+
+	.op {
+		align-self: center;
+		font-size: 1.5rem;
+		color: #a0aec0;
+	}
+
+	.detail {
+		color: #4a5568;
+	}
+
+	.source {
+		background: #f0fff4;
+		border-left: 4px solid #38a169;
+		padding: 8px 12px;
+		border-radius: 4px;
+	}
+
+	.source.saved {
+		background: #fffaf0;
+		border-left-color: #dd6b20;
+	}
+
+	.checks {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 8px;
+	}
+
+	.checks li {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		border: 1px solid #e2e8f0;
+		border-radius: 999px;
+		padding: 4px 6px 4px 12px;
+	}
+
+	.checks a {
+		color: #2d3748;
+		text-decoration: none;
+	}
+
+	.checks a:hover {
+		text-decoration: underline;
+	}
+
+	.badge {
+		min-width: 1.6em;
+		padding: 0 6px;
+		border-radius: 999px;
+		text-align: center;
+		font-weight: 700;
+		box-sizing: border-box;
+	}
+
+	.checks .ok .badge {
+		background: #c6f6d5;
+		color: #22543d;
+	}
+
+	.checks .todo {
+		border-color: #f6ad55;
+	}
+
+	.checks .todo .badge {
+		background: #feebc8;
+		color: #9c4221;
+	}
+
+	.checks .info .badge {
+		background: #bee3f8;
+		color: #2a4365;
+	}
+
+	/* Tables: rows of the spreadsheet */
+	.table {
+		width: 100%;
+		border-collapse: collapse;
+		white-space: normal;
+	}
+
+	.table th {
+		text-align: left;
+		font-size: 0.8rem;
+		text-transform: uppercase;
+		letter-spacing: 0.03em;
+		color: #4a5568;
+		border-bottom: 2px solid #e2e8f0;
+		padding: 6px 10px 6px 0;
+	}
+
+	.table td {
+		border-bottom: 1px solid #edf2f7;
+		padding: 8px 10px 8px 0;
+		vertical-align: top;
+	}
+
+	.table tr:last-child td {
+		border-bottom: none;
+	}
+
+	.row-number {
+		white-space: nowrap;
+		font-weight: 700;
+		color: #2d3748;
+	}
+
+	.sector,
+	.hint {
+		display: block;
+		font-size: 0.85rem;
+		color: #4a5568;
+	}
+
+	.dot {
+		display: inline-block;
+		width: 0.7em;
+		height: 0.7em;
+		border-radius: 50%;
+		margin-right: 0.4em;
+		vertical-align: baseline;
+	}
+
+	.sector-list {
+		list-style: none;
+		padding: 0;
+		margin: 6px 0 14px;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 6px;
+	}
+
+	.sector-list li {
+		border: 1px solid #e2e8f0;
+		border-radius: 999px;
+		padding: 0 10px;
+		background: white;
+	}
+
+	.column-list {
+		margin: 0;
+		padding-left: 1.2em;
+	}
+
+	.howto {
+		background: #ebf8ff;
+		box-shadow: none;
+		border: 1px solid #bee3f8;
+	}
+
+	.howto ol {
+		margin: 0 0 12px;
+		padding-left: 1.4em;
+	}
+
+	.howto li {
+		margin-bottom: 6px;
+	}
+
+	.howto .sector-list {
+		margin-bottom: 4px;
+	}
+
+	.more {
+		margin: 0;
+		color: #4a5568;
+	}
+
+	@media (max-width: 720px) {
+		.page-header h1 {
+			font-size: 1.8rem;
+		}
+
+		.flow {
+			flex-direction: column;
+		}
+
+		.step {
+			display: flex;
+			align-items: baseline;
+			gap: 10px;
+			text-align: left;
+			padding: 8px 12px;
+		}
+
+		.step strong {
+			font-size: 1.6rem;
+			min-width: 2.2em;
+		}
+
+		.op {
+			align-self: flex-start;
+			margin-left: 1.6em;
+			line-height: 1;
+		}
+
+		.op:not(.plus) span[aria-hidden] {
+			display: inline-block;
+			transform: rotate(90deg);
+		}
+
+		/* One block per spreadsheet row instead of table columns */
+		.table thead {
+			position: absolute;
+			width: 1px;
+			height: 1px;
+			overflow: hidden;
+			clip-path: inset(50%);
+		}
+
+		.table,
+		.table tbody,
+		.table tr,
+		.table td {
+			display: block;
+		}
+
+		.table tr {
+			padding: 10px 0;
+			border-bottom: 1px solid #edf2f7;
+		}
+
+		.table td {
+			border: none;
+			padding: 2px 0;
+		}
+
+		.table td[data-label]::before {
+			content: attr(data-label) ': ';
+			color: #4a5568;
+			font-weight: 400;
+		}
+	}
+
+	@media (max-width: 480px) {
+		.wrap {
+			padding-left: 12px;
+			padding-right: 12px;
+		}
+
+		.card {
+			padding: 16px;
+		}
+	}
+</style>

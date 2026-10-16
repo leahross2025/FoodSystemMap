@@ -1,0 +1,49 @@
+# Every night: look up map locations for new addresses in the spreadsheet and refresh the saved copy
+# of the sheet (scripts/sync.js), then commit any changes to main, which redeploys the site.
+# To run it now: GitHub → Actions → "Refresh map data" → Run workflow.
+name: Refresh map data
+
+on:
+  schedule:
+    - cron: '0 10 * * *' # 10:00 UTC = 3 am Pacific (2 am in winter)
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: refresh-data
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm test
+
+      - run: npm run sync
+
+      - name: Commit changed data
+        run: |
+          git add src/data/geocode-cache.json src/data/snapshot.json
+          if git diff --cached --quiet; then
+            echo "Nothing changed."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "chore: refresh map data from spreadsheet"
+          # Someone may have pushed to main during the run; only this job changes these two files.
+          git pull --rebase origin main
+          git push origin HEAD:main
