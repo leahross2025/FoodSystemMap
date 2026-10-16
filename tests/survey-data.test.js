@@ -36,7 +36,8 @@ test(
       uniqueOrganizations: 143,
       surveyRespondents: 83,
       mapOnly: 60,
-      onMap: 122,
+      // How many are placed depends on src/data/geocode-cache.json, which changes every night.
+      onMap: organizations.filter((o) => o.coordinates).length,
       source: 'live',
       fetchedAt: metadata.fetchedAt,
       sectors: SECTORS.map((s) => s.key),

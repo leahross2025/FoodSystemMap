@@ -7,11 +7,14 @@ import { describe, test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { createGeocoder, FALLBACK_COORDS, formatCache, geocodeQueries, knownCoords, sync, toSnapshot } from '../scripts/sync.js';
 import { SHEET_CSV_URL } from '../src/config/googleSheets.js';
-import geocodeCache from '../src/data/geocode-cache.json' with { type: 'json' };
 import { parseCSV } from '../src/lib/organizations.js';
+// The geocode cache as it was when the sheet fixture was taken. The real one (src/data/) gains
+// addresses every night, which would change the numbers these tests expect.
+import geocodeCache from './fixtures/geocode-cache.json' with { type: 'json' };
 
 const SCRIPT = fileURLToPath(new URL('../scripts/sync.js', import.meta.url));
 const FIXTURE = fileURLToPath(new URL('./fixtures/sheet.csv', import.meta.url));
+const CACHE_FIXTURE = fileURLToPath(new URL('./fixtures/geocode-cache.json', import.meta.url));
 const fixtureText = await readFile(FIXTURE, 'utf8');
 const PRIVATE_COLUMNS = ['Your Name (First/Last)', 'Email Address', 'Additional questions or comments'];
 
@@ -40,12 +43,12 @@ function noNetwork() {
   return { fetch, calls };
 }
 
-/** A temporary folder with a copy of the real geocode cache; the snapshot file starts out missing. */
+/** A temporary folder with a copy of the test geocode cache; the snapshot file starts out missing. */
 async function tempData(t) {
   const dir = await mkdtemp(join(tmpdir(), 'fsm-sync-'));
   t.after(() => rm(dir, { recursive: true, force: true }));
   const cachePath = join(dir, 'geocode-cache.json');
-  await copyFile(fileURLToPath(new URL('../src/data/geocode-cache.json', import.meta.url)), cachePath);
+  await copyFile(CACHE_FIXTURE, cachePath);
   return { cachePath, snapshotPath: join(dir, 'snapshot.json') };
 }
 

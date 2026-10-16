@@ -78,6 +78,7 @@ src/
 tests/
   *.test.js                         node:test suites
   fixtures/sheet.csv                copy of the real sheet (148 rows), names, emails and comments redacted
+  fixtures/geocode-cache.json       the geocode cache as it was when sheet.csv was taken
 ```
 
 ## Commands
@@ -134,7 +135,9 @@ same page.
 ## Tests and privacy
 
 `npm test` runs the `node:test` suites in `tests/`. They never fetch the live sheet; use
-`tests/fixtures/sheet.csv`, a copy of the sheet with names, emails and comments redacted.
+`tests/fixtures/sheet.csv`, a copy of the sheet with names, emails and comments redacted. Tests that expect
+exact numbers use `tests/fixtures/geocode-cache.json` (the geocode cache when the fixture was taken), not
+`src/data/geocode-cache.json`, which the nightly job keeps adding to.
 
 Organizations never carry contact names or survey comments, and the snapshot also leaves out email addresses. Don't
 commit raw survey exports: they contain respondents' names and email addresses.

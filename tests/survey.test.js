@@ -2,12 +2,13 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { describe, test } from 'node:test';
 import districtsGeojson from '../src/data/districts.json' with { type: 'json' };
-import geocodeCache from '../src/data/geocode-cache.json' with { type: 'json' };
 import { resolveColumns } from '../src/lib/columns.js';
 import { DISTRICTS, makeDistrictLookup, NOT_SPECIFIED } from '../src/lib/districts.js';
 import { buildDataset, parseCSV } from '../src/lib/organizations.js';
 import { SECTORS } from '../src/lib/sectors.js';
 import { QUESTIONS, splitMultiSelect, summarize, WRITE_IN } from '../src/lib/survey.js';
+// The geocode cache as it was when the sheet fixture was taken (the real one changes every night).
+import geocodeCache from './fixtures/geocode-cache.json' with { type: 'json' };
 
 const optionsOf = (field) => QUESTIONS.find((q) => q.field === field).options;
 const sectionOf = (summary, id) => summary.sections.find((s) => s.id === id);
