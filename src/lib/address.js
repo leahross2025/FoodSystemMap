@@ -21,6 +21,18 @@ export function geocodeCacheKey(street, zipCode) {
   return `${cleaned}, Los Angeles, CA${zipPart}`.toLowerCase();
 }
 
+/**
+ * True when an address clearly names another state: it ends in a two-letter state code other than CA and
+ * a zip code outside California's 90000–96199 ("PO Box 480, Joseph, OR 97846"). The map only shows
+ * California, so these aren't looked up.
+ */
+export function outsideCalifornia(street) {
+  const m = String(street ?? '').replace(/,?\s*USA\s*$/i, '').trim().match(/[\s,]([A-Z]{2})\.?,?\s+(\d{5})(?:-\d{4})?$/);
+  if (!m || m[1] === 'CA') return false;
+  const zip = Number(m[2]);
+  return zip < 90000 || zip > 96199;
+}
+
 // Rough California bounding box — catches typos and swapped lat/lng.
 const CA = { latMin: 32.4, latMax: 42.1, lngMin: -124.6, lngMax: -114.1 };
 const inCA = (lat, lng) => lat >= CA.latMin && lat <= CA.latMax && lng >= CA.lngMin && lng <= CA.lngMax;

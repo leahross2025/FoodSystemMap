@@ -42,6 +42,8 @@ test('common spelling variants map to the canonical sector', () => {
     college: 'College/University',
     University: 'College/University',
     'Labor Union': 'Labor',
+    Academic: 'College/University', // Kumu's sector names
+    Union: 'Labor',
     Farms: 'Farm',
     FOUNDATION: 'Foundation',
   };

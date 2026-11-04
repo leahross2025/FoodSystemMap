@@ -5,7 +5,20 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, test } from 'node:test';
 import { fileURLToPath } from 'node:url';
-import { createGeocoder, FALLBACK_COORDS, formatCache, geocodeQueries, hasStreetNumber, knownCoords, sync, toSnapshot } from '../scripts/sync.js';
+import {
+  censusQuery,
+  createGeocoder,
+  expectedZip,
+  FALLBACK_COORDS,
+  formatCache,
+  geocodeQueries,
+  hasStreetNumber,
+  knownCoords,
+  sync,
+  toSnapshot,
+} from '../scripts/sync.js';
+import { geocodeCacheKey } from '../src/lib/address.js';
+import { resolveColumns } from '../src/lib/columns.js';
 import { SHEET_CSV_URL } from '../src/config/googleSheets.js';
 import { buildDataset, parseCSV } from '../src/lib/organizations.js';
 // The geocode cache as it was when the sheet fixture was taken. The real one (src/data/) gains
@@ -18,23 +31,50 @@ const CACHE_FIXTURE = fileURLToPath(new URL('./fixtures/geocode-cache.json', imp
 const fixtureText = await readFile(FIXTURE, 'utf8');
 const PRIVATE_COLUMNS = ['Your Name (First/Last)', 'Email Address', 'Additional questions or comments'];
 
+/** The cache keys of the addresses a sheet uses. */
+function addressKeys(text) {
+  const { headers, rows } = parseCSV(text);
+  const cols = resolveColumns(headers);
+  return new Set(rows.map((row) => geocodeCacheKey(cols.get(row, 'address'), cols.get(row, 'zip'))).filter(Boolean));
+}
+const fixtureKeys = addressKeys(fixtureText);
+
 const inCalifornia = (lat, lon, postcode) => ({
   lat: String(lat),
   lon: String(lon),
   address: { state: 'California', ...(postcode && { postcode }) },
 });
 
-/** A fake Nominatim: `places` maps a search string to its result; anything else finds nothing. */
-function fakeNominatim(places = {}) {
+const CENSUS = 'https://geocoding.geo.census.gov/geocoder/locations/onelineaddress';
+
+/** A Census geocoder match. */
+const censusMatch = (lat, lon, matchedAddress, state = 'CA') => ({
+  matchedAddress,
+  coordinates: { x: lon, y: lat },
+  addressComponents: { state },
+});
+
+/**
+ * Fake Nominatim and Census geocoders: `places` maps a Nominatim search string to its result and `census`
+ * maps a Census address to its match; anything else finds nothing. `calls` lists the Nominatim searches,
+ * `censusCalls` the Census ones.
+ */
+function fakeNominatim(places = {}, census = {}) {
   const calls = [];
+  const censusCalls = [];
   const fetch = async (url, init) => {
     const u = new URL(url);
+    if (`${u.origin}${u.pathname}` === CENSUS) {
+      const address = u.searchParams.get('address');
+      censusCalls.push({ address, params: Object.fromEntries(u.searchParams), init });
+      return Response.json({ result: { addressMatches: census[address] ? [census[address]] : [] } });
+    }
     assert.equal(`${u.origin}${u.pathname}`, 'https://nominatim.openstreetmap.org/search');
     const q = u.searchParams.get('q');
     calls.push({ q, params: Object.fromEntries(u.searchParams), init });
     return Response.json(places[q] ? [places[q]] : []);
   };
-  return { fetch, calls };
+  return { fetch, calls, censusCalls };
 }
 
 /** fetch for tests that must not make any request: records the attempt and fails it. */
@@ -80,6 +120,22 @@ describe('geocodeQueries', () => {
   test('drops suite numbers; nothing to search without an address', () => {
     assert.deepEqual(geocodeQueries('1000 N. Alameda St. Suite 240', ''), ['1000 N. Alameda St., Los Angeles, CA']);
     assert.deepEqual(geocodeQueries('', '90012'), []);
+  });
+});
+
+describe('expectedZip and censusQuery', () => {
+  test("uses the zip column, else a zip code at the end of the address, never the street number", () => {
+    assert.equal(expectedZip('1847 W 43rd Street', '90062'), '90062');
+    assert.equal(expectedZip('200 N Tustin Ave, Suite 110, Santa Ana, CA 92705', ''), '92705');
+    assert.equal(expectedZip('4340 11TH AVE LOS ANGELES, CA 90008-5205', ''), '90008');
+    assert.equal(expectedZip('13212 Saticoy Street, North Hollywood', ''), null);
+  });
+
+  test('sends the whole address, adding Los Angeles only when no city is given', () => {
+    assert.equal(censusQuery('1847 W 43rd Street', '90062'), '1847 W 43rd Street, Los Angeles, CA, 90062');
+    assert.equal(censusQuery('17948 Avalon Boulevard, Carson California, 90746', ''), '17948 Avalon Boulevard, Carson California, 90746');
+    assert.equal(censusQuery('32712 El Sastre Rd Acton Ca', '93510'), '32712 El Sastre Rd Acton Ca, 93510');
+    assert.equal(censusQuery('', ''), '');
   });
 });
 
@@ -159,6 +215,34 @@ describe('createGeocoder', () => {
     await geocode('1 Main St', '90012'); // 2 requests
     await geocode('2 Main St', ''); // 1 request
     assert.deepEqual(sleeps, [1100, 1100]);
+  });
+
+  test("asks the Census geocoder when Nominatim finds nothing, keeping only California matches with the same street number", async () => {
+    const geo = fakeNominatim({}, {
+      '1010 W 108th St, Unit B, Los Angeles, CA 90044': censusMatch(33.9381, -118.2936, '1010 W 108TH ST, LOS ANGELES, CA, 90044'),
+      '5 Main St, Los Angeles, CA, 90012': censusMatch(34.05, -118.24, '55 MAIN ST, LOS ANGELES, CA, 90012'), // another number
+      '9 Elm St, Reno, CA 89501': censusMatch(39.53, -119.81, '9 ELM ST, RENO, NV, 89501', 'NV'),
+    });
+    const geocode = createGeocoder({ fetch: geo.fetch, sleep: async () => {} });
+    assert.deepEqual(await geocode('1010 W 108th St, Unit B, Los Angeles, CA 90044', ''), [33.9381, -118.2936]);
+    assert.equal(await geocode('5 Main St', '90012'), null);
+    assert.equal(await geocode('9 Elm St, Reno, CA 89501', ''), null);
+    assert.deepEqual(geo.censusCalls.map((c) => c.address), [
+      '1010 W 108th St, Unit B, Los Angeles, CA 90044',
+      '5 Main St, Los Angeles, CA, 90012',
+      '9 Elm St, Reno, CA 89501',
+    ]);
+    assert.equal(geo.censusCalls[0].params.benchmark, 'Public_AR_Current');
+  });
+
+  test("checks Nominatim matches against the zip code at the end of the address when there's no zip column", async () => {
+    const geo = fakeNominatim({
+      '10900 Mulhall St, El Monte, CA 91731': inCalifornia(34.07, -118.03, '91732'),
+      '816 S Figueroa St, Los Angeles, CA 90017': inCalifornia(34.0485, -118.2603, '90017'),
+    });
+    const geocode = createGeocoder({ fetch: geo.fetch, sleep: async () => {} });
+    assert.equal(await geocode('10900 Mulhall St, El Monte, CA 91731', ''), null);
+    assert.deepEqual(await geocode('816 S Figueroa St, Suite 200, Los Angeles, CA 90017', ''), [34.0485, -118.2603]);
   });
 
   test('throws when Nominatim answers with an error, so the address is retried next time', async () => {
@@ -260,12 +344,17 @@ describe('sync', () => {
     const cache = JSON.parse(cacheText);
     assert.deepEqual(Object.keys(cache), Object.keys(cache).sort());
     assert.equal(cacheText, formatCache(cache));
-    for (const [key, value] of Object.entries(geocodeCache)) assert.deepEqual(cache[key], value, key);
+    // Cached addresses the sheet still uses are kept as they were; the rest (deleted or rewritten rows) are dropped.
+    for (const [key, value] of Object.entries(geocodeCache)) {
+      if (fixtureKeys.has(key)) assert.deepEqual(cache[key], value, key);
+      else assert.ok(!Object.hasOwn(cache, key), key);
+    }
     assert.deepEqual(cache['1847 w 43rd street, los angeles, ca, 90062'], [34.0046, -118.3087]);
     assert.deepEqual(cache['490 43rd st, unit 332, oakland, ca 94609, los angeles, ca, 94609'], [37.8302, -122.2617]);
     assert.equal(cache['texas, los angeles, ca, 90277'], null); // not looked up, and not tried again
     assert.equal(cache['9415 culver blvd #368, los angeles, ca, 90232'], null); // not found
-    assert.equal(Object.keys(cache).length, Object.keys(geocodeCache).length + 6);
+    assert.deepEqual(Object.keys(cache), [...fixtureKeys].sort());
+    assert.equal(first.removed, Object.keys(geocodeCache).filter((key) => !fixtureKeys.has(key)).length);
 
     // Eastmont's dot is now at the address its popup shows, rather than at the older row's address.
     const { headers, rows } = parseCSV(fixtureText);
@@ -302,7 +391,7 @@ describe('sync', () => {
     // Only the address without a street number is saved, since it isn't looked up at all.
     assert.deepEqual(
       Object.keys(JSON.parse(await readFile(cachePath, 'utf8'))).sort(),
-      [...Object.keys(geocodeCache), 'texas, los angeles, ca, 90277'].sort(),
+      [...Object.keys(geocodeCache).filter((key) => fixtureKeys.has(key)), 'texas, los angeles, ca, 90277'].sort(),
     );
     assert.match(lines.join('\n'), /SoLA Food Co-op — 1847 W 43rd Street, 90062: lookup failed, will retry next time \(Nominatim answered HTTP 429\)/);
   });
@@ -355,6 +444,97 @@ describe('sync', () => {
     });
     assert.deepEqual(report.missingLocation.map((m) => m.name), ['Common Threads']);
     assert.match(lines.join('\n'), /row 2 {2}Common Threads — Texas, 90277: no street number, so not looked up \(add lat\/lng in the sheet\)/);
+  });
+
+  test('follows additions, changes and deletions in the sheet', async (t) => {
+    const { cachePath, snapshotPath, csvPath } = await tempData(t);
+    await writeFile(cachePath, '{}\n');
+    const geo = fakeNominatim({
+      '1 Old St, Los Angeles, CA, 90001': inCalifornia(33.97, -118.25, '90001'),
+      '2 Keep St, Los Angeles, CA, 90002': inCalifornia(33.95, -118.24, '90002'),
+      '3 Gone St, Los Angeles, CA, 90003': inCalifornia(33.96, -118.27, '90003'),
+      '9 New St, Los Angeles, CA, 90009': inCalifornia(34.01, -118.3, '90009'),
+      '4 Added St, Los Angeles, CA, 90004': inCalifornia(34.07, -118.31, '90004'),
+    });
+    const run = () => sync({ csvPath, fetch: geo.fetch, sleep: async () => {}, log: quiet, cachePath, snapshotPath });
+
+    await writeSheet(csvPath, [
+      SHEET_HEADERS,
+      ['', 'Moving Org', 'Nonprofit', '1 Old St', '90001', '', ''],
+      ['', 'Staying Org', 'Business', '2 Keep St', '90002', '', ''],
+      ['', 'Deleted Org', 'Farm', '3 Gone St', '90003', '', ''],
+    ]);
+    const before = await run();
+    assert.equal(before.report.onMap, 3);
+
+    // Next day: Moving Org has a new address and a new sector, Deleted Org's row is gone, two rows are new
+    // (one with lat/lng typed in), and Staying Org moved up a row.
+    await writeSheet(csvPath, [
+      SHEET_HEADERS,
+      ['', 'Staying Org', 'Business', '2 Keep St', '90002', '', ''],
+      ['', 'Moving Org', 'Foundation', '9 New St', '90009', '', ''],
+      ['', 'Added Org', 'Union', '4 Added St', '90004', '', ''],
+      ['', 'Added Farm', 'Farm', '', '', '34.4, -118.9', ''],
+    ]);
+    const callsBefore = geo.calls.length;
+    const after = await run();
+
+    assert.deepEqual(geo.calls.slice(callsBefore).map((c) => c.q), ['9 New St, Los Angeles, CA, 90009', '4 Added St, Los Angeles, CA, 90004']);
+    assert.equal(after.removed, 2); // 1 Old St and 3 Gone St
+    assert.deepEqual(Object.keys(JSON.parse(await readFile(cachePath, 'utf8'))), [
+      '2 keep st, los angeles, ca, 90002',
+      '4 added st, los angeles, ca, 90004',
+      '9 new st, los angeles, ca, 90009',
+    ]);
+    const snapshot = JSON.parse(await readFile(snapshotPath, 'utf8'));
+    assert.deepEqual(snapshot.rows.map((row) => row['Organization Name']), ['Staying Org', 'Moving Org', 'Added Org', 'Added Farm']);
+
+    const { headers, rows } = parseCSV(await readFile(csvPath, 'utf8'));
+    const { organizations, report } = buildDataset(headers, rows, { geocodeCache: JSON.parse(await readFile(cachePath, 'utf8')) });
+    assert.deepEqual(
+      organizations.map((o) => [o.row, o.name, o.sector, o.coordinates]),
+      [
+        [2, 'Staying Org', 'For-Profit', [33.95, -118.24]],
+        [3, 'Moving Org', 'Foundation', [34.01, -118.3]],
+        [4, 'Added Org', 'Labor', [34.07, -118.31]],
+        [5, 'Added Farm', 'Farm', [34.4, -118.9]],
+      ],
+    );
+    assert.deepEqual([report.sheetRows, report.onMap, report.missingLocation.length], [4, 4, 0]);
+  });
+
+  test('does not look up addresses in another state', async (t) => {
+    const { cachePath, snapshotPath, csvPath } = await tempData(t);
+    await writeFile(cachePath, '{}\n');
+    await writeSheet(csvPath, [
+      SHEET_HEADERS,
+      ['', 'ReFed', 'Nonprofit', '122 S. Michigan Ave., #1390-L74, Chicago, IL 60603', '', '', ''],
+      ['', 'Wild Earth Guardian', 'Nonprofit', '301 N Guadalupe St., Ste 201, Santa Fe NM 87501', '', '', ''],
+    ]);
+    const network = noNetwork();
+    const lines = [];
+    const { report } = await sync({ csvPath, fetch: network.fetch, log: (line) => lines.push(line), cachePath, snapshotPath });
+    assert.deepEqual(network.calls, []);
+    assert.equal(report.missingLocation.length, 2);
+    assert.match(lines.join('\n'), /row 2 {2}ReFed — .*: outside California, so not placed on the map/);
+  });
+
+  test('--retry-not-found looks up again the addresses cached as not found', async (t) => {
+    const { cachePath, snapshotPath, csvPath } = await tempData(t);
+    await writeFile(cachePath, formatCache({ '7 farm rd, cuyama, ca 93254, los angeles, ca': null, 'texas, los angeles, ca, 90277': null }));
+    await writeSheet(csvPath, [
+      SHEET_HEADERS,
+      ['', 'Some Farm', 'Farm', '7 Farm Rd, Cuyama, CA 93254', '', '', ''],
+      ['', 'Common Threads', 'Nonprofit/CBO', 'Texas', '90277', '', ''],
+    ]);
+    const geo = fakeNominatim({}, { '7 Farm Rd, Cuyama, CA 93254': censusMatch(34.93, -119.6, '7 FARM RD, CUYAMA, CA, 93254') });
+    const options = { csvPath, fetch: geo.fetch, sleep: async () => {}, log: quiet, cachePath, snapshotPath };
+
+    assert.equal((await sync(options)).toLookUp, 0); // normally a "not found" stays not found
+    const retried = await sync({ ...options, retryNotFound: true });
+    assert.equal(retried.toLookUp, 1); // not "Texas": it has no street number
+    assert.equal(retried.report.onMap, 1);
+    assert.deepEqual(JSON.parse(await readFile(cachePath, 'utf8'))['7 farm rd, cuyama, ca 93254, los angeles, ca'], [34.93, -119.6]);
   });
 
   test('downloads the published sheet when no CSV file is given', async (t) => {

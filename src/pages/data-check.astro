@@ -5,7 +5,7 @@ import BaseHead from '../components/BaseHead.astro';
 import Footer from '../components/Footer.astro';
 import { SITE_TITLE } from '../consts';
 import geocodeCache from '../data/geocode-cache.json';
-import { geocodeCacheKey } from '../lib/address.js';
+import { geocodeCacheKey, outsideCalifornia } from '../lib/address.js';
 import { loadData } from '../lib/data.server.js';
 import { dedupeKey } from '../lib/organizations.js';
 import { OTHER_SECTOR, SECTOR_COLORS, SECTORS } from '../lib/sectors.js';
@@ -45,6 +45,7 @@ function whyMissing(m) {
   if (coordinateProblemRows.has(m.row)) return 'The lat/lng in this row can’t be used: see Coordinate problems below.';
   const key = geocodeCacheKey(m.address, m.zip);
   if (!key) return 'No address in the sheet.';
+  if (outsideCalifornia(m.address)) return 'Headquarters outside California, which this map doesn’t show.';
   if (!Object.hasOwn(geocodeCache, key)) {
     return 'New address: the nightly update will try to place it. If it’s still here tomorrow, add lat/lng.';
   }

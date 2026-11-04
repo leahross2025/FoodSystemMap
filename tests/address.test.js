@@ -1,6 +1,15 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { cleanAddress, geocodeCacheKey, normalizeWebsite, parseManualCoords } from '../src/lib/address.js';
+import { cleanAddress, geocodeCacheKey, normalizeWebsite, outsideCalifornia, parseManualCoords } from '../src/lib/address.js';
+
+test('outsideCalifornia spots addresses in another state, and only those', () => {
+  for (const a of ['PO Box 480, Joseph, OR 97846', '122 S. Michigan Ave., #1390-L74, Chicago, IL 60603', '301 N Guadalupe St., Ste 201, Santa Fe NM 87501', '1105 E Levee Street, Dallas, TX 75207, USA']) {
+    assert.equal(outsideCalifornia(a), true, a);
+  }
+  for (const a of ['1010 W 108th St, Los Angeles, CA 90044', '32712 El Sastre Rd Acton Ca 93510', '123 Main St, LA 90012', '13212 Saticoy Street, North Hollywood', '', null]) {
+    assert.equal(outsideCalifornia(a), false, String(a));
+  }
+});
 
 test('cleanAddress drops suites, a trailing ", USA" and "X and at" prefixes', () => {
   assert.equal(cleanAddress('1231 N. Spring Street, Suite C-102'), '1231 N. Spring Street');

@@ -7,6 +7,11 @@ on:
   schedule:
     - cron: '0 10 * * *' # 10:00 UTC = 3 am Pacific (2 am in winter)
   workflow_dispatch:
+    inputs:
+      retry_not_found:
+        description: Also look up again the addresses that weren't found before
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -32,7 +37,7 @@ jobs:
 
       - run: npm test
 
-      - run: npm run sync
+      - run: npm run sync ${{ inputs.retry_not_found && '-- --retry-not-found' || '' }}
 
       - name: Commit changed data
         run: |

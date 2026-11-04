@@ -23,8 +23,8 @@ from Kumu go in the same columns as everyone else; don't add a second name or ad
 | --- | --- |
 | Organization Name | The organization's name (required). |
 | Sector | One of the sectors listed below. |
-| Main Org Street Address (headquarters) | Street address with its number. For places outside Los Angeles, include the city, e.g. `889 Guadalupe Rd, Arroyo Grande, CA`. |
-| Main Org Zip Code | Zip code. |
+| Main Org Street Address (headquarters) | Street address with its number. For places outside Los Angeles, include the city, e.g. `889 Guadalupe Rd, Arroyo Grande, CA`. A whole address copied from Kumu (`200 N Tustin Ave, Suite 110, Santa Ana, CA 92705`) is fine too. |
+| Main Org Zip Code | Zip code. Can stay blank when the address already ends with it. |
 | lat and lng | Map coordinates. Optional, but needed for farms and for any address the map can't find on its own. |
 | Website | The website, e.g. `www.example.org`. |
 | Activity | What the organization does, e.g. its Kumu Service Category. |
@@ -42,7 +42,9 @@ The dot colors on the map and the Sector Legend use exactly these sectors, in th
 Nonprofit/CBO · For-Profit · Government Agency · K-12 School/School District · College/University · Labor ·
 Farm · Foundation · Other
 
-Small differences in capitals or punctuation are fine ("nonprofit" counts as Nonprofit/CBO). Anything else,
+Small differences in capitals or punctuation are fine ("nonprofit" counts as Nonprofit/CBO), and Kumu's sector
+names work too: Nonprofit → Nonprofit/CBO, Business → For-Profit, Academic → College/University, Union → Labor.
+Anything else (Kumu's "Trade Association", for example),
 including a write-in answer from the form's "Other:" option, is shown as Other and listed on the data check
 page so you can fix it.
 
@@ -52,6 +54,14 @@ page so you can fix it.
 2. Fill in Organization Name, Sector, the address and zip code, and the Website and Activity if you have them.
 3. For a farm, or anything outside Los Angeles, also fill in **lat** and **lng** (see below).
 4. After about 10 minutes, check the data check page.
+
+## Changing or removing an organization
+
+Edit or delete its row; the map and dashboard follow the sheet within about 10 minutes. A deleted row
+disappears from the map and from the counts, and the next nightly refresh removes it from the saved copy too.
+If you change an address and the row has no lat/lng, the dot disappears until the nightly refresh finds the
+new address (fill in lat/lng if you want it back right away). Row numbers on the data check page are always
+the sheet's current row numbers, so they shift when you delete or insert rows.
 
 ## Finding lat and lng
 
@@ -89,8 +99,9 @@ The page isn't linked from the website and is hidden from search engines. Bookma
 
 Every night at about 3 am, an automatic job on GitHub:
 
-- looks up a map location for each new address (each address is tried once; if it can't be found, the data
-  check page says so and you can add lat/lng instead),
+- looks up a map location for each new or changed address (each address is tried once; if it can't be
+  found, the data check page says so and you can add lat/lng instead). Addresses outside California
+  aren't looked up, because the map only shows California,
 - saves a copy of the sheet inside the website, used whenever Google Sheets can't be reached,
 - updates the website if anything changed.
 

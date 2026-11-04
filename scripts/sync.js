@@ -6,6 +6,7 @@
 //
 //   npm run sync                  read the published sheet, look up new addresses, save both files
 //   npm run sync -- --dry-run     same report, but no address lookups and no files written
+//   npm run sync -- --retry-not-found   also look up again the addresses cached as not found (null)
 //   SHEET_CSV_PATH=tests/fixtures/sheet.csv npm run sync -- --dry-run    read a local CSV instead
 
 import { realpathSync } from 'node:fs';
@@ -13,7 +14,7 @@ import { readFile, writeFile } from 'node:fs/promises';
 import { setTimeout as wait } from 'node:timers/promises';
 import { fileURLToPath } from 'node:url';
 import { SHEET_CSV_URL } from '../src/config/googleSheets.js';
-import { cleanAddress, geocodeCacheKey, parseManualCoords } from '../src/lib/address.js';
+import { cleanAddress, geocodeCacheKey, outsideCalifornia, parseManualCoords } from '../src/lib/address.js';
 import { resolveColumns } from '../src/lib/columns.js';
 import { buildDataset, parseCSV } from '../src/lib/organizations.js';
 
@@ -21,6 +22,7 @@ const CACHE_PATH = fileURLToPath(new URL('../src/data/geocode-cache.json', impor
 const SNAPSHOT_PATH = fileURLToPath(new URL('../src/data/snapshot.json', import.meta.url));
 
 const NOMINATIM_URL = 'https://nominatim.openstreetmap.org/search';
+const CENSUS_URL = 'https://geocoding.geo.census.gov/geocoder/locations/onelineaddress';
 const USER_AGENT = 'FoodSystemsStakeholderSurvey/1.0 (lacountyfoodsystems.org)';
 const REQUEST_GAP_MS = 1100; // Nominatim allows at most one request per second
 const TIMEOUT_MS = 30_000;
@@ -117,16 +119,43 @@ export function knownCoords(street, zip) {
 export const hasStreetNumber = (street) => /\d/.test(cleanAddress(street) ?? '');
 
 /**
- * Address lookups on Nominatim, at most one request per 1.1 s. The returned function resolves to
- * [lat, lng], or null when there's no match in California with the sheet's zip code; it throws when
- * Nominatim can't be reached, so that address is simply tried again next time.
+ * The zip code to check a match against: the sheet's zip column, else a zip code at the end of the
+ * address (rows copied from Kumu have the whole address in one cell and no zip column).
+ */
+export function expectedZip(street, zip) {
+  const fromColumn = zipCodes(zip)[0];
+  if (fromColumn) return fromColumn;
+  const tail = (cleanAddress(street) ?? '').match(/\b(\d{5})(?:-\d{4})?\s*$/);
+  return tail ? tail[1] : null;
+}
+
+/**
+ * Address lookups: OpenStreetMap's Nominatim first (at most one request per 1.1 s), then the US Census
+ * Bureau's geocoder for anything Nominatim didn't find. The returned function resolves to [lat, lng], or
+ * null when neither has a trustworthy match in California; it throws when a service can't be reached, so
+ * that address is simply tried again next time.
  */
 export function createGeocoder({ fetch = globalThis.fetch, sleep = wait } = {}) {
   let requests = 0;
 
+  // Census matches street number + street name against official address ranges, so it rarely settles for
+  // a look-alike; still, only a California match with the same street number counts.
+  async function census(query) {
+    if (!query) return null;
+    const url = `${CENSUS_URL}?benchmark=Public_AR_Current&format=json&address=${encodeURIComponent(tidy(query))}`;
+    const res = await fetch(url, { headers: { 'User-Agent': USER_AGENT }, signal: AbortSignal.timeout(TIMEOUT_MS) });
+    if (!res.ok) throw new Error(`the Census geocoder answered HTTP ${res.status}`);
+    const [hit] = (await res.json())?.result?.addressMatches ?? [];
+    if (hit?.addressComponents?.state !== 'CA') return null;
+    const number = (text) => String(text ?? '').match(/\d+/)?.[0];
+    if (number(hit.matchedAddress) !== number(query)) return null;
+    const coords = [Number(hit.coordinates?.y), Number(hit.coordinates?.x)];
+    return coords.every(Number.isFinite) ? coords : null;
+  }
+
   async function search(query, sheetZip) {
     if (requests++ > 0) await sleep(REQUEST_GAP_MS);
-    const url = `${NOMINATIM_URL}?format=json&q=${encodeURIComponent(query)}&addressdetails=1&limit=1`;
+    const url = `${NOMINATIM_URL}?format=json&q=${encodeURIComponent(tidy(query))}&addressdetails=1&limit=1`;
     const res = await fetch(url, { headers: { 'User-Agent': USER_AGENT }, signal: AbortSignal.timeout(TIMEOUT_MS) });
     if (!res.ok) throw new Error(`Nominatim answered HTTP ${res.status}`);
     const [hit] = await res.json();
@@ -140,14 +169,26 @@ export function createGeocoder({ fetch = globalThis.fetch, sleep = wait } = {}) 
   }
 
   return async function geocode(street, zip) {
-    const sheetZip = zipCodes(zip)[0];
+    const sheetZip = expectedZip(street, zip);
     for (const query of geocodeQueries(street, zip)) {
       const coords = await search(query, sheetZip);
       if (coords) return coords;
     }
-    return null;
+    return census(censusQuery(street, zip));
   };
 }
+
+/** The Census geocoder takes the whole address, suite numbers and all; it needs a city or zip code. */
+export function censusQuery(street, zip) {
+  const cleaned = cleanAddress(street);
+  if (!cleaned) return '';
+  if (!/\b(CA|California)\b/i.test(cleaned)) return geocodeQueries(street, zip)[0];
+  const sheetZip = zipCodes(zip)[0];
+  return sheetZip && !cleaned.includes(sheetZip) ? `${cleaned}, ${sheetZip}` : cleaned;
+}
+
+/** A search string without the gaps cleanAddress leaves behind: "816 S Figueroa St, , Los Angeles". */
+const tidy = (query) => query.replace(/\s*,(?:\s*,)+/g, ',').replace(/\s{2,}/g, ' ').trim();
 
 /** The 5-digit zip codes in a text: "90277-1234" → ["90277"]. */
 const zipCodes = (text) => String(text ?? '').match(/\b\d{5}\b/g) ?? [];
@@ -180,11 +221,13 @@ export function formatCache(cache) {
  * @param {object} [options]
  * @param {string | null} [options.csvPath]  read this CSV file instead of downloading the published sheet
  * @param {boolean} [options.dryRun]         no address lookups and no files written
+ * @param {boolean} [options.retryNotFound]  look up again addresses cached as not found (null)
  * @returns {Promise<{ report: object, toLookUp: number, written: string[] }>}
  */
 export async function sync({
   csvPath = null,
   dryRun = false,
+  retryNotFound = false,
   fetch = globalThis.fetch,
   sleep = wait,
   log = console.log,
@@ -207,11 +250,18 @@ export async function sync({
   // were looked up and not found are cached as null and not retried: add lat/lng in the sheet instead.
   const cols = resolveColumns(headers);
   const toLookUp = new Map();
+  // Every address in the sheet right now. Cached addresses no row uses any more (deleted rows, corrected
+  // addresses) are dropped, so the public cache file doesn't keep them and a re-added address is looked up
+  // fresh. Rows with typed lat/lng count too, so clearing the lat/lng falls back on the cached location.
+  const inUse = new Set(rows.map((row) => geocodeCacheKey(cols.get(row, 'address'), cols.get(row, 'zip'))).filter(Boolean));
   for (const row of rows) {
     if (parseManualCoords(cols.get(row, 'lat'), cols.get(row, 'lng')).coords) continue;
     const place = { row: row.__row, name: cols.get(row, 'name'), address: cols.get(row, 'address'), zip: cols.get(row, 'zip') };
     const key = geocodeCacheKey(place.address, place.zip);
-    if (key && !Object.hasOwn(cache, key) && !toLookUp.has(key)) toLookUp.set(key, place);
+    if (!key) continue;
+    const retry = retryNotFound && cache[key] === null && hasStreetNumber(place.address) && !outsideCalifornia(place.address);
+    const tried = Object.hasOwn(cache, key) && !retry;
+    if (!tried && !toLookUp.has(key)) toLookUp.set(key, place);
   }
 
   if (toLookUp.size) {
@@ -224,6 +274,9 @@ export async function sync({
     if (known) {
       cache[key] = known;
       log(`${label}: found in the built-in address list`);
+    } else if (outsideCalifornia(place.address)) {
+      cache[key] = null;
+      log(`${label}: outside California, so not placed on the map`);
     } else if (!hasStreetNumber(place.address)) {
       cache[key] = null;
       log(`${label}: no street number, so not looked up (add lat/lng in the sheet)`);
@@ -238,6 +291,10 @@ export async function sync({
       }
     }
   }
+
+  const unused = Object.keys(cache).filter((key) => !inUse.has(key));
+  for (const key of unused) delete cache[key];
+  if (unused.length) log(`\n${count(unused.length, 'cached address', 'cached addresses')} no longer in the sheet${dryRun ? ' (dry run: kept)' : ': removed from the cache'}`);
 
   const { report } = buildDataset(headers, rows, { geocodeCache: cache, fetchedAt: now.toISOString() });
   printReport(report, log);
@@ -261,7 +318,7 @@ export async function sync({
     }
     log(written.length ? `\nSaved ${written.join(' and ')}` : '\nNo changes to save.');
   }
-  return { report, toLookUp: toLookUp.size, written };
+  return { report, toLookUp: toLookUp.size, removed: unused.length, written };
 }
 
 async function downloadSheet(fetch) {
@@ -306,13 +363,14 @@ const count = (n, one, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
 /** Address and zip code, without repeating a zip code that's already in the address. */
 const addressText = ({ address, zip }) => (zip && !address.includes(zip) ? [address, zip].filter(Boolean).join(', ') : address);
 
-const USAGE = 'Usage: npm run sync [-- --dry-run]    (set SHEET_CSV_PATH=file.csv to read a local CSV instead)';
+const USAGE =
+  'Usage: npm run sync [-- --dry-run] [-- --retry-not-found]    (set SHEET_CSV_PATH=file.csv to read a local CSV instead)';
 
 // Run only when started as a script, not when imported by the tests. realpath: Node resolves symlinks in
 // import.meta.url but not in argv[1], so a checkout under a symlinked folder would otherwise do nothing.
 if (process.argv[1] && realpathSync(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const args = process.argv.slice(2);
-  const unknown = args.filter((arg) => arg !== '--dry-run');
+  const unknown = args.filter((arg) => arg !== '--dry-run' && arg !== '--retry-not-found');
   if (unknown.length) {
     console.error(`Unknown option: ${unknown.join(' ')}\n${USAGE}`);
     process.exit(1);
@@ -321,6 +379,7 @@ if (process.argv[1] && realpathSync(process.argv[1]) === fileURLToPath(import.me
     csvPath: process.env.SHEET_CSV_PATH || null,
     // `npm run sync --dry-run` (without the `--`) arrives as npm's own dry-run setting.
     dryRun: args.includes('--dry-run') || process.env.npm_config_dry_run === 'true',
+    retryNotFound: args.includes('--retry-not-found'),
   }).catch((err) => {
     console.error(`\nSync failed: ${err.message}`);
     process.exitCode = 1;

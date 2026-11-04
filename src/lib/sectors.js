@@ -39,8 +39,10 @@ const ALIASES = {
   schooldistrict: 'K-12 School/School District',
   college: 'College/University',
   university: 'College/University',
+  academic: 'College/University', // Kumu's word for colleges and universities
   labor: 'Labor',
   laborunion: 'Labor',
+  union: 'Labor', // Kumu's word for labor unions
   farm: 'Farm',
   farms: 'Farm',
   foundation: 'Foundation',

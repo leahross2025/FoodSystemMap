@@ -104,19 +104,26 @@ Use Node 22 (the version the nightly job uses). All commands run from the projec
 ```sh
 npm run sync                                                       # read the sheet, geocode, write both files
 npm run sync -- --dry-run                                          # report only: no lookups, no files written
+npm run sync -- --retry-not-found                                  # also retry addresses cached as not found
 SHEET_CSV_PATH=tests/fixtures/sheet.csv npm run sync -- --dry-run  # read a local CSV instead of the sheet
 ```
 
 - It prints the same summary as `/data-check` (rows → duplicate rows merged → organizations → on the map +
   missing a location) and lists the rows that need attention.
 - Each row's address that isn't in the cache yet is looked up (rows with usable `lat`/`lng` are skipped),
-  using OpenStreetMap's Nominatim, at most one request per 1.1 s. A merged organization's older rows count
+  with OpenStreetMap's Nominatim (at most one request per 1.1 s), then the US Census Bureau geocoder for
+  anything Nominatim didn't find (a California match with the same street number). The zip code to check
+  against is the zip column, else a zip at the end of the address (Kumu rows have no zip column). Addresses
+  that name another state aren't looked up. A merged organization's older rows count
   too, and its latest row's address is looked up even when an older row already puts it on the map.
   Only results in California and in the row's zip code count; addresses without a street number
   ("Texas") aren't searched for. Addresses that weren't found are cached as `null` and not tried again:
-  the fix is `lat`/`lng` in the sheet, or a corrected address. Lookups that fail (network, rate limit)
+  the fix is `lat`/`lng` in the sheet, or a corrected address (or `--retry-not-found` after improving the
+  lookup; the workflow's manual run has a checkbox for it). Lookups that fail (network, rate limit)
   aren't cached and are retried on the next run. A few hand-located addresses from the original geocoding
   script are built in (`FALLBACK_COORDS`).
+- Cached addresses no sheet row uses any more (deleted rows, corrected addresses) are removed from the cache,
+  so it follows deletions and a re-added address is looked up fresh.
 - `snapshot.json` is rewritten only when the sheet's content changed, so an unchanged sheet doesn't create
   a commit every night. The contact name, email and comments columns are left out.
 - If the sheet can't be downloaded or has no rows, nothing is written and the script exits with an error.
