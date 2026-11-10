@@ -1,19 +1,56 @@
 ---
+// Rendered on each request from the live stakeholder spreadsheet (see src/lib/data.server.js),
+// so edits to the sheet show up without a rebuild.
+export const prerender = false;
+
 import BaseHead from '../components/BaseHead.astro';
 import Footer from '../components/Footer.astro';
 import SearchFilters from '../components/SearchFilters.astro';
 import MapContainer from '../components/MapContainer.astro';
+import SectorLegend from '../components/SectorLegend.astro';
 import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
+import { loadData } from '../lib/data.server.js';
+import { OUTSIDE_COUNTY } from '../lib/districts.js';
+
+const { organizations } = await loadData(Astro.locals.runtime?.ctx);
+
+// Organizations with a map location, with just what the map, filters and popups use.
+// Emails are shown for survey respondents only, so other rows' emails never reach the browser.
+const orgs = organizations
+	.filter((org) => org.coordinates)
+	.map((org) => ({
+		id: org.id,
+		name: org.name,
+		sector: org.sector,
+		coordinates: org.coordinates,
+		address: displayAddress(org.address, org.zip),
+		districtLabel: org.districtLabel,
+		spas: org.spas,
+		activity: org.activity,
+		mission: org.mission,
+		website: org.website,
+		email: org.isSurveyRespondent ? org.email : '',
+	}));
+
+const outsideCounty = orgs.filter((org) => org.districtLabel === OUTSIDE_COUNTY).length;
+
+// The zip code has its own column; add it unless the address already includes it.
+function displayAddress(address: string, zip: string) {
+	const street = address.replace(/,?\s*USA\s*$/i, '').replace(/[\s,]+$/, '');
+	return street && zip && !street.includes(zip) ? `${street}, ${zip}` : street;
+}
 ---
 
 <!doctype html>
 <html lang="en">
 	<head>
 		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
-		<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 	</head>
 	<body>
+		<script type="application/json" id="org-data" set:html={JSON.stringify(orgs).replace(/</g, '\\u003c')}></script>
+
 		<div class="hero-section">
+			<h1 class="sr-only">{SITE_TITLE}</h1>
 			<div class="hero-logo">
 				<a href="https://lacountyfoodsystems.org/" target="_blank" rel="noopener noreferrer">
 					<img src="/images/LACOFE_FoodSystems_wht.webp" alt="LA Food Systems" />
@@ -26,56 +63,38 @@ import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
 		</div>
 		
 		<div class="map-section">
-			<SearchFilters />
-			<MapContainer />
+			<SearchFilters orgs={orgs} />
+			<div class="map-frame">
+				<a href="#sector-legend" class="skip-map">Skip map</a>
+				<MapContainer />
+			</div>
+			<p class="map-note">Data updates automatically from the stakeholder spreadsheet</p>
 		</div>
-		
+
 		<main>
 			<div class="info-section">
-				<div class="legend">
-					<h3>District Legend</h3>
-					<div class="legend-items">
-						<div class="legend-item">
-							<div class="legend-color" style="background-color: #E53E3E;"></div>
-							<span>1st District - Hilda Solis</span>
-						</div>
-						<div class="legend-item">
-							<div class="legend-color" style="background-color: #3182CE;"></div>
-							<span>2nd District - Holly Mitchell</span>
-						</div>
-						<div class="legend-item">
-							<div class="legend-color" style="background-color: #38A169;"></div>
-							<span>3rd District - Lindsey Horvath</span>
-						</div>
-						<div class="legend-item">
-							<div class="legend-color" style="background-color: #805AD5;"></div>
-							<span>4th District - Janice Hahn</span>
-						</div>
-						<div class="legend-item">
-							<div class="legend-color" style="background-color: #DD6B20;"></div>
-							<span>5th District - Kathryn Barger</span>
-						</div>
-					<div class="legend-item">
-						<div class="legend-color" style="background-color: #4A5568;"></div>
-						<span>Countywide</span>
-					</div>
-					<div class="legend-item">
-						<div class="legend-color" style="background-color: #319795;"></div>
-						<span>Other / Map Only</span>
-					</div>
-				</div>
-				</div>
-				
+				<SectorLegend orgs={orgs} />
+
 				<div class="about">
-					<h3>About This Map</h3>
+					<h2>About This Map</h2>
 					<p>
 						This interactive map displays food systems stakeholder organizations across Los Angeles County. 
-						Use the search and filters above to explore organizations by sector, district, or search terms.
+						Each dot is colored by the organization's sector, as shown in the Sector Legend.
 					</p>
 					<p>
-						Click on any marker to view detailed information about an organization, including their mission, 
+						Use the search and filters above the map, or click a sector in the legend, to explore organizations
+						by name, sector, supervisorial district, or Service Planning Area (SPA).
+					</p>
+					<p>
+						Click on any dot to view detailed information about an organization, including their mission,
 						activities, and contact information.
 					</p>
+					{outsideCounty > 0 && (
+						<p>
+							{outsideCounty === 1 ? '1 organization is' : `${outsideCounty} organizations are`} outside
+							LA County. Zoom out on the map to see them.
+						</p>
+					)}
 				</div>
 			</div>
 		</main>
@@ -151,6 +170,52 @@ import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
 		overflow: hidden;
 	}
 	
+	.map-frame {
+		position: relative;
+	}
+
+	/* Lets keyboard users jump past the map's dots to the Sector Legend. Shown only while it has the focus. */
+	.skip-map {
+		position: absolute;
+		top: 10px;
+		left: 50%;
+		z-index: 1001; /* above the map's zoom buttons */
+		transform: translateX(-50%);
+		padding: 6px 14px;
+		border-radius: 6px;
+		background: #383838;
+		color: white;
+		font-size: 0.9rem;
+		font-weight: 600;
+		line-height: 1.4;
+		white-space: nowrap;
+		text-decoration: none;
+	}
+
+	.skip-map:focus-visible {
+		outline: 2px solid #3182ce;
+		outline-offset: 2px;
+	}
+
+	.skip-map:not(:focus) {
+		width: 1px;
+		height: 1px;
+		padding: 0;
+		overflow: hidden;
+		clip-path: inset(50%);
+	}
+
+	.map-note {
+		margin: 8px 0 0 0;
+		font-size: 0.8rem;
+		line-height: 1.4;
+		color: #4a5568;
+	}
+
+	.about h2 {
+		font-size: 1.953em; /* the h3 size of the site's type scale */
+	}
+
 	.info-section {
 		display: grid;
 		grid-template-columns: 2fr 2fr;
@@ -158,49 +223,10 @@ import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
 		margin-bottom: 40px;
 	}
 	
-	.legend {
-		background: white;
-		padding: 20px;
-		border-radius: 8px;
-		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-	}
-	
-	.legend h3 {
-		margin: 0 0 15px 0;
-		color: #2d3748;
-	}
-	
-	.legend-items {
-		display: flex;
-		flex-direction: column;
-		gap: 10px;
-	}
-	
-	.legend-item {
-		display: flex;
-		align-items: center;
-		gap: 10px;
-	}
-	
-	.legend-color {
-		width: 20px;
-		height: 20px;
-		border-radius: 50%;
-		border: 2px solid white;
-		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-	}
-	
-
-	
 	@media (max-width: 768px) {
 		.hero-section {
 			padding: 30px 15px;
 			margin-bottom: 25px;
-		}
-		
-		.hero-section h1 {
-			font-size: 2.2rem;
-			margin-bottom: 15px;
 		}
 		
 		.hero-section p {
@@ -220,29 +246,13 @@ import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
 			margin-bottom: 30px;
 		}
 		
-		.legend,
 		.about {
 			padding: 15px;
 		}
 		
-		.legend h3,
-		.about h3 {
+		.about h2 {
 			font-size: 1.4rem;
 			margin-bottom: 12px;
-		}
-		
-		.legend-items {
-			gap: 8px;
-		}
-		
-		.legend-item {
-			gap: 8px;
-		}
-		
-		.legend-color {
-			width: 18px;
-			height: 18px;
-			flex-shrink: 0;
 		}
 		
 		.about p {
@@ -261,11 +271,6 @@ import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
 			margin-bottom: 20px;
 		}
 		
-		.hero-section h1 {
-			font-size: 1.8rem;
-			margin-bottom: 12px;
-		}
-		
 		.hero-section p {
 			font-size: 0.9rem;
 		}
@@ -280,29 +285,13 @@ import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
 			margin-bottom: 25px;
 		}
 		
-		.legend,
 		.about {
 			padding: 12px;
 		}
 		
-		.legend h3,
-		.about h3 {
+		.about h2 {
 			font-size: 1.2rem;
 			margin-bottom: 10px;
-		}
-		
-		.legend-items {
-			gap: 6px;
-		}
-		
-		.legend-item {
-			gap: 6px;
-			font-size: 0.85rem;
-		}
-		
-		.legend-color {
-			width: 16px;
-			height: 16px;
 		}
 		
 		.about p {

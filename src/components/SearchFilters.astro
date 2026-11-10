@@ -1,198 +1,176 @@
 ---
-import organizationsData from '../data/organizations.json';
+import { SECTORS } from '../lib/sectors.js';
+import { districtLabel } from '../lib/districts.js';
 
-// Get unique sectors and districts for filter options
-const sectors = [...new Set(organizationsData.organizations.map(org => org.sector))].sort();
-const districts = [...new Set(organizationsData.organizations.map(org => org.primaryDistrict))].sort();
-
-// Get unique SPAs from both primarySPA and additionalSPAs fields
-const allSPAs = new Set();
-organizationsData.organizations.forEach(org => {
-  // Add primarySPA
-  if (org.primarySPA) {
-    allSPAs.add(org.primarySPA);
-  }
+interface Props {
+  /** The organizations on the map (see index.astro). */
+  orgs: { sector: string; districtLabel: string; spas: string[] }[];
+}
   
-  // Parse and add additionalSPAs
-  if (org.additionalSPAs) {
-    const additionalSPAsList = org.additionalSPAs.split(',').map(spa => spa.trim());
-    additionalSPAsList.forEach(spa => {
-      if (spa) {
-        allSPAs.add(spa);
-      }
-    });
-  }
-});
+const { orgs } = Astro.props;
 
-// Convert to array and sort SPAs (Countywide first, then numerical order)
-const spas = Array.from(allSPAs).sort((a, b) => {
-  if (a === 'Countywide') return -1;
-  if (b === 'Countywide') return 1;
+// Every sector in legend order (the Sector Legend can select any of them), with how many are on the map.
+const sectors = SECTORS.map(({ key }) => ({ key, count: orgs.filter((org) => org.sector === key).length }));
   
-  // Extract numbers for proper numerical sorting
-  const aNum = parseInt(a.replace('SPA ', ''));
-  const bNum = parseInt(b.replace('SPA ', ''));
-  return aNum - bNum;
-});
+// The districts organizations are in, in this order.
+const districts = [1, 2, 3, 4, 5, 'countywide', 0, null]
+  .map(districtLabel)
+  .filter((label) => orgs.some((org) => org.districtLabel === label));
+
+// SPAs are filtered by number ("SPA 4"), so a label spelled slightly differently still matches.
+// Countywide first, then by number.
+const spaLabels = new Map<string, string>();
+for (const label of orgs.flatMap((org) => org.spas)) {
+  const value = label.match(/^SPA \d+/)?.[0] ?? label;
+  if (!spaLabels.has(value)) spaLabels.set(value, label);
+}
+const spaOrder = (value: string) => (value === 'Countywide' ? 0 : parseInt(value.replace('SPA ', '')) || 99);
+const spas = [...spaLabels].sort(([a], [b]) => spaOrder(a) - spaOrder(b));
 ---
 
-<div class="filters-container">
+<div class="filters-container" role="search" aria-label="Find organizations">
   <div class="search-section">
     <div class="search-input-container">
+      <label for="searchInput" class="sr-only">Search organizations</label>
       <input
         type="text"
         id="searchInput"
         placeholder="Search organizations..."
         class="search-input"
+        autocomplete="off"
       />
-      <button id="clearSearch" class="clear-button" title="Clear search">×</button>
+      <button type="button" id="clearSearch" class="clear-button" title="Clear search" aria-label="Clear search">×</button>
     </div>
     
     <div class="filter-dropdowns">
-      <select id="sectorFilter" class="filter-select">
+      <select id="sectorFilter" class="filter-select" aria-label="Sector" autocomplete="off">
         <option value="">All Sectors</option>
-        {sectors.map(sector => (
-          <option value={sector}>{sector}</option>
+        {sectors.map(({ key, count }) => (
+          <option value={key}>{key} ({count})</option>
         ))}
       </select>
       
-      <select id="districtFilter" class="filter-select">
+      <select id="districtFilter" class="filter-select" aria-label="Supervisorial district" autocomplete="off">
         <option value="">All Districts</option>
         {districts.map(district => (
           <option value={district}>{district}</option>
         ))}
       </select>
       
-      <select id="spaFilter" class="filter-select">
+      <select id="spaFilter" class="filter-select" aria-label="Service Planning Area (SPA)" autocomplete="off">
         <option value="">All SPAs</option>
-        {spas.map(spa => (
-          <option value={spa}>{spa}</option>
+        {spas.map(([value, label]) => (
+          <option value={value}>{label}</option>
         ))}
       </select>
     </div>
   </div>
   
   <div class="results-section">
-    <div id="resultsCount" class="results-count">
-      Showing {organizationsData.organizations.length} of {organizationsData.organizations.length} organizations
+    <div id="resultsCount" class="results-count" role="status">
+      Showing {orgs.length} of {orgs.length} organizations
     </div>
     
-    <button id="clearFilters" class="clear-filters-button">Clear All Filters</button>
+    <button type="button" id="clearFilters" class="clear-filters-button">Clear All Filters</button>
   </div>
 </div>
 
 <script>
-  // Wait for map to be initialized
-  function initializeFilters() {
-    if (!window.allMarkers) {
-      setTimeout(initializeFilters, 100);
-      return;
-    }
-
-    const searchInput = document.getElementById('searchInput');
-    const sectorFilter = document.getElementById('sectorFilter');
-    const districtFilter = document.getElementById('districtFilter');
-    const spaFilter = document.getElementById('spaFilter');
-    const clearSearch = document.getElementById('clearSearch');
-    const clearFilters = document.getElementById('clearFilters');
-    const resultsCount = document.getElementById('resultsCount');
-
-    let filteredMarkers = [...window.allMarkers];
-
-    // Filter function
-    function filterMarkers() {
-      const searchTerm = searchInput.value.toLowerCase();
-      const selectedSector = sectorFilter.value;
-      const selectedDistrict = districtFilter.value;
-      const selectedSPA = spaFilter.value;
-
-      // Hide all markers first
-      window.allMarkers.forEach(marker => {
-        window.mapInstance.removeLayer(marker);
-      });
-
-      // Filter and show matching markers
-      filteredMarkers = window.allMarkers.filter(marker => {
-        const org = marker.orgData;
+  // Decides which organizations are shown. The map and the Sector Legend follow along through
+  // document events, so it doesn't matter which component's script starts first:
+  //   'orgs:filter'          detail { visible: Set of org ids, sector } — sent whenever the filters change
+  //   'orgs:filter-request'  asks for 'orgs:filter' again
+  //   'orgs:pick-sector'     detail { sector } — sets the Sector filter ('' = all sectors)
         
-        // Text search across multiple fields
-        const searchableText = [
-          org.name,
-          org.sector,
-          org.mission,
-          org.primaryActivity,
-          org.address,
-          org.primaryDistrict
-        ].join(' ').toLowerCase();
+  type Org = {
+    id: string;
+    name: string;
+    sector: string;
+    activity: string;
+    mission: string;
+    address: string;
+    districtLabel: string;
+    spas: string[];
+  };
         
-        const matchesSearch = !searchTerm || searchableText.includes(searchTerm);
-        const matchesSector = !selectedSector || org.sector === selectedSector;
-        const matchesDistrict = !selectedDistrict || org.primaryDistrict === selectedDistrict;
-        
-        // SPA filtering logic with special Countywide handling
-        let matchesSPA = true;
-        if (selectedSPA) {
-          // Check if organization has "Countywide" in additionalSPAs - if so, always include
-          const hasCountywide = org.additionalSPAs && org.additionalSPAs.includes('Countywide');
+  const orgs: Org[] = JSON.parse(document.getElementById('org-data')?.textContent || '[]');
           
-          if (hasCountywide) {
-            matchesSPA = true; // Always show Countywide organizations
-          } else {
-            // Check if selected SPA matches primarySPA or is in additionalSPAs
-            const matchesPrimary = org.primarySPA === selectedSPA;
-            const matchesAdditional = org.additionalSPAs && 
-              org.additionalSPAs.split(',').map(spa => spa.trim()).includes(selectedSPA);
+  const searchInput = document.getElementById('searchInput') as HTMLInputElement;
+  const sectorFilter = document.getElementById('sectorFilter') as HTMLSelectElement;
+  const districtFilter = document.getElementById('districtFilter') as HTMLSelectElement;
+  const spaFilter = document.getElementById('spaFilter') as HTMLSelectElement;
+  const clearSearch = document.getElementById('clearSearch') as HTMLButtonElement;
+  const clearFilters = document.getElementById('clearFilters') as HTMLButtonElement;
+  const resultsCount = document.getElementById('resultsCount') as HTMLElement;
             
-            matchesSPA = matchesPrimary || matchesAdditional;
-          }
-        }
+  // Lowercase, without accents or curly apostrophes, so "cafe" finds "Café" and "henry's" finds "Henry’s".
+  const fold = (text: string) =>
+    text.normalize('NFKD').replace(/\p{M}/gu, '').replace(/[‘’]/g, "'").toLowerCase();
         
-        return matchesSearch && matchesSector && matchesDistrict && matchesSPA;
-      });
+  const searchable = orgs.map((org) => ({
+    org,
+    text: fold([org.name, org.sector, org.activity, org.mission, org.address, org.districtLabel].join('\n')),
+  }));
 
-      // Add filtered markers back to map
-      filteredMarkers.forEach(marker => {
-        marker.addTo(window.mapInstance);
-      });
+  // Screen readers announce the results count (role="status"), so while someone is typing it's only
+  // updated once they pause, instead of being read out after every key.
+  const TYPING_PAUSE_MS = 500;
+  let countTimer: ReturnType<typeof setTimeout> | undefined;
 
-      // Update results count
-      const total = window.allMarkers.length;
-      const showing = filteredMarkers.length;
-      resultsCount.textContent = `Showing ${showing} of ${total} organizations`;
+  function filterMarkers({ typing = false } = {}) {
+    const query = searchInput.value.trim();
+    const words = fold(query).split(/\s+/).filter(Boolean);
+    const sector = sectorFilter.value;
+    const district = districtFilter.value;
+    const spa = spaFilter.value;
 
-      // Show/hide clear search button
-      clearSearch.style.display = searchTerm ? 'block' : 'none';
-    }
+    const visible = new Set(
+      searchable
+        .filter(
+          ({ org, text }) =>
+            words.every((word) => text.includes(word)) &&
+            (!sector || org.sector === sector) &&
+            (!district || org.districtLabel === district) &&
+            // Countywide organizations serve every SPA, so they always match.
+            (!spa || org.spas.some((label) => label === 'Countywide' || label === spa || label.startsWith(`${spa} `))),
+        )
+        .map(({ org }) => org.id),
+    );
 
-    // Clear all filters
-    function clearAllFilters() {
-      searchInput.value = '';
-      sectorFilter.value = '';
-      districtFilter.value = '';
-      spaFilter.value = '';
-      filterMarkers();
-    }
+    const count = `Showing ${visible.size} of ${orgs.length} organizations`;
+    clearTimeout(countTimer);
+    if (typing) countTimer = setTimeout(() => (resultsCount.textContent = count), TYPING_PAUSE_MS);
+    else resultsCount.textContent = count;
+    clearSearch.style.display = query ? 'block' : 'none';
+    document.dispatchEvent(new CustomEvent('orgs:filter', { detail: { visible, sector } }));
+  }
 
-    // Clear search only
-    function clearSearchOnly() {
-      searchInput.value = '';
-      filterMarkers();
-    }
-
-    // Event listeners
-    searchInput.addEventListener('input', filterMarkers);
-    sectorFilter.addEventListener('change', filterMarkers);
-    districtFilter.addEventListener('change', filterMarkers);
-    spaFilter.addEventListener('change', filterMarkers);
-    clearSearch.addEventListener('click', clearSearchOnly);
-    clearFilters.addEventListener('click', clearAllFilters);
-
-    // Initial filter (show all)
+  function clearAllFilters() {
+    searchInput.value = '';
+    sectorFilter.value = '';
+    districtFilter.value = '';
+    spaFilter.value = '';
     filterMarkers();
   }
 
-  // Initialize when DOM is loaded
-  document.addEventListener('DOMContentLoaded', initializeFilters);
+  function clearSearchOnly() {
+    searchInput.value = '';
+    filterMarkers();
+    searchInput.focus();
+  }
+
+  searchInput.addEventListener('input', () => filterMarkers({ typing: true }));
+  for (const select of [sectorFilter, districtFilter, spaFilter]) select.addEventListener('change', () => filterMarkers());
+  clearSearch.addEventListener('click', clearSearchOnly);
+  clearFilters.addEventListener('click', clearAllFilters);
+
+  document.addEventListener('orgs:pick-sector', (event) => {
+    sectorFilter.value = (event as CustomEvent<{ sector: string }>).detail.sector;
+    filterMarkers();
+  });
+  document.addEventListener('orgs:filter-request', () => filterMarkers());
+
+  filterMarkers();
 </script>
 
 <style>
