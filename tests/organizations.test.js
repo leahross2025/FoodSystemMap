@@ -443,3 +443,23 @@ describe('report', () => {
     assert.ok(!Number.isNaN(Date.parse(buildDataset([], []).report.fetchedAt)));
   });
 });
+
+describe('row order', () => {
+  test('sorting the sheet (say, alphabetically) changes nothing on the map or the dashboard', () => {
+    const text = readFileSync(new URL('./fixtures/sheet.csv', import.meta.url), 'utf8');
+    const { headers, rows } = parseCSV(text);
+    const name = resolveColumns(headers).map.name;
+    // Sort A → Z by organization name, then renumber the rows as the sheet would.
+    const sorted = [...rows]
+      .sort((a, b) => a[name].localeCompare(b[name]) || a.__row - b.__row)
+      .map((row, i) => ({ ...row, __row: i + 2 }));
+    const view = (rowsIn) => {
+      const { organizations, report } = buildDataset(headers, rowsIn, { geocodeCache });
+      const orgs = organizations
+        .map((o) => [o.name, o.sector, o.coordinates, o.isSurveyRespondent, o.address, o.timestamp, o.survey])
+        .sort((a, b) => a[0].localeCompare(b[0]));
+      return { orgs, counts: [report.sheetRows, report.uniqueOrganizations, report.surveyRespondents, report.onMap] };
+    };
+    assert.deepEqual(view(sorted), view(rows));
+  });
+});

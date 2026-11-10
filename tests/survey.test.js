@@ -85,8 +85,8 @@ describe('summarize (tests/fixtures/sheet.csv)', () => {
     const { bars } = section('sector');
     assert.deepEqual(bars.map((b) => b.label), SECTORS.map((s) => s.key));
     assert.deepEqual(bars.map((b) => b.color), SECTORS.map((s) => s.color));
-    assert.deepEqual(bars.map((b) => b.count), [59, 5, 10, 0, 5, 0, 0, 3, 1]);
-    assert.deepEqual(bars.map((b) => b.percent), [71, 6, 12, 0, 6, 0, 0, 4, 1]);
+    assert.deepEqual(bars.map((b) => b.count), [59, 5, 10, 0, 5, 0, 0, 3, 0, 1]);
+    assert.deepEqual(bars.map((b) => b.percent), [71, 6, 12, 0, 6, 0, 0, 4, 0, 1]);
   });
 
   test('goals', () => {

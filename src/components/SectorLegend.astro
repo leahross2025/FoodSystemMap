@@ -21,7 +21,7 @@ const rows = SECTORS.map(({ key, color }) => ({ key, color, count: orgs.filter((
         <button type="button" class="legend-item" data-sector={key} aria-pressed="false" style={`--sector-color: ${color}`}>
           <span class="legend-color"></span>
           <span class="legend-name">{key}</span>
-          <span class="legend-count">{count}<span class="sr-only"> organizations</span></span>
+          <span class="legend-count">{count}<span class="sr-only">{count === 1 ? " organization" : " organizations"}</span></span>
         </button>
       </li>
     ))}

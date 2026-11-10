@@ -40,12 +40,11 @@ appear on the map but aren't counted as survey responses on the dashboard.
 The dot colors on the map and the Sector Legend use exactly these sectors, in this order:
 
 Nonprofit/CBO · For-Profit · Government Agency · K-12 School/School District · College/University · Labor ·
-Farm · Foundation · Other
+Farm · Foundation · Trade Association · Other
 
 Small differences in capitals or punctuation are fine ("nonprofit" counts as Nonprofit/CBO), and Kumu's sector
 names work too: Nonprofit → Nonprofit/CBO, Business → For-Profit, Academic → College/University, Union → Labor.
-Anything else (Kumu's "Trade Association", for example),
-including a write-in answer from the form's "Other:" option, is shown as Other and listed on the data check
+Anything else, including a write-in answer from the form's "Other:" option, is shown as Other and listed on the data check
 page so you can fix it.
 
 ## Adding a farm or an organization from Kumu
@@ -62,6 +61,18 @@ disappears from the map and from the counts, and the next nightly refresh remove
 If you change an address and the row has no lat/lng, the dot disappears until the nightly refresh finds the
 new address (fill in lat/lng if you want it back right away). Row numbers on the data check page are always
 the sheet's current row numbers, so they shift when you delete or insert rows.
+
+## Sorting the sheet
+
+The website doesn't care what order the rows are in, so sorting never changes the map or the dashboard.
+The Google Form, though, always puts a new answer right below the last answer it added (that's how the
+11/4 MEND response ended up at row 86, above the farms), not at the bottom. In a sorted sheet, new answers
+therefore land in the middle. They still show up on the map and dashboard; they're just harder to spot.
+
+To look at the sheet in alphabetical order without moving anything, use a filter view: **Data → Filter
+views → Create new filter view**, then sort the Organization Name column A → Z. Only your view is sorted.
+If you do sort the sheet itself, use **Data → Sort sheet** (with the header row frozen), never a sort of a
+few selected columns, which would mix up which answers belong to which organization.
 
 ## Finding lat and lng
 

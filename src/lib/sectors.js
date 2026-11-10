@@ -16,6 +16,10 @@ export const SECTORS = [
   { key: 'Labor', color: '#D55E00' },
   { key: 'Farm', color: '#009E73' },
   { key: 'Foundation', color: '#D4B800' },
+  // Added at the client's request so Kumu's "Trade Association" isn't shown as Other. Medium brown:
+  // lighter than Government Agency's near-black, and still clearly apart from the other
+  // colors under simulated red-green and blue-yellow color blindness.
+  { key: 'Trade Association', color: '#8C564B' },
   { key: OTHER_SECTOR, color: '#8A94A6' },
 ];
 
@@ -46,6 +50,7 @@ const ALIASES = {
   farm: 'Farm',
   farms: 'Farm',
   foundation: 'Foundation',
+  tradeassociations: 'Trade Association',
   other: OTHER_SECTOR,
 };
 for (const s of SECTORS) ALIASES[squash(s.key)] = s.key;

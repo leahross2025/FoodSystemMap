@@ -5,7 +5,7 @@ import { isKnownSector, normalizeSector, OTHER_SECTOR, SECTOR_COLORS, SECTORS } 
 test('the legend lists exactly the requested sectors, in order', () => {
   assert.deepEqual(
     SECTORS.map((s) => s.key),
-    ['Nonprofit/CBO', 'For-Profit', 'Government Agency', 'K-12 School/School District', 'College/University', 'Labor', 'Farm', 'Foundation', 'Other'],
+    ['Nonprofit/CBO', 'For-Profit', 'Government Agency', 'K-12 School/School District', 'College/University', 'Labor', 'Farm', 'Foundation', 'Trade Association', 'Other'],
   );
   assert.equal(OTHER_SECTOR, 'Other');
 });
@@ -46,6 +46,8 @@ test('common spelling variants map to the canonical sector', () => {
     Union: 'Labor',
     Farms: 'Farm',
     FOUNDATION: 'Foundation',
+    'Trade Association': 'Trade Association',
+    'trade associations': 'Trade Association',
   };
   for (const [raw, expected] of Object.entries(variants)) {
     assert.equal(normalizeSector(raw), expected, raw);
