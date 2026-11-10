@@ -445,6 +445,21 @@ describe('report', () => {
 });
 
 describe('row order', () => {
+  test('a city-only address is placed at the city centre and marked approximate', () => {
+    const headers = ['Organization Name', 'Sector', 'Main Org Street Address (headquarters)', 'Main Org Zip Code', 'lat', 'lng'];
+    const rows = [
+      { __row: 2, 'Organization Name': 'City Org', Sector: 'Nonprofit', 'Main Org Street Address (headquarters)': 'Truckee, CA', 'Main Org Zip Code': '', lat: '', lng: '' },
+      { __row: 3, 'Organization Name': 'Street Org', Sector: 'Nonprofit', 'Main Org Street Address (headquarters)': '1 Main St, Truckee, CA', 'Main Org Zip Code': '', lat: '', lng: '' },
+    ];
+    const { organizations } = buildDataset(headers, rows, {
+      geocodeCache: { 'truckee, ca, los angeles, ca': [39.3279, -120.1836], '1 main st, truckee, ca, los angeles, ca': [39.33, -120.19] },
+    });
+    assert.deepEqual(organizations.map((o) => [o.name, o.coordinates, o.coordSource]), [
+      ['City Org', [39.3279, -120.1836], 'city'],
+      ['Street Org', [39.33, -120.19], 'geocoded'],
+    ]);
+  });
+
   test('sorting the sheet (say, alphabetically) changes nothing on the map or the dashboard', () => {
     const text = readFileSync(new URL('./fixtures/sheet.csv', import.meta.url), 'utf8');
     const { headers, rows } = parseCSV(text);

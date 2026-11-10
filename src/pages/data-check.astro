@@ -31,6 +31,8 @@ const addressText = ({ address, zip }) => (zip && !address.includes(zip) ? [addr
 const mapsSearch = (m) => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${m.name} ${addressText(m)}`.trim())}`;
 
 const coordinateProblemRows = new Set(report.coordinateIssues.map((c) => c.row));
+// Dots placed at a city centre because the sheet only gives a city, not a street address.
+const cityOnly = organizations.filter((org) => org.coordSource === 'city');
 
 // The sector the map shows for a spreadsheet row. A row merged with others shows as its organization,
 // which takes a sector from another of its rows when its own isn't in the list.
@@ -81,6 +83,7 @@ const COLUMNS = {
 // Duplicates are merged automatically, so they're shown as information rather than as problems.
 const checks = [
   { id: 'missing-location', title: 'Missing a location', count: missing.length },
+  { id: 'city-level', title: 'Placed by city only', count: cityOnly.length, info: true },
   { id: 'coordinates', title: 'Coordinate problems', count: report.coordinateIssues.length },
   { id: 'duplicates', title: 'Duplicates', count: report.duplicates.length, info: true },
   { id: 'possible-duplicates', title: 'Possible duplicates', count: possibleDuplicates.length, info: true },
@@ -174,6 +177,38 @@ const counts = Object.fromEntries(checks.map((c) => [c.id, c.count]));
 										<td>
 											<a href={mapsSearch(m)} target="_blank" rel="noopener">Find on Google Maps<span class="sr-only">: {m.name}</span></a>
 										</td>
+									</tr>
+								))}
+							</tbody>
+						</table>
+					</Fragment>
+				)}
+			</section>
+
+			<section id="city-level" class="card">
+				<h2>Placed by city only</h2>
+				{cityOnly.length === 0 ? (
+					<p class="all-good">✓ All good: every dot is at a street address or has lat/lng.</p>
+			) : (
+					<Fragment>
+						<p>
+							These rows have only a city in the address column, so the dot sits at the <b>centre of that city</b> rather than
+							at a particular address. The popup says “Approximate location: city centre”. Fine for a network map; add a street
+							address or lat/lng if you want the dot exact.
+						</p>
+						<table class="table">
+							<thead>
+								<tr><th scope="col">Row</th><th scope="col">Organization</th><th scope="col">City in the sheet</th></tr>
+							</thead>
+							<tbody>
+								{cityOnly.map((org) => (
+									<tr>
+										<td class="row-number" data-label="Row">{org.row}</td>
+										<td data-label="Organization">
+											<b>{org.name}</b>
+											<span class="sector"><span class="dot" style={{ background: SECTOR_COLORS[org.sector] }}></span>{org.sector}</span>
+										</td>
+										<td data-label="City">{addressText(org)}</td>
 									</tr>
 								))}
 							</tbody>

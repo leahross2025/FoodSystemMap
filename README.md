@@ -116,8 +116,9 @@ SHEET_CSV_PATH=tests/fixtures/sheet.csv npm run sync -- --dry-run  # read a loca
   against is the zip column, else a zip at the end of the address (Kumu rows have no zip column). Addresses
   that name another state aren't looked up. A merged organization's older rows count
   too, and its latest row's address is looked up even when an older row already puts it on the map.
-  Only results in California and in the row's zip code count; addresses without a street number
-  ("Texas") aren't searched for. Addresses that weren't found are cached as `null` and not tried again:
+  Only results in California and in the row's zip code count. A city-only address (`Truckee, CA`) is
+  placed at the city centre (`coordSource: 'city'`, flagged in the popup and on /data-check); anything else
+  without a street number ("Texas") isn't searched for. Addresses that weren't found are cached as `null` and not tried again:
   the fix is `lat`/`lng` in the sheet, or a corrected address (or `--retry-not-found` after improving the
   lookup; the workflow's manual run has a checkbox for it). Lookups that fail (network, rate limit)
   aren't cached and are retried on the next run. A few hand-located addresses from the original geocoding

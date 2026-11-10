@@ -3,7 +3,7 @@
 // and in the Cloudflare Worker.
 
 import Papa from 'papaparse';
-import { geocodeCacheKey, normalizeWebsite, parseManualCoords } from './address.js';
+import { geocodeCacheKey, isCityOnly, normalizeWebsite, parseManualCoords } from './address.js';
 import { resolveColumns } from './columns.js';
 import { districtLabel, parseDistrict, parseSPAs } from './districts.js';
 import { isKnownSector, normalizeSector, OTHER_SECTOR } from './sectors.js';
@@ -31,7 +31,8 @@ const SURVEY_FIELDS = ['groups', 'goals', 'topGoal', 'objectives', 'topObjective
  * @property {string} address
  * @property {string} zip
  * @property {[number, number] | null} coordinates  [lat, lng]
- * @property {'sheet' | 'geocoded' | null} coordSource
+ * @property {'sheet' | 'geocoded' | 'city' | null} coordSource  'city' = the address is only a city, so
+ *   the dot is the city centre
  * @property {1 | 2 | 3 | 4 | 5 | 'countywide' | 0 | null} district  0 = outside LA County
  * @property {string} districtLabel
  * @property {'survey' | 'location' | null} districtSource
@@ -176,7 +177,8 @@ function readRow(raw, row, cols, geocodeCache, report) {
     const cached = key ? geocodeCache?.[key] : null;
     if (isLatLng(cached)) {
       coordinates = [cached[0], cached[1]];
-      coordSource = 'geocoded';
+      // A city-only address is placed at the city centre, so the map can say the dot is approximate.
+      coordSource = isCityOnly(address) ? 'city' : 'geocoded';
     }
   }
 

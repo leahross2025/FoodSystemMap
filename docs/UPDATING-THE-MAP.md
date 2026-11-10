@@ -26,7 +26,7 @@ from Kumu go in the same columns as everyone else; don't add a second name or ad
 | Main Org Street Address (headquarters) | Street address with its number. For places outside Los Angeles, include the city, e.g. `889 Guadalupe Rd, Arroyo Grande, CA`. A whole address copied from Kumu (`200 N Tustin Ave, Suite 110, Santa Ana, CA 92705`) is fine too. |
 | Main Org Zip Code | Zip code. Can stay blank when the address already ends with it. |
 | lat and lng | Map coordinates. Optional, but needed for farms and for any address the map can't find on its own. |
-| Website | The website, e.g. `www.example.org`. |
+| Website | The website, e.g. `www.example.org`. Optional; without the column, popups just have no website link. |
 | Activity | What the organization does, e.g. its Kumu Service Category. |
 
 Column headings may differ slightly. For example, "Latitude" and "Longitude", "Contact (website address from
@@ -73,6 +73,33 @@ To look at the sheet in alphabetical order without moving anything, use a filter
 views → Create new filter view**, then sort the Organization Name column A → Z. Only your view is sorted.
 If you do sort the sheet itself, use **Data → Sort sheet** (with the header row frozen), never a sort of a
 few selected columns, which would mix up which answers belong to which organization.
+
+## Adding the Website column
+
+The map doesn't need this column, but with it each popup gets a clickable link to the organization's site.
+
+1. Click the letter of the last used column header (column X at the moment) to select it.
+2. **Insert → Columns → Insert 1 column right** (or right-click the header → **Insert 1 column right**).
+3. In the new column's header cell, type exactly **Website** (capital W, no extra words).
+4. Fill the cells below with the addresses, e.g. `www.example.org` or `https://example.org`. A bare
+   `example.org` works too; `@` handles and plain email addresses are ignored.
+
+Save nothing else; the next page load picks the column up. To add other optional information, do the same
+with a column headed **Activity** (what the organization does, e.g. its Kumu Service Category). Column
+headings may be at the far right; the site looks for them by name, not by position.
+
+The data check page's **Missing columns** section turns from "Website" to ✓ once the column is there.
+
+## Organizations with only a city
+
+An address column of just a city and state works: `Los Angeles, CA` or `Truckee, CA`. The dot goes to the
+centre of that city and the popup says "Approximate location: city centre", so nobody mistakes it for a
+street address. The data check page lists these rows under **Placed by city only**.
+
+Useful for organizations headquartered elsewhere that work in Los Angeles County: put the city where they
+work (e.g. `Los Angeles, CA`) and the dot will sit there. A city outside California (`Portland, OR`) isn't
+placed, and a bare state or a partial address without a city (`Texas`) isn't either: give the city, or
+paste lat/lng.
 
 ## Finding lat and lng
 
