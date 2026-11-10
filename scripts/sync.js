@@ -14,7 +14,7 @@ import { readFile, writeFile } from 'node:fs/promises';
 import { setTimeout as wait } from 'node:timers/promises';
 import { fileURLToPath } from 'node:url';
 import { SHEET_CSV_URL } from '../src/config/googleSheets.js';
-import { cleanAddress, geocodeCacheKey, outsideCalifornia, parseManualCoords } from '../src/lib/address.js';
+import { cleanAddress, geocodeCacheKey, isCityOnly, outsideCalifornia, parseManualCoords } from '../src/lib/address.js';
 import { resolveColumns } from '../src/lib/columns.js';
 import { buildDataset, parseCSV } from '../src/lib/organizations.js';
 
@@ -24,6 +24,8 @@ const SNAPSHOT_PATH = fileURLToPath(new URL('../src/data/snapshot.json', import.
 const NOMINATIM_URL = 'https://nominatim.openstreetmap.org/search';
 const CENSUS_URL = 'https://geocoding.geo.census.gov/geocoder/locations/onelineaddress';
 const USER_AGENT = 'FoodSystemsStakeholderSurvey/1.0 (lacountyfoodsystems.org)';
+// What Nominatim calls a settlement ("Truckee, CA" → addresstype "town"); used for city-only rows.
+const PLACE_TYPES = new Set(['city', 'town', 'village', 'hamlet', 'suburb', 'municipality', 'borough', 'locality']);
 const REQUEST_GAP_MS = 1100; // Nominatim allows at most one request per second
 const TIMEOUT_MS = 30_000;
 
@@ -153,7 +155,7 @@ export function createGeocoder({ fetch = globalThis.fetch, sleep = wait } = {}) 
     return coords.every(Number.isFinite) ? coords : null;
   }
 
-  async function search(query, sheetZip) {
+  async function search(query, sheetZip, { cityOnly = false } = {}) {
     if (requests++ > 0) await sleep(REQUEST_GAP_MS);
     const url = `${NOMINATIM_URL}?format=json&q=${encodeURIComponent(tidy(query))}&addressdetails=1&limit=1`;
     const res = await fetch(url, { headers: { 'User-Agent': USER_AGENT }, signal: AbortSignal.timeout(TIMEOUT_MS) });
@@ -161,6 +163,8 @@ export function createGeocoder({ fetch = globalThis.fetch, sleep = wait } = {}) 
     const [hit] = await res.json();
     // Only California counts, so a same-named street in another state never lands on the map.
     if (hit?.address?.state !== 'California') return null;
+    // A city-only address must resolve to a settlement, not to a street or a building that shares its name.
+    if (cityOnly && !PLACE_TYPES.has(hit.addresstype ?? '') && !['place', 'boundary'].includes(hit.class)) return null;
     // Nor does a match in another zip code than the sheet's: that's a different place with a similar name.
     const postcode = hit.address.postcode;
     if (sheetZip && postcode && !zipCodes(postcode).includes(sheetZip)) return null;
@@ -170,11 +174,13 @@ export function createGeocoder({ fetch = globalThis.fetch, sleep = wait } = {}) 
 
   return async function geocode(street, zip) {
     const sheetZip = expectedZip(street, zip);
+    const cityOnly = isCityOnly(street);
     for (const query of geocodeQueries(street, zip)) {
-      const coords = await search(query, sheetZip);
+      const coords = await search(query, sheetZip, { cityOnly });
       if (coords) return coords;
     }
-    return census(censusQuery(street, zip));
+    // The Census geocoder needs a street address; a city-only row has nothing more to try.
+    return isCityOnly(street) ? null : census(censusQuery(street, zip));
   };
 }
 
@@ -259,7 +265,11 @@ export async function sync({
     const place = { row: row.__row, name: cols.get(row, 'name'), address: cols.get(row, 'address'), zip: cols.get(row, 'zip') };
     const key = geocodeCacheKey(place.address, place.zip);
     if (!key) continue;
-    const retry = retryNotFound && cache[key] === null && hasStreetNumber(place.address) && !outsideCalifornia(place.address);
+    const retry =
+      retryNotFound &&
+      cache[key] === null &&
+      (hasStreetNumber(place.address) || isCityOnly(place.address)) &&
+      !outsideCalifornia(place.address);
     const tried = Object.hasOwn(cache, key) && !retry;
     if (!tried && !toLookUp.has(key)) toLookUp.set(key, place);
   }
@@ -277,15 +287,16 @@ export async function sync({
     } else if (outsideCalifornia(place.address)) {
       cache[key] = null;
       log(`${label}: outside California, so not placed on the map`);
-    } else if (!hasStreetNumber(place.address)) {
+    } else if (!hasStreetNumber(place.address) && !isCityOnly(place.address)) {
       cache[key] = null;
-      log(`${label}: no street number, so not looked up (add lat/lng in the sheet)`);
+      log(`${label}: no street number, so not looked up (add a city, or lat/lng)`);
     } else if (dryRun) {
       log(label);
     } else {
       try {
         cache[key] = await geocode(place.address, place.zip);
-        log(`${label}: ${cache[key] ? 'found' : 'not found (add lat/lng in the sheet)'}`);
+        const where = cache[key] ? (isCityOnly(place.address) ? 'found the city centre' : 'found') : 'not found (add lat/lng in the sheet)';
+        log(`${label}: ${where}`);
       } catch (err) {
         log(`${label}: lookup failed, will retry next time (${err.message})`);
       }

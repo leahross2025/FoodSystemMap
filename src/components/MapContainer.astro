@@ -17,6 +17,7 @@ import 'leaflet/dist/leaflet.css';
     coordinates: [number, number];
     address: string;
     districtLabel: string;
+    coordSource: 'sheet' | 'geocoded' | 'city' | null;
     activity: string;
     mission: string;
     website: string;
@@ -119,6 +120,8 @@ import 'leaflet/dist/leaflet.css';
 
     const content = h('div', { class: 'popup-content' }, h('h2', {}, org.name), h('p', {}, pill));
     if (org.address) content.append(field('Address', org.address));
+    // The sheet only gave a city, so the dot is the city centre rather than a specific address.
+    if (org.coordSource === 'city') content.append(h('p', { class: 'approx' }, 'Approximate location: city centre'));
     content.append(field('District', org.districtLabel));
     if (org.activity) content.append(field('Activity', org.activity));
     if (org.mission) content.append(field('Mission', org.mission));
@@ -243,6 +246,11 @@ import 'leaflet/dist/leaflet.css';
     font-size: 0.9em;
     line-height: 1.4;
     white-space: pre-line;
+  }
+
+  :global(.popup-content p.approx) {
+    font-style: italic;
+    color: #4a5568;
   }
 
   /* Tinted rather than solid, so the text stays readable on every sector color. */

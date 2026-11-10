@@ -33,6 +33,17 @@ export function outsideCalifornia(street) {
   return zip < 90000 || zip > 96199;
 }
 
+/**
+ * True when an address is just a California city: "Los Angeles, CA", "Truckee, CA". Those are placed at
+ * the city centre and marked as approximate, so the map can show an organization that only has a city.
+ */
+export function isCityOnly(street) {
+  const cleaned = String(street ?? '').replace(/,?\s*USA\s*$/i, '').trim();
+  if (!cleaned || /\d/.test(cleaned)) return false;
+  if (outsideCalifornia(cleaned)) return false;
+  return /\b(CA|California)\b\.?$/i.test(cleaned);
+}
+
 // Rough California bounding box — catches typos and swapped lat/lng.
 const CA = { latMin: 32.4, latMax: 42.1, lngMin: -124.6, lngMax: -114.1 };
 const inCA = (lat, lng) => lat >= CA.latMin && lat <= CA.latMax && lng >= CA.lngMin && lng <= CA.lngMax;

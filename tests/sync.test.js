@@ -217,6 +217,17 @@ describe('createGeocoder', () => {
     assert.deepEqual(sleeps, [1100, 1100]);
   });
 
+  test('places a city-only address at the city centre, and refuses a street that shares the city\'s name', async () => {
+    const town = { lat: '39.3279454', lon: '-120.1835765', addresstype: 'town', class: 'boundary', address: { state: 'California', city: 'Truckee' } };
+    const street = { lat: '34.05', lon: '-118.24', addresstype: 'road', class: 'highway', address: { state: 'California' } };
+    const geo = fakeNominatim({ 'Truckee, CA': town, 'Springfield, CA': street });
+    const geocode = createGeocoder({ fetch: geo.fetch, sleep: async () => {} });
+    assert.deepEqual(await geocode('Truckee, CA', ''), [39.3279454, -120.1835765]);
+    assert.equal(await geocode('Springfield, CA', ''), null);
+    // A city has no street address for the Census geocoder to match, so it isn't asked.
+    assert.deepEqual(geo.censusCalls, []);
+  });
+
   test("asks the Census geocoder when Nominatim finds nothing, keeping only California matches with the same street number", async () => {
     const geo = fakeNominatim({}, {
       '1010 W 108th St, Unit B, Los Angeles, CA 90044': censusMatch(33.9381, -118.2936, '1010 W 108TH ST, LOS ANGELES, CA, 90044'),
@@ -299,7 +310,7 @@ describe('sync', () => {
     assert.equal(report.onMap + report.missingLocation.length, 143);
     const output = lines.join('\n');
     assert.match(output, /148 rows in the spreadsheet → 5 duplicate rows merged → 143 organizations → 122 on the map \+ 21 missing a location/);
-    assert.match(output, /row 84 {2}Common Threads — Texas, 90277: no street number, so not looked up \(add lat\/lng in the sheet\)/);
+    assert.match(output, /row 84 {2}Common Threads — Texas, 90277: no street number, so not looked up \(add a city, or lat\/lng\)/);
     assert.match(output, /row 85 {2}Calibbean Farm\/UFEI of GLA\/Bloom Ranch — 32712 El Sastre Rd Acton Ca 93510\n/);
     assert.match(output, /Dry run: no files written\./);
   });
@@ -443,7 +454,7 @@ describe('sync', () => {
       'texas, los angeles, ca, 90277': null,
     });
     assert.deepEqual(report.missingLocation.map((m) => m.name), ['Common Threads']);
-    assert.match(lines.join('\n'), /row 2 {2}Common Threads — Texas, 90277: no street number, so not looked up \(add lat\/lng in the sheet\)/);
+    assert.match(lines.join('\n'), /row 2 {2}Common Threads — Texas, 90277: no street number, so not looked up \(add a city, or lat\/lng\)/);
   });
 
   test('follows additions, changes and deletions in the sheet', async (t) => {
@@ -501,6 +512,33 @@ describe('sync', () => {
       ],
     );
     assert.deepEqual([report.sheetRows, report.onMap, report.missingLocation.length], [4, 4, 0]);
+  });
+
+  test('places an organization that has only a city, and reports it as approximate', async (t) => {
+    const { cachePath, snapshotPath, csvPath } = await tempData(t);
+    await writeFile(cachePath, '{}\n');
+    await writeSheet(csvPath, [
+      SHEET_HEADERS,
+      ['', 'ReFed', 'Nonprofit', 'Truckee, CA', '', '', ''],
+      ['', 'Independent Restaurant Coalition', 'Trade Association', 'Los Angeles, CA', '', '', ''],
+      ['', 'Common Threads', 'Nonprofit', 'Texas', '90277', '', ''],
+    ]);
+    const tok = (lat, lon) => ({ lat: String(lat), lon: String(lon), addresstype: 'town', class: 'boundary', address: { state: 'California' } });
+    const geo = fakeNominatim({ 'Truckee, CA': tok(39.3279, -120.1836), 'Los Angeles, CA': tok(34.0537, -118.2428) });
+    const lines = [];
+    const { report } = await sync({ csvPath, fetch: geo.fetch, sleep: async () => {}, log: (l) => lines.push(l), cachePath, snapshotPath });
+
+    assert.equal(report.onMap, 2);
+    assert.match(lines.join('\n'), /ReFed — Truckee, CA: found the city centre/);
+    const cache = JSON.parse(await readFile(cachePath, 'utf8'));
+    assert.deepEqual(cache['truckee, ca, los angeles, ca'], [39.3279, -120.1836]);
+    const { headers, rows } = parseCSV(await readFile(csvPath, 'utf8'));
+    const { organizations } = buildDataset(headers, rows, { geocodeCache: cache });
+    assert.deepEqual(organizations.map((o) => [o.name, o.coordSource]), [
+      ['ReFed', 'city'],
+      ['Independent Restaurant Coalition', 'city'],
+      ['Common Threads', null],
+    ]);
   });
 
   test('does not look up addresses in another state', async (t) => {

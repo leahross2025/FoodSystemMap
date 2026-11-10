@@ -1,6 +1,15 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { cleanAddress, geocodeCacheKey, normalizeWebsite, outsideCalifornia, parseManualCoords } from '../src/lib/address.js';
+import { cleanAddress, geocodeCacheKey, isCityOnly, normalizeWebsite, outsideCalifornia, parseManualCoords } from '../src/lib/address.js';
+
+test('isCityOnly spots a city with no street address, and only California ones', () => {
+  for (const a of ['Los Angeles, CA', 'Truckee, CA', 'Los Angeles, California', 'Los Angeles, CA, USA']) {
+    assert.equal(isCityOnly(a), true, a);
+  }
+  for (const a of ['123 Main St, Los Angeles, CA', 'Texas, 90277', 'PO Box 480, Joseph, OR 97846', 'Truckee, NV', '', null]) {
+    assert.equal(isCityOnly(a), false, String(a));
+  }
+});
 
 test('outsideCalifornia spots addresses in another state, and only those', () => {
   for (const a of ['PO Box 480, Joseph, OR 97846', '122 S. Michigan Ave., #1390-L74, Chicago, IL 60603', '301 N Guadalupe St., Ste 201, Santa Fe NM 87501', '1105 E Levee Street, Dallas, TX 75207, USA']) {
